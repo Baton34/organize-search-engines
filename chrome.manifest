@@ -1,0 +1,11 @@
+override chrome://browser/content/search/engineManager.xul       chrome://seorganizer/content/engineManager.xul
+overlay chrome://browser/content/browser.xul            chrome://seorganizer/content/browser.xul
+overlay chrome://global/content/customizeToolbar.xul    chrome://seorganizer/content/customizeToolbar.xul
+overlay chrome://addtosearchbox/content/engineInfos.xul chrome://seorganizer/content/addToSearchbarCompat.xul
+
+content seorganizer                 chrome/content/
+
+locale  seorganizer                 en-US       chrome/locale/en-US/
+locale  seorganizer                 de          chrome/locale/de/
+
+skin    seorganizer                 classic/1.0 chrome/skin/classic/
