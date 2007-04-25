@@ -1,0 +1,15 @@
+<!ENTITY namecol.label            "Name">
+<!ENTITY aliascol.label           "Schlüsselwort">
+
+<!ENTITY restoreDefault.label     "Vorgabe wiederherstellen">
+<!ENTITY restoreDefault.accesskey "V">
+
+<!ENTITY new-folder.label         "Neuer Ordner...">
+<!ENTITY new-folder.accesskey     "N">
+<!ENTITY new-separator.label      "Neue Trennlinie">
+<!ENTITY new-separator.accesskey  "T">
+
+<!ENTITY rename.label             "Umbenennen...">
+<!ENTITY rename.accesskey         "U">
+<!ENTITY editalias.label          "Schlüsselwort...">
+<!ENTITY editalias.accesskey      "S">

@@ -1,0 +1,80 @@
+#include "nsISupports.idl"
+
+interface nsIRDFContainer;
+interface nsIRDFResource;
+interface nsIInputStream;
+
+[scriptable, uuid(e4e6e165-81e7-44fb-a027-8b606c865b00)]
+interface nsISEOrganizer : nsISupports {
+  /* Get the root element of the rdf graph. */
+  nsIRDFResource getRoot();
+
+  /* Check whether a node is a folder. */
+  boolean isFolder(in nsIRDFResource folder);
+  /**
+   * Create a new Folder.
+   *
+   * @param name The name of the folder to create.
+   * @param parent The parent nsIRDFResource or null for the root.
+   *
+   * @return The new Folder.
+   */
+  nsIRDFResource newFolder(in AUTF8String name, in nsISupports parent);
+
+  /* Check whether a node is a separator. */
+  boolean isSeparator(in nsIRDFResource separator);
+  /**
+   * Create a new Separator.
+   *
+   * @param parent The parent nsIRDFResource or null for the root.
+   *
+   * @return The new separator.
+   */
+  nsIRDFResource newSeparator(in nsISupports parent);
+
+  /**
+   * Removes an engine/separator/folder and all references to it.
+   *
+   * @param item The item to remove.
+   */
+  void removeItem(in nsIRDFResource item);
+
+
+  /**** Item/Name/Index handling ****/
+  /* Returns whether an item with a specific name exists. */
+  boolean itemWithNameExists(in AUTF8String name);
+  /* Returns the (string) name of a given item. */
+  AUTF8String getNameByItem(in nsIRDFResource item);
+  /* Returns the item with a given name.            *
+   * @return The item or null if it does not exist. */
+  nsIRDFResource getItemByName(in AUTF8String name);
+
+  /* Get an item from a given index. */
+  nsIRDFResource getItemByIndex(in long index);
+  /* Returns the icon URI of the engine with a given index. */
+  AUTF8String getIconByIndex(in long index);
+  /**
+   * Determine the index of an item.
+   *
+   * @param item   The item of which you want the index.
+   * @param global True if the index should be a global index, false if the
+   *               index is to be relative to the parent container
+   */
+  long indexOf(in nsIRDFResource item, in boolean global);
+
+  /* Determine how many children a given container has.                        *
+   * Including grand-children. (The number of direct children can be retrieved *
+   * using nsIRDFContainer.)                                                   */
+  long getChildCount(in nsIRDFResource item);
+
+  nsIRDFResource getParent(in nsIRDFResource item);
+
+  /* Provides the API to use search aliases in Firefox. Has to be in the xpcom *
+   * service because the out-parameter can't be imitated with pure javascript. */
+  string resolveKeyword(in wstring name, out nsIInputStream postData);
+
+  /* Save the changes. */
+  void saveChanges();
+  /* Reload the datasource from disk */
+  void reload();
+};

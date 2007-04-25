@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<RDF:RDF xmlns:em="http://www.mozilla.org/2004/em-rdf#"
+         xmlns:NC="http://home.netscape.com/NC-rdf#"
+         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+    <RDF:Description RDF:about="urn:mozilla:install-manifest">
+        <em:id>organize-search-engines@maltekraus.de</em:id>
+
+        <em:name>Organize Search Engines</em:name>
+        <em:version>1.1b2pre</em:version>
+        <em:description>Organize your search engines with separators and folders.</em:description>
+
+        <em:optionsURL>chrome://browser/content/search/engineManager.xul</em:optionsURL>
+        <em:homepageURL>http://maltekraus.de/Firefox/search-tools/</em:homepageURL>
+        <em:iconURL>chrome://seorganizer/skin/ose.png</em:iconURL>
+
+        <em:creator>Malte Kraus</em:creator>
+        <em:contributor>ReVox: help sorting out a crasher</em:contributor>
+
+        <!-- Firefox -->
+        <em:targetApplication>
+            <RDF:Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>2.0</em:minVersion>
+                <em:maxVersion>3.0a3</em:maxVersion>
+            </RDF:Description>
+        </em:targetApplication>
+
+    </RDF:Description>
+</RDF:RDF>

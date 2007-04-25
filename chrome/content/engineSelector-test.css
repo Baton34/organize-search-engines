@@ -1,0 +1,12 @@
+toolbox, separator, description, splitter, splitter + vbox, hbox:last-child {
+  display: none;
+}
+
+treechildren::-moz-tree-checkbox {
+    list-style-image: url("chrome://global/skin/checkbox/cbox-check-dis.gif");
+    width: 16px;
+    height: 16px;
+}
+treechildren::-moz-tree-checkbox(checked) {
+    list-style-image: url("chrome://global/skin/checkbox/cbox-check.gif");
+}

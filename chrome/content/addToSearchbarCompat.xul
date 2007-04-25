@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet href="chrome://browser/skin/bookmarks/addBookmark.css"?>
+<!DOCTYPE dialog [
+  <!ENTITY % addBookmarkDTD SYSTEM "chrome://browser/locale/bookmarks/addBookmark.dtd">
+  %addBookmarkDTD;
+  <!ENTITY % confirmAddDTD SYSTEM "chrome://seorganizer/locale/confirmAddEngine.dtd">
+  %confirmAddDTD;
+]>
+
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+  <script type="application/x-javascript" src="chrome://seorganizer/content/confirmAddEngine.js"/>
+
+  <rows id="rows">
+    <!-- drop down -->
+    <row id="engineListContainer">
+      <label id="engineListLabel" value="&createin.label;" accesskey="&createin.accesskey;" control="engineList" />
+      <menulist id="engineList" class="folder-icon" oncommand="organizeSE.onEngineListChange(this);">
+        <menupopup ref="urn:organize-search-engines:folders-root"
+                datasources="rdf:organized-internet-search-engines rdf:organized-internet-search-folders"
+                sortResource="urn:organize-search-engines#Name"
+                sortDirection="natural">
+          <menuitem class="menuitem-iconic folder-icon"
+                    label="&searchEngines;" selected="true"
+                    id="rdf:urn:organize-search-engines:folders-root"/>
+          <menuseparator/>
+          <template>
+            <rule iscontainer="true" parent="menupopup">
+              <menuitem uri="rdf:*" label="rdf:urn:organize-search-engines#Name"
+                        src="rdf:urn:organize-search-engines#Icon"
+                        class="menuitem-iconic folder-icon" />
+            </rule>
+          </template>
+        </menupopup>
+      </menulist>
+    </row>
+  </rows>
+
+</overlay>

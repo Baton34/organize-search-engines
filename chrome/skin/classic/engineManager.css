@@ -1,0 +1,42 @@
+@import url(grippy.css);
+
+/*treechildren::-moz-tree-image(primary) {
+  list-style-image: url(chrome://global/skin/icons/folder-item.png);
+  -moz-image-region: rect(0, 16px, 16px, 0);
+  margin-right: 3px;
+  width: 16px; /* cut icons that are too big 
+  height: 16px;
+}
+treechildren::-moz-tree-image(container, closed, primary) {
+  -moz-image-region: rect(0px, 32px, 16px, 16px);
+}
+treechildren::-moz-tree-image(container, open, primary) {
+  -moz-image-region: rect(16px, 32px, 32px, 16px);
+}*/
+
+treechildren::-moz-tree-image(separator, Name) {
+  margin: 0 !important;
+  /*width: 0;
+  height: 0;
+  -moz-image-region: auto;
+  list-style-image: none;*/
+  padding-right: 0 !important;
+}
+
+
+:root {
+  padding-top: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+#engine-view-splitter {
+  border-left: none;
+}
+#engine-view-splitter[state="collapsed"] {
+  border-right: none;
+}
+
+toolbarbutton, treecolpicker {
+  -moz-user-focus: normal;
+}

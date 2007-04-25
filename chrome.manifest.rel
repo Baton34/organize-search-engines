@@ -1,0 +1,11 @@
+override chrome://browser/content/search/engineManager.xul       chrome://seorganizer/content/engineManager.xul
+
+overlay chrome://browser/content/browser.xul            chrome://seorganizer/content/browser.xul
+overlay chrome://global/content/customizeToolbar.xul    chrome://seorganizer/content/customizeToolbar.xul
+
+content seorganizer                 jar:chrome/seorganizer.jar!/content/
+
+locale  seorganizer                 en-US       jar:chrome/seorganizer.jar!/locale/en-US/
+locale  seorganizer                 de          jar:chrome/seorganizer.jar!/locale/de/
+
+skin    seorganizer                 classic/1.0 jar:chrome/seorganizer.jar!/skin/classic/

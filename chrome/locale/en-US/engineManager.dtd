@@ -1,0 +1,15 @@
+<!ENTITY namecol.label            "Name">
+<!ENTITY aliascol.label           "Keyword">
+
+<!ENTITY restoreDefault.label     "Restore Default Engine">
+<!ENTITY restoreDefault.accesskey "e">
+
+<!ENTITY new-folder.label         "New Folder...">
+<!ENTITY new-folder.accesskey     "F">
+<!ENTITY new-separator.label      "New Separator">
+<!ENTITY new-separator.accesskey  "S">
+
+<!ENTITY rename.label             "Rename...">
+<!ENTITY rename.accesskey         "n">
+<!ENTITY editalias.label          "Edit Keyword...">
+<!ENTITY editalias.accesskey      "K">

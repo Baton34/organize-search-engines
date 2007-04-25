@@ -1,0 +1,12 @@
+@import url("chrome://global/skin/");
+
+/* hide manage engines item templates */
+#searchpopup-bottom-container {
+  display: none;
+  visibility: collapse;
+}
+
+menu.searchbar-engine-menu[selected="true"],
+menuitem.searchbar-engine-menuitem[selected="true"] {
+  font-weight: bolder;
+}

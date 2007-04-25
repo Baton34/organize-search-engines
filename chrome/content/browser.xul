@@ -1,0 +1,71 @@
+<?xml-stylesheet href="chrome://seorganizer/skin/browser.css" type="text/css" ?>
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+  <script type="application/x-javascript"
+          src="chrome://seorganizer/content/browser.js" />
+  <script type="application/x-javascript"
+          src="chrome://seorganizer/content/browserDragDrop.js" />
+  <script type="application/x-javascript"
+          src="chrome://seorganizer/content/browserExtCompat.js" />
+   <!--
+   <script src="chrome://global/content/nsDragAndDrop.js" type="application/x-javascript" />
+   <script src="chrome://global/content/nsTransferable.js" type="application/x-javascript" />
+   -->
+
+  <window id="main-window">
+    <popupset id="search-popupset" ref="urn:organize-search-engines:root"
+              datasources="rdf:organized-internet-search-engines"
+              sortResource="urn:organize-search-engines#Name"
+              sortDirection="natural"
+              ondragover="nsDragAndDrop.dragOver(event, seOrganizer_dragObserver);"
+              ondragexit="nsDragAndDrop.dragExit(event, seOrganizer_dragObserver);"
+              ondragdrop="nsDragAndDrop.drop(event, seOrganizer_dragObserver);">
+
+      <template id="searchbar-template">
+        <rule rdf:type="urn:organize-search-engines#separator">
+          <menupopup> <!-- prevname is here so that sorting works -->
+            <menuseparator uri="rdf:*" class="searchbar-engine-menuseparator"
+                           prevname="rdf:urn:organize-search-engines#Name" />
+          </menupopup>
+        </rule>
+        <rule iscontainer="true">
+          <menupopup> <!-- .bookmark-item adds the folder icon -->
+            <menu uri="rdf:*" label="rdf:urn:organize-search-engines#Name"
+                  selected="rdf:urn:organize-search-engines#Selected"
+                  class="searchbar-engine-menu bookmark-item menu-iconic">
+              <menupopup />
+            </menu>
+          </menupopup>
+        </rule>
+
+        <rule>
+          <menupopup>
+            <menuitem uri="rdf:*" label="rdf:urn:organize-search-engines#Name"
+                      image="rdf:urn:organize-search-engines#Icon"
+                      selected="rdf:urn:organize-search-engines#Selected"
+                      class="searchbar-engine-menuitem menuitem-iconic" />
+          </menupopup>
+        </rule>
+
+      </template>
+    </popupset>
+  </window>
+
+  <!-- - - - - - - - - - extensions - - - - - - - - - -->
+  <!-- Context Search -->
+  <menu id="context-searchmenu" ref="urn:organize-search-engines:root"
+        datasources="rdf:organized-internet-search-engines"
+        template="searchbar-template" sortDirection="natural"
+        sortResource="urn:organize-search-engines#Name" />
+  <!-- Second Search -->
+  <menu id="secondsearch_popup_all" ref="urn:organize-search-engines:root"
+        datasources="rdf:null" template="searchbar-template"
+        sortResource="urn:organize-search-engines#Name"
+        sortDirection="natural" />
+  <toolbaritem id="search-container" ref="urn:organize-search-engines:root"
+             datasources="rdf:null" template="searchbar-template"
+             sortResource="urn:organize-search-engines#Name"
+             sortDirection="natural" /> <!-- this sucks! -->
+
+</overlay>
