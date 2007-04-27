@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/"?>
+<window id="engineManager"
+               xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+               xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+               windowtype="Browser:SearchManager">
+
+    <tree id="engineList" flex="1" rows="10"
+           ref="urn:organize-search-engines:root"
+              datasources="rdf:organized-internet-search-engines"
+              sortResource="urn:organize-search-engines#Name"
+              sortDirection="natural" hidecolumnpicker="true">
+
+      <treecols>
+        <treecol id="engineName" primary="true" flex="1" hideheader="true"
+                  type="checkbox" editable="true" />
+        <treecol id="engineAlias" width="35" hideheader="true" />
+      </treecols>
+    <template>
+      <rule rdf:type="urn:organize-search-engines#separator">
+        <treechildren>
+          <treeseparator uri="rdf:*" />
+        </treechildren>
+      </rule>
+      <rule>
+        <treechildren>
+          <treeitem uri="rdf:*">
+            <treerow>
+              <treecell label="rdf:urn:organize-search-engines#Name" src="rdf:urn:organize-search-engines#Icon"
+                        value="rdf:urn:organize-search-engines#Selected"/>
+              <treecell label="rdf:urn:organize-search-engines#Alias"/>
+            </treerow>
+          </treeitem>
+        </treechildren>
+      </rule>
+    </template>
+    </tree>
+
+  <hbox pack="end">
+    <button label="OK" />
+    <button label="Cancel" />
+  </hbox>
+</window>
