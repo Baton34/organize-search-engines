@@ -1,4 +1,4 @@
-cd "D:\Erweiterungen\Organize Search Engines"
+cd "D:\Erweiterungen\organize-search-engines"
 
 
 copy components\nsISEOrganizer.idl ..\xpidl
