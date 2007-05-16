@@ -86,66 +86,26 @@ Resizer.prototype = {
   },
 
   paintIcons: function() {
-    var halfWidth = Math.floor(this.width / 2);
-    var halfHeight = Math.floor(this.height / 2);
-    switch(this.icons.length) {
-      case 1:
-        this._canvas.drawImage(this.icons[0], 0, 0, this.width, this.height);
-        break;
-      case 2:
-        if(this.width >= this.height) {
-          this._canvas.drawImage(this.icons[0], 0, 0, halfWidth,
-                                 this.height);
-          this._canvas.drawImage(this.icons[1], halfWidth, 0,
-                                 halfWidth, this.height);
-        } else {
-          this._canvas.drawImage(this.icons[0], 0, 0, this.width,
-                                 halfHeight);
-          this._canvas.drawImage(this.icons[1], 0, halfHeight,
-                                 this.width, halfHeight);
-        }
-        break;
-      case 3:
-        var icons = [];
-        var bigIcon = null;
-        if(this.icons[0].squarePixels > this.icons[1].squarePixels) {
-          bigIcon = this.icons[0];
-          icons.push(this.icons[1]);
-        } else {
-          bigIcon = this.icons[1];
-          icons.push(this.icons[0]);
-        }
-        if(this.icons[2].squarePixels > this.icons[0].squarePixels) {
-          icons.push(bigIcon);
-          bigIcon = this.icons[2];
-        } else {
-          icons.push(this.icons[2]);
-        }
+    this._canvas.fillStyle = this._canvas.strokeStyle = "rgba(254, 254, 254, 1)"
+    this._canvas.fillRect(0, 0, this.width, this.height);
+    var num = this.icons.length;
+    var height = Math.floor(this.height / 2);
+    var width = (this.width * this.height) / ((num + (num % 2)) * height);
 
-        this._canvas.drawImage(bigIcon, 0, 0, halfWidth,
-                               this.height);
-        this._canvas.drawImage(icons[0], halfWidth, 0,
-                               halfWidth,
-                               halfHeight);
-        this._canvas.drawImage(icons[1], halfWidth,
-                               halfHeight,
-                               halfWidth,
-                               halfHeight);
-        break;
-      case 4:
-      default:
-        this._canvas.drawImage(this.icons[0], 0, 0, halfWidth,
-                               halfHeight);
-        this._canvas.drawImage(this.icons[1], halfHeight, 0,
-                               halfWidth,
-                               halfHeight);
-        this._canvas.drawImage(this.icons[2], 0, halfHeight,
-                               halfWidth,
-                               halfHeight);
-        this._canvas.drawImage(this.icons[3], halfWidth,
-                               halfHeight, halfWidth,
-                               halfHeight);
-        break;
+    for(var i = 0; i < num - 1; i++) {
+      this._canvas.drawImage(this.icons[i],
+                             Math.floor(i / 2) * width, (i % 2) * height,
+                             width, height);
+    }
+
+    if(num % 2) {
+      this._canvas.drawImage(this.icons[i],
+                             Math.floor(i / 2) * width, (i % 2) * height,
+                             width, height * 2);
+    } else {
+      this._canvas.drawImage(this.icons[i],
+                             Math.floor(i / 2) * width, (i % 2) * height,
+                             width, height);
     }
   },
   getDataURL: function() {
