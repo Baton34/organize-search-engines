@@ -1,3 +1,5 @@
+try {
+
 const Ci = Components.interfaces, Cc = Components.classes;
 
 const ENGINE_FLAVOR = "text/x-moz-search-engine";
@@ -1043,17 +1045,22 @@ EngineView.prototype = {
     // now that we have the indexes, do the moving
     var parent = this._indexCache[treeParentIndex];
     var item = this._indexCache[treeSourceIndex];
+    if(!item || !parent) {
+      Components.reportError(new Error('an unknown error occured'));
+      return;
+    }
     if(treeParentIndex != -1 && !this.isContainerOpen(treeParentIndex)) {
       this.toggleOpenState(treeParentIndex);
     }
     var node = item.node;
-    if(item.isSeq)
+    if(item.isSeq) {
       var children = item.children;
-    item.destroy();
-    if(item.isSeq)
+      item.destroy();
       item = new Structure__Container(parent, node, children, item.open);
-    else
+    } else {
+      item.destroy();
       item = new Structure__Item(parent, node);
+    }
     parent.insertAt(dropIndex, item);
 
     // update the tree and correct the selection
@@ -1118,8 +1125,8 @@ EngineView.prototype = {
     var row = this._indexCache[rowIndex];
     var parent = row.parent;
     var siblings = parent.children;
-    var rowIndex = siblings.indexOf(row)
-    if(rowIndex + 1 == siblings.length)
+    var internalRowIndex = siblings.indexOf(row)
+    if(internalRowIndex + 1 == siblings.length)
       return false;
     else if(rowIndex == afterIndex) {
       return true;
@@ -1167,3 +1174,7 @@ EngineView.prototype = {
     return open;
   }
 };
+} catch(e) {
+  Components.reportError(e);
+  new Reporter(e);
+}
