@@ -30,6 +30,78 @@ function LOG(msg) {
   return msg;
 }
 
+function Window () {};
+Window.prototype = {
+  setTimeout: function setTimeout(callback, timeout) {
+    var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+    var obj = { notify: callback };
+    timer.initWithCallback(obj, timeout, Ci.nsITimer.TYPE_ONE_SHOT);
+    return timer;
+  },
+  setInterval: function setInterval(callback, timeout) {
+    var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+    var obj = { notify: callback };
+    timer.initWithCallback(obj, timeout, Ci.nsITimer.TYPE_REPEATING_PRECISE);
+    return timer;
+  },
+  clearTimeout: function clearTimeout(timer) {
+    timer.cancel();
+  },
+  openDialog: function openDialog() {
+    var args = [];
+    for(var i = 0; i < arguments.length; ++i)
+      args.push(arguments[i]);
+    var win = this._getMostRecentWindow();
+    if(win) {
+      try {
+        return win.openDialog.apply(win, args);
+      } catch(e) { }
+    }
+    throw Cr.NS_ERROR_NOT_AVAILABLE;
+  },
+  open: function open() {
+    var args = [];
+    for(var i = 0; i < arguments.length; ++i)
+      args.push(arguments[i]);
+    var win = this._getMostRecentWindow();
+    if(win) {
+      try {
+        return win.open.apply(win, args);
+      } catch(e) { }
+    }
+    throw Cr.NS_ERROR_NOT_AVAILABLE;
+  },
+  _getMostRecentWindow: function _getMostRecentWindow() {
+    var mediator = Cc["@mozilla.org/appshell/window-mediator;1"]
+                     .getService(Ci.nsIWindowMediator);
+    return mediator.getMostRecentWindow("");
+  },
+  get document() {
+    if(!this._document) {
+      var origDoc = this._getMostRecentWindow().document;
+      this._document = origDoc.implementation.createDocument("", "", null);
+    }
+    return this._document;
+  },
+  parent: null,
+  faked: true
+};
+var window = new Window();
+window.window = window.self = window.top = window;
+
+function Reporter(e) {
+  return window.Reporter(e);
+}
+
+(function() {
+  var jsLoader = Cc["@mozilla.org/moz/jssubscript-loader;1"]
+                   .getService(Ci.mozIJSSubScriptLoader);
+  jsLoader.loadSubScript("chrome://seorganizer/content/reporter.js", window);
+})();
+
+
+try {
+
 const FILENAME = "organize-search-engines.rdf";
 const UUID = "organize-search-engines@maltekraus.de";
 
@@ -86,30 +158,34 @@ SEOrganizer.prototype = {
     for(var i = 0; i < this._indexCache.length; ++i) {
       if(!this.isFolder(this._indexCache[i]) &&
          !this.isSeparator(this._indexCache[i])) {
-        engines.push(this._indexCache[i]);
+        engines.push(this.getNameByItem(this._indexCache[i]));
       }
     }
-    var i = engines.length;
+    LOG(engines.join("\n"));
+    i = 0;
+    var ss = Cc["@mozilla.org/browser/search-service;1"]
+               .getService(Ci.nsIBrowserSearchService);
     var obj = {
       notify: function notify() {
-        if(i <= 0) {
+        if(i >= engines.length) {
           timer.cancel();
           os.addObserver(instance, "browser-search-engine-modified", false);
           os.removeObserver(quit, "quit-application");
           timer = null;
           return;
         }
-        i = i - 1;
-        var item = engines[i];
-        var engineName = instance.getNameByItem(item);
+        var engineName = engines[i];
         if(engineName) {
-          var engine = instance.getEngineByName(engineName);
+          var engine = ss.getEngineByName(engineName);
           if(engine instanceof Ci.nsISearchEngine) {
             try {
               instance.moveEngine(engine, i);
-            } catch(e) { }
+            } catch(e) {
+              Components.reportError(e);
+            }
           }
         }
+        i = i + 1;
       }
     };
     var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
@@ -119,7 +195,7 @@ SEOrganizer.prototype = {
     // the search service of the right order. If so, let's freeze Firefox!
     var quit = {
       observe: function observe() {
-        while(i > 0) {
+        while(timer) {
           obj.notify();
         }
       }
@@ -703,7 +779,7 @@ SEOrganizer.prototype = {
     return this._searchService.addEngine(name, iconURL, alias, description, method, url);
   },
   restoreDefaultEngines: function nsIBrowserSearchService__restoreDefaultEngines() {
-    this._searchService.restoreDefaultEngines();
+    return this._searchService.restoreDefaultEngines();
   },
   getDefaultEngines: function nsIBrowserSearchService__getDefaultEngines(num) {
     return this._searchService.getDefaultEngines(num);
@@ -712,8 +788,6 @@ SEOrganizer.prototype = {
     return this._searchService.getEngineByAlias(alias);
   },
   getEngineByName: function nsIBrowserSearchService__getEngineByName(name) {
-    /*while(name in this.nameChanges)
-      name = this.nameChanges[name];*/
     return this._searchService.getEngineByName(name);
   },
   getEngines: function nsIBrowserSearchService__getEngines(engineCount) {
@@ -723,10 +797,10 @@ SEOrganizer.prototype = {
     return this._searchService.getVisibleEngines(engineCount);
   },
   moveEngine: function nsIBrowserSearchService__moveEngine(engine, newIndex) {
-    this._searchService.moveEngine(engine, newIndex);
+    return this._searchService.moveEngine(engine, newIndex);
   },
   removeEngine: function nsIBrowserSearchService__removeEngine(engine) {
-    this._searchService.removeEngine(engine);
+    return this._searchService.removeEngine(engine);
   },
   get defaultEngine() {
     return this._searchService.defaultEngine;
@@ -1013,6 +1087,10 @@ FoldersOnly.prototype = {
     throw Cr.NS_ERROR_NO_INTERFACE;
   }
 };
+} catch(e) {
+  new Reporter(e);
+  Components.reportError(e);
+}
 
 /***********************************************************
 class factory
