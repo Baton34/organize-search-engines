@@ -12,7 +12,8 @@ SEOrganizer.prototype = {
     if(parent.getElementsByClassName) { // minefield only
       return parent.getElementsByClassName('searchbar-engine-menuitem');
     } else { // else fall back on xpath
-      var xpath = "descendant::xul:menuitem[contains(concat(' ', @class, ' '), ' searchbar-engine-menuitem ')]";
+      var xpath = "descendant::xul:menuitem[contains(concat(' ', @class, ' '),\
+                                            ' searchbar-engine-menuitem ')]";
       return this.evalXPath(xpath, parent);
     }
   },
@@ -32,7 +33,7 @@ SEOrganizer.prototype = {
       }
     };
     var scope = aScope || document;
-    var doc = scope.ownerDocument || document;
+    var doc = ((scope.nodeName == "#document") ? scope : scope.ownerDocument);
     var result = doc.evaluate(aExpression, scope, resolver,
                               XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
     var found = [];
@@ -316,6 +317,9 @@ SEOrganizer.prototype = {
       if(event.target == event.currentTarget) {
         organizeSE.removeDynamicItems();
       }
+      var item = document.getElementById("empty-menuitem");
+      if(item)
+        item.parentNode.removeChild(item);
     },
     popupShowing: function observe__popupshowing(event) {
       if(event.target == event.currentTarget) {
@@ -323,6 +327,22 @@ SEOrganizer.prototype = {
         organizeSE.removeDynamicItems(); // event isn't fired sometimes
 
         organizeSE.insertDynamicItems();
+      }
+
+      // code taken from Firefox' bookmarksMenu.js::showEmptyItem
+      // not reusing that method to remain compatible to places
+      if(!event.target.hasChildNodes()) {
+        var EmptyMsg;
+        if(BookmarksUtils)
+          EmptyMsg = BookmarksUtils.getLocaleString("emptyFolder");
+        else
+          EmptyMsg = PlacesUtils.getString("bookmarksMenuEmptyFolder");
+        var emptyElement = document.createElementNS(gXUL_NS, "menuitem");
+        emptyElement.setAttribute("id", "empty-menuitem");
+        emptyElement.setAttribute("label", EmptyMsg);
+        emptyElement.setAttribute("disabled", "true");
+
+        event.target.appendChild(emptyElement);
       }
     },
     onCommand: function onCommand(event) {
@@ -337,13 +357,14 @@ SEOrganizer.prototype = {
 
         if("onEnginePopupCommand" in searchbar) // only available in firefox 2.0
           searchbar.onEnginePopupCommand(target);
-
-        // this event is only sent on trunk builds - the builds needing it
-        var evt = document.createEvent("XULCommandEvent");
-        evt.initCommandEvent("command", true, true, window, 1, false, false,
-                             false, false, event);
-        evt.__defineGetter__("originalTarget",function(){return target;});// xxx
-        searchbar.dispatchEvent(evt);
+        else {
+          // this event is only sent on trunk builds - the builds needing it
+          var evt = document.createEvent("XULCommandEvent");
+          evt.initCommandEvent("command", true, true, window, 1, false, false,
+                               false, false, event);
+          evt.__defineGetter__("originalTarget",function(){return target;});// xxx
+          searchbar.dispatchEvent(evt);
+        }
       }
     },
     didRebuild: function observe__didRebuild() {
