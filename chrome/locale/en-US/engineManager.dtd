@@ -9,6 +9,9 @@
 <!ENTITY new-separator.label      "New Separator">
 <!ENTITY new-separator.accesskey  "S">
 
+<!ENTITY move-engine.label        "Move...">
+<!ENTITY move-engine.accesskey    "M">
+
 <!ENTITY rename.label             "Rename...">
 <!ENTITY rename.accesskey         "n">
 <!ENTITY editalias.label          "Edit Keyword...">

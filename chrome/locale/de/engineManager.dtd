@@ -9,6 +9,9 @@
 <!ENTITY new-separator.label      "Neue Trennlinie">
 <!ENTITY new-separator.accesskey  "T">
 
+<!ENTITY move-engine.label        "Verschieben...">
+<!ENTITY move-engine.accesskey    "V">
+
 <!ENTITY rename.label             "Umbenennen...">
 <!ENTITY rename.accesskey         "U">
 <!ENTITY editalias.label          "Schlüsselwort...">
