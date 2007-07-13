@@ -5,7 +5,6 @@
 <?xml-stylesheet href="chrome://seorganizer/skin/engineManager.css"?>
 
 <?xml-stylesheet href="chrome://global/skin/tree.css"?>
-<?xml-stylesheet href="chrome://browser/skin/bookmarks/bookmarksManager.css" type="text/css"?>
 
 <!DOCTYPE dialog [
   <!ENTITY % browser SYSTEM "chrome://browser/locale/engineManager.dtd">
@@ -33,8 +32,8 @@
 
   <script type="application/x-javascript"
           src="chrome://seorganizer/content/engineManager.js"/>
-  <script type="application/x-javascript"
-          src="chrome://seorganizer/content/reporter.js"/>
+  <!--<script type="application/x-javascript"
+          src="chrome://seorganizer/content/reporter.js"/>-->
   <script type="application/x-javascript"
           src="chrome://global/content/nsDragAndDrop.js"/>
   <script type="application/x-javascript"
@@ -56,6 +55,9 @@
              oncommand="gEngineManagerDialog.editName();"
              disabled="true"/>
 
+    <command id="cmd_move-engine" oncommand="gEngineManagerDialog.move();"
+             disabled="true" />
+
     <command id="cmd_moveup"
              oncommand="gEngineManagerDialog.bump(1);"
              disabled="true"/>
@@ -68,20 +70,22 @@
     <key id="remove" keycode="VK_DELETE" command="cmd_remove"/>
   </keyset>
 
-  <toolbox id="bookmark-window"><!-- #bookmark-window is required by the
-  stylesheet we borrow from the bookmarks manager -->
+  <toolbox>
     <toolbar id="command-toolbar" tbalign="stretch" class="chromeclass-toolbar">
       <toolbarbutton id="newfolder" command="cmd_new-folder"
-                     label="&new-folder.label;" />
+                     label="&new-folder.label;" accesskey="&new-folder.accesskey;" />
       <toolbarbutton id="newseparator" command="cmd_new-separator"
-                     label="&new-separator.label;" />
+                     label="&new-separator.label;" accesskey="&new-separator.accesskey;" />
+      <toolbarseparator />
+      <toolbarbutton id="moveengine" command="cmd_move-engine"
+                     label="&move-engine.label;" accesskey="&move-engine.accesskey;" />
       <toolbarseparator />
       <toolbarbutton id="rename" command="cmd_rename"
-                     label="&rename.label;" />
-      <toolbarbutton id="properties" command="cmd_editalias"
-                     label="&editalias.label;" /> <!-- xxx -->
+                     label="&rename.label;" accesskey="&rename.accesskey;" />
+      <toolbarbutton id="editalias" command="cmd_editalias"
+                     label="&editalias.label;" accesskey="&editalias.accesskey;" />
       <toolbarbutton id="delete" command="cmd_remove"
-                     label="&remove.label;" />
+                     label="&remove.label;" accesskey="&remove.accesskey;" />
     </toolbar>
   </toolbox>
   <separator class="thin" />
