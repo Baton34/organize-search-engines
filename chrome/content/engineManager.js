@@ -514,7 +514,11 @@ DragObserver.prototype = {
   onDrop: function (aEvent, aXferData, aDragSession) { },
   onDragExit: function (aEvent, aDragSession) { },
   onDragOver: function (aEvent, aFlavour, aDragSession) { },
-  getSupportedFlavours: function() { }
+  getSupportedFlavours: function() {
+    return {
+      ENGINE_FLAVOR: { iid: "nsISupportsString", width: 2 }
+    };
+  }
 };
 gDragObserver = new DragObserver();
 
