@@ -67,7 +67,7 @@ Resizer.prototype = {
                                           "canvas");
     canvas.setAttribute("width", this.width);
     canvas.setAttribute("height", this.height);
-    document.appendChild(canvas);
+    //document.appendChild(canvas);
     this._canvas = canvas.getContext("2d");
   },
   onload: null,
@@ -98,8 +98,8 @@ Resizer.prototype = {
     }
     if(biggest + 1 != icons.length) {
       var image = icons[biggest];
-      (this.icons = icons.slice(0, biggest).concat(icons.slice(biggest + 1)))
-                         .push(image);
+      this.icons = icons.slice(0, biggest).concat(icons.slice(biggest + 1))
+      this.icons.push(image);
     }
   },
 
@@ -148,12 +148,12 @@ Resizer.prototype = {
     }
 
 
-    if(num % 2) {
+    if(num % 2) { // modulo 1
 //      this._canvas.drawImage(this.icons[i], i * width, i * height, width,
 //                             height * 2);
       this._canvas.drawImage(this.icons[i], Math.floor(i / 2) * width, (i % 2) * height,
                              width, height * 2);
-    } else {
+    } else { // modulo 0
       this._canvas.drawImage(this.icons[i], Math.floor(i / 2) * width, (i % 2) * height,
                              width, height);
     }
