@@ -16,24 +16,24 @@
                   type="checkbox" editable="true" />
         <treecol id="engineAlias" width="35" hideheader="true" />
       </treecols>
-    <template>
-      <rule rdf:type="urn:organize-search-engines#separator">
-        <treechildren>
-          <treeseparator uri="rdf:*" />
-        </treechildren>
-      </rule>
-      <rule>
-        <treechildren>
-          <treeitem uri="rdf:*">
-            <treerow>
-              <treecell label="rdf:urn:organize-search-engines#Name" src="rdf:urn:organize-search-engines#Icon"
-                        value="rdf:urn:organize-search-engines#Selected"/>
-              <treecell label="rdf:urn:organize-search-engines#Alias"/>
-            </treerow>
-          </treeitem>
-        </treechildren>
-      </rule>
-    </template>
+      <template>
+        <rule rdf:type="urn:organize-search-engines#separator">
+          <treechildren>
+            <treeseparator uri="rdf:*" />
+          </treechildren>
+        </rule>
+        <rule>
+          <treechildren>
+            <treeitem uri="rdf:*">
+              <treerow>
+                <treecell label="rdf:urn:organize-search-engines#Name" src="rdf:urn:organize-search-engines#Icon"
+                          value="rdf:urn:organize-search-engines#Selected"/>
+                <treecell label="rdf:urn:organize-search-engines#Alias"/>
+              </treerow>
+            </treeitem>
+          </treechildren>
+        </rule>
+      </template>
     </tree>
 
   <hbox pack="end">
