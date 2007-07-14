@@ -3,6 +3,7 @@ try {
 const Ci = Components.interfaces, Cc = Components.classes;
 
 const ENGINE_FLAVOR = "text/x-moz-search-engine";
+const FLAVOR_SEPARATOR = ";";
 const BROWSER_SUGGEST_PREF = "browser.search.suggest.enabled";
 const SORT_DIRECTION_PREF = "extensions.seorganizer.sortDirection";
 
@@ -265,6 +266,50 @@ EngineManagerDialog.prototype = {
     }
     document.getElementById("engineList").focus();
   },
+  move: function EngineManager__move() {
+    var canceled = {value: true}, returnVal = {};
+    window.openDialog("chrome://seorganizer/content/moveTo.xul", "_blank",
+                      "resizable,chrome", canceled, returnVal);
+    if(canceled.value)
+      return;
+    var target;
+    if(returnVal.value == ROOT)
+      target = gEngineView._structure;
+    target = gEngineView._structure.find(returnVal.value);
+    if(!target)
+      return;
+
+    var selected = gEngineView.selectedItems;
+    var allAncestors = true, item, itemIndex, node, children;
+    var n = 0;
+    for(var i = 0; i < selected.length; i++) {
+      if(selected[i].parent != target) {
+        selected[i] = gEngineView.internalMove(selected[i], target, -1);
+        if(selected[i])
+          allAncestors = false;
+      }
+    }
+
+    if(allAncestors) {
+      alert("Damn, that doesn't work this way!");
+    } else {
+      gEngineView.updateCache();
+      gEngineView.invalidate();
+      gEngineView.selection.clearSelection();
+      var idx = -1;
+      for each(var item in selected) {
+        if(item) {
+          idx = gEngineView._indexCache.indexOf(item);
+          gEngineView.selection.toggleSelect(idx);
+          this.ensureRowIsVisible(idx);
+        }
+      }
+      //var startIndex = gEngineView._indexCache.indexOf(selected[0]);
+      //var endIndex = startIndex + selected.length - 1;
+      //gEngineView.selection.rangedSelect(startIndex, endIndex, true);
+    }
+    document.getElementById("engineList").focus();
+  },
   editAlias: function EngineManager__editAlias() {
     document.getElementById("engineList").focus();
     var index = gEngineView.selectedIndex;
@@ -427,6 +472,8 @@ EngineManagerDialog.prototype = {
 
     document.getElementById("cmd_rename").setAttribute("disabled",
                                                        writeableSelected);
+    document.getElementById("cmd_move-engine").setAttribute("disabled",
+                                                            disableButtons);
     document.getElementById("cmd_editalias").setAttribute("disabled",
                                                  specialSelected || item.isSeq);
 
@@ -443,7 +490,7 @@ EngineManagerDialog.prototype = {
   },
 
   startDrag: function EngineManager__startDrag(event) {
-    if(event.target.localName === "treechildren" && gEngineView.selectedIndexes.length == 1)
+    if(event.target.localName === "treechildren")
       nsDragAndDrop.startDrag(event, gDragObserver);
   }
 };
@@ -454,12 +501,13 @@ function DragObserver() {
 }
 DragObserver.prototype = {
   onDragStart: function (aEvent, aXferData, aDragAction) {
-    var selectedIndex = window.gEngineView.selectedIndex;
-    if (selectedIndex === -1)
+    var selectedIndexes = window.gEngineView.selectedIndexes;
+    if (!selectedIndexes.length)
       return;
 
+    var data = selectedIndexes.join(FLAVOR_SEPARATOR);
     aXferData.data = new TransferData();
-    aXferData.data.addDataForFlavour(ENGINE_FLAVOR, selectedIndex.toString());
+    aXferData.data.addDataForFlavour(ENGINE_FLAVOR, data);
 
     aDragAction.action = Ci.nsIDragService.DRAGDROP_ACTION_MOVE;
   },
@@ -619,11 +667,11 @@ Structure__Item.prototype = {
                            .getService(Ci.nsIRDFService);
         var namePred = rdfService.GetResource(NS + "Name");
         oldName = rdfService.GetLiteral(oldName);
+        gSEOrganizer.Assert(this.node, namePred,
+                            rdfService.GetLiteral(this.name), true);
         try {
           gSEOrganizer.Unassert(this.node, namePred, oldName);
         } catch(e) {}
-        gSEOrganizer.Assert(this.node, namePred,
-                            rdfService.GetLiteral(this.name), true);
         // we pretend the engine would have been updated - otherwise it'd need
         // a restart for Firefox to completely realize the engine changed
         var clone = {};
@@ -643,6 +691,7 @@ Structure__Item.prototype = {
         os.notifyObservers(engine, SEARCH_ENGINE_TOPIC, "engine-loaded");
         //os.addObserver(gSEOrganizer, SEARCH_ENGINE_TOPIC, false);
 
+        // update the orig search service's cache
         var realSearchService = gSEOrganizer._searchService;
         realSearchService.wrappedJSObject._engines[engine.name] = engine;
       }
@@ -706,10 +755,10 @@ Structure__Container.prototype.commit = Structure.prototype.commit =
                            .getService(Ci.nsIRDFService);
         var namePred = rdfService.GetResource(NS + "Name");
         var oldName = gSEOrganizer.GetTarget(this.node, namePred, true);
-        if(oldName instanceof Ci.nsIRDFLiteral)
-          gSEOrganizer.Unassert(this.node, namePred, oldName);
         gSEOrganizer.Assert(this.node, namePred, rdfService.GetLiteral(this.name),
                             true);
+        if(oldName instanceof Ci.nsIRDFLiteral)
+          gSEOrganizer.Unassert(this.node, namePred, oldName);
       }
     }
     var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
@@ -717,7 +766,11 @@ Structure__Container.prototype.commit = Structure.prototype.commit =
     var rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
                               .getService(Ci.nsIRDFContainerUtils);
     var container = rdfContainerUtils.MakeSeq(gSEOrganizer, this.node);
-    for(var i = container.GetCount(); i !== 0; --i) {
+    var oldCount = container.GetCount();
+    for(var i = 0; i < this.children.length; ++i) {
+      container.AppendElement(this.children[i].node);
+    }
+    for(var i = oldCount; i !== 0; --i) {
       var pred = rdfService.GetResource(NS_RDF + "_" + i);
       if(gSEOrganizer.hasArcOut(container.Resource, pred)) {
         try {
@@ -725,13 +778,23 @@ Structure__Container.prototype.commit = Structure.prototype.commit =
         } catch(e) { }
       }
     }
-    for(var i = 0; i < this.children.length; ++i) {
-      container.AppendElement(this.children[i].node);
-    }
   }
   for(var i = 0; i < this.children.length; ++i) {
     this.children[i].commit();
   }
+};
+Structure__Container.prototype.find = Structure.prototype.find =
+           function Structure__General__find(nodeID) {
+  for(var i = 0, tmp; i < this.children.length; i++) {
+    if(this.children[i].node.ValueUTF8 == nodeID)
+      return this.children[i];
+    if(this.children[i] instanceof Structure__Container) {
+      tmp = this.children[i].find(nodeID);
+      if(tmp)
+        return tmp;
+    }
+  }
+  return null;
 };
 (function() { // anonymous function so we don't pollute the global namespace
   function recursiveChildCount() {
@@ -937,7 +1000,7 @@ EngineView.prototype = {
   getLocalIndex: function getLocalIndex(idx) {
     return this._indexCache[idx].parent.children.indexOf(this._indexCache[idx]);
   },
-  getSourceIndexFromDrag: function getSourceIndexFromDrag() {
+  getSourceIndexesFromDrag: function getSourceIndexesFromDrag() {
     var dragService = Cc["@mozilla.org/widget/dragservice;1"].
                       getService().QueryInterface(Ci.nsIDragService);
     var dragSession = dragService.getCurrentSession();
@@ -949,17 +1012,20 @@ EngineView.prototype = {
 
     var dataObj = {};
     var len = {};
-    var sourceIndex = -1;
+    var sourceIndexes = [];
     try {
       transfer.getAnyTransferData({}, dataObj, len);
     } catch (ex) {}
 
     if (dataObj.value) {
-      sourceIndex = dataObj.value.QueryInterface(Ci.nsISupportsString).data;
-      sourceIndex = parseInt(sourceIndex.substring(0, len.value));
+      sourceIndexes = dataObj.value.QueryInterface(Ci.nsISupportsString).data;
+      sourceIndexes = sourceIndexes.substring(0, len.value).split(FLAVOR_SEPARATOR);
+      for(var i = 0; i < sourceIndexes.length; i++) {
+        sourceIndexes[i] = parseInt(sourceIndexes[i]);
+      }
     }
 
-    return sourceIndex;
+    return sourceIndexes;
   },
 
   /* attempts to be compatible to the original code */
@@ -973,23 +1039,30 @@ EngineView.prototype = {
   },
   selection: null,
   canDrop: function EngineView__canDrop(index, orientation) {
-    var sourceIndex = this.getSourceIndexFromDrag();
-    var sourceItem = this._indexCache[sourceIndex];
-    var dropItem = this._indexCache[index];
+    var sourceIndexes = this.getSourceIndexesFromDrag();
+    if(!sourceIndexes.length)
+      return false;
+    for(var i = 0; i < sourceIndexes.length; i++) {
+      var sourceIndex = sourceIndexes[i];
+      var sourceItem = this._indexCache[sourceIndex];
+      var dropItem = this._indexCache[index];
 
-    var itemSelected = sourceIndex !== -1;
-    var dropOnNext = (sourceIndex !== index + orientation ||
-                      sourceItem.parent !== dropItem.parent);
-    var dropOnSame = sourceIndex !== index;
-    var isAncestor = !dropItem.isAncestorOf(sourceItem)
-    if(gSortDir == "ascending" || gSortDir == "descending") {
-      var sameParent = (dropItem.parent != sourceItem.parent) ||
-                       (sourceItem.isSep) || (orientation == 0) ||
-                       (orientation == 1 && dropItem.isSep && dropItem.open);
-      return (itemSelected && dropOnNext && dropOnSame && sameParent);
-    } else {
-      return (itemSelected && dropOnNext && dropOnSame && isAncestor);
+      var dropOnNext = (sourceIndex !== index + orientation ||
+                        sourceItem.parent !== dropItem.parent);
+      var dropOnSame = sourceIndex !== index;
+      if(gSortDir == "ascending" || gSortDir == "descending") {
+        var sameParent = (dropItem.parent != sourceItem.parent) ||
+                         (sourceItem.isSep) || (orientation == 0) ||
+                         (orientation == 1 && dropItem.isSep && dropItem.open);
+        if(!(dropOnNext && dropOnSame && sameParent))
+          return false;
+      } else {
+        var isAncestor = !dropItem.isAncestorOf(sourceItem);
+        if(!(dropOnNext && dropOnSame && isAncestor))
+          return false;
+      }
     }
+    return true;
   },
   cycleCell: function() {},
   cycleHeader: function(col) {
@@ -1008,50 +1081,74 @@ EngineView.prototype = {
     this.updateCache();
     this.invalidate();
   },
-  drop: function EngineView__drop(treeDropIndex, orientation, treeSourceIndex) {
+  drop: function EngineView__drop(treeDropIndex, orientation) {
     // find out indexes
-    if(treeSourceIndex === undefined || treeSourceIndex === null)
-      treeSourceIndex = this.getSourceIndexFromDrag();
+    var treeSourceIndexes = this.getSourceIndexesFromDrag();
     var treeParentIndex = this.getParentIndex(treeDropIndex);
     var dropIndex;
 
-    if(orientation === Ci.nsITreeView.DROP_ON) {
-      treeParentIndex = treeDropIndex;
-      dropIndex = -1;
-    } else if(orientation === Ci.nsITreeView.DROP_BEFORE) {
-      var dropParent = this._indexCache[treeDropIndex].parent;
-      var sourceParent = this._indexCache[treeSourceIndex].parent;
-      if(treeDropIndex > treeSourceIndex && dropParent === sourceParent)
-        dropIndex = this.getLocalIndex(treeDropIndex) - 1;
-      else
-        dropIndex = this.getLocalIndex(treeDropIndex);
-      if(dropIndex === -1)
-        dropIndex = 0;
-    } else if(orientation === Ci.nsITreeView.DROP_AFTER) {
-      var dropItem = this._indexCache[treeDropIndex];
-      if(dropItem.isSeq && dropItem.open) {
+    switch(orientation) {
+      case Ci.nsITreeView.DROP_ON:
         treeParentIndex = treeDropIndex;
-        dropIndex = 0;
-      } else {
+        dropIndex = -1;
+        break;
+      case Ci.nsITreeView.DROP_BEFORE:
         var dropParent = this._indexCache[treeDropIndex].parent;
-        var sourceParent = this._indexCache[treeSourceIndex].parent;
-        if(treeDropIndex < treeSourceIndex || dropParent !== sourceParent)
-          dropIndex = this.getLocalIndex(treeDropIndex) + 1;
-        else
+        dropIndex = this.getLocalIndex(treeDropIndex);
+        break;
+      case Ci.nsITreeView.DROP_AFTER:
+        var dropItem = this._indexCache[treeDropIndex];
+        if(dropItem.isSeq && dropItem.open) {
+          treeParentIndex = treeDropIndex;
+          dropIndex = 0;
+        } else {
+          var dropParent = this._indexCache[treeDropIndex].parent;
           dropIndex = this.getLocalIndex(treeDropIndex);
-      }
+        }
+        break;
+      default:
+        return;
     }
 
     // now that we have the indexes, do the moving
     var parent = this._indexCache[treeParentIndex];
-    var item = this._indexCache[treeSourceIndex];
+    var items = [], tempDropIndex;
+    for(var i = 0; i < treeSourceIndexes.length; i++) {
+      var item = this._indexCache[treeSourceIndexes[i]];
+      tempDropIndex = dropIndex;
+      if(tempDropIndex != 0) {
+        if(orientation == Ci.nsITreeView.DROP_BEFORE &&
+           (treeDropIndex > treeSourceIndexes[i] || dropParent == item.parent)) {
+          tempDropIndex = tempDropIndex - 1;
+        } else if(orientation == Ci.nsITreeView.DROP_AFTER &&
+                  (treeDropIndex < treeSourceIndexes[i] ||
+                   dropParent != item.parent)) {
+          tempDropIndex = tempDropIndex + 1;
+        }
+      }
+      items[i] = this.internalMove(item, parent, tempDropIndex);
+    }
+    item = items[0];
+
+    // update the tree and correct the selection
+    this.updateCache();
+    this.invalidate();
+    this.selection.clearSelection();
+    for(var i = 0; i < items.length; i++) {
+      treeDropIndex = this._indexCache.indexOf(items[i]);
+      this.selection.toggleSelect(treeDropIndex);
+      this.ensureRowIsVisible(treeDropIndex);
+    }
+    document.getElementById("engineList").focus();
+  },
+  internalMove: function(item, parent, index) {
+    var treeParentIndex = this._indexCache.indexOf(parent);
     if(!item || !parent) {
       Components.reportError(new Error('an unknown error occured'));
-      return;
+      return false;
     }
-    if(treeParentIndex != -1 && !this.isContainerOpen(treeParentIndex)) {
+    if(treeParentIndex != -1 && !this.isContainerOpen(treeParentIndex))
       this.toggleOpenState(treeParentIndex);
-    }
     var node = item.node;
     if(item.isSeq) {
       var children = item.children;
@@ -1061,17 +1158,8 @@ EngineView.prototype = {
       item.destroy();
       item = new Structure__Item(parent, node);
     }
-    parent.insertAt(dropIndex, item);
-
-    // update the tree and correct the selection
-    this.updateCache();
-    treeDropIndex = this._indexCache.indexOf(item);
-    var count = (item.isSeq && item.open) ? item.recursiveChildCount : 0;
-    this.rowCountChanged(treeSourceIndex, -1 - count);
-    this.rowCountChanged(treeDropIndex, 1 + count);
-    this.selection.clearSelection();
-    this.selection.select(treeDropIndex);
-    this.ensureRowIsVisible(treeDropIndex);
+    parent.insertAt(index, item);
+    return item;
   },
   getCellProperties: function EngineView__getCellProperties(row, col, props) {
     var aserv = Cc["@mozilla.org/atom-service;1"].getService(Ci.nsIAtomService);
@@ -1171,10 +1259,19 @@ EngineView.prototype = {
     var open = (item.open = !item.open);
     this.updateCache();
     this.rowCountChanged(index + 1, (open ? 1 : -1) * count);
+    this.invalidate();
     return open;
   }
 };
 } catch(e) {
   Components.reportError(e);
   new Reporter(e);
+}
+function LOG(msg) {
+  /*msg = "Organize Search Engines:   " + msg;
+  var consoleService = Cc["@mozilla.org/consoleservice;1"]
+                         .getService(Ci.nsIConsoleService);
+  consoleService.logStringMessage(msg);
+  //dump(msg + "\n");
+  return msg;*/
 }
