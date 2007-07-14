@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <?xml-stylesheet href="chrome://seorganizer/skin/browser.css" type="text/css" ?>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -8,10 +9,6 @@
           src="chrome://seorganizer/content/browserDragDrop.js" />
   <script type="application/x-javascript"
           src="chrome://seorganizer/content/browserExtCompat.js" />
-   <!--
-   <script src="chrome://global/content/nsDragAndDrop.js" type="application/x-javascript" />
-   <script src="chrome://global/content/nsTransferable.js" type="application/x-javascript" />
-   -->
 
   <window id="main-window">
     <popupset id="search-popupset" ref="urn:organize-search-engines:root"
