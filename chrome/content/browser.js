@@ -44,6 +44,12 @@ SEOrganizer.prototype = {
   },
 
   init: function init() {
+    document.getElementById("navigator-toolbox").addEventListener("DOMNodeInserted",
+      function(e) {
+        if(e.target.id == "searchbar") {
+          organizeSE.onCustomizeToolbarFinished();
+        }
+      }, false);
     this.onCustomizeToolbarFinished();
     var popupset = this.popupset;
 
@@ -117,7 +123,7 @@ SEOrganizer.prototype = {
 
     popupset.builder.rebuild();
 
-    if(!("searchOnTab" in window)) // yeah, I know
+    if(!("searchOnTab" in window) && popup.parentNode) // yeah, I know
       window.setTimeout(function() { popup.parentNode.removeChild(popup); }, 1);
   },
 
