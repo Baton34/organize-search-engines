@@ -1,3 +1,5 @@
+CALL components.bat
+
 SET extShortName=seorganizer
 SET filename=organize-search-engines_1.1b2pre.xpi
 SET extFolder="D:\Erweiterungen\organize-search-engines"
