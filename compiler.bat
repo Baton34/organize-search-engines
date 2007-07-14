@@ -8,7 +8,7 @@ SET path=%extFolder%;%path%
 
 CD /d %extFolder%\chrome
 rem make the jar file (no compression)
-%ProgramFiles%\7-Zip\7z.exe u -tzip %extShortName%.jar -r * -x!*~ -x!*/CVS/* -x!*/CVSROOT/* -mx=0
+%ProgramFiles%\7-Zip\7z.exe u -tzip %extShortName%.jar -r * -x!*~ -x!*/CVS/* -x!*/CVSROOT/* -x!*/.svn/* -mx=0
 
 cd /d %extFolder%
 
