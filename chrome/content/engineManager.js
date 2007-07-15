@@ -79,11 +79,12 @@ EngineManagerDialog.prototype = {
     var prefService = Cc["@mozilla.org/preferences-service;1"]
                         .getService(Ci.nsIPrefService).getBranch("");
     var suggestEnabled = prefService.getBoolPref(BROWSER_SUGGEST_PREF);
-    document.getElementById("enableSuggest").checked = suggestEnabled;
+    document.getElementById("enableSuggest").setAttribute("checked", suggestEnabled);
     gSortDir = prefService.getComplexValue(SORT_DIRECTION_PREF,
                                            Ci.nsISupportsString).data;
     document.getElementById("engineName").setAttribute("sortDirection",
                                                        gSortDir);
+    document.getElementById(gSortDir).setAttribute("checked", "true");
 
     var engineList = document.getElementById("engineList");
     gEngineView = new EngineView(new Structure());
@@ -97,10 +98,22 @@ EngineManagerDialog.prototype = {
     prefService.QueryInterface(Ci.nsIPrefBranch2).addObserver("", this, false);
 
     this.showRestoreDefaults();
+
+    var dlgStrings = document.getElementById("dlg-strings");
+    var ok = document.getElementById("btn_ok");
+    ok.setAttribute("label", dlgStrings.getString("button-accept"));
+    ok.setAttribute("accesskey", dlgStrings.getString("accesskey-accept"));
+    var cancel = document.getElementById("btn_cancel");
+    cancel.setAttribute("label", dlgStrings.getString("button-cancel"));
+    cancel.setAttribute("accesskey", dlgStrings.getString("accesskey-cancel"));
+
+    document.getElementById("engineList").focus();
   },
   onOK: function EngineManager__onOK() {
     // Set the preference
-    var newSuggestEnabled = document.getElementById("enableSuggest").checked;
+    var newSuggestEnabled = document.getElementById("enableSuggest")
+                                    .getAttribute("checked");
+    newSuggestEnabled = (newSuggestEnabled == "true") ? true : false;
     var prefService = Cc["@mozilla.org/preferences-service;1"]
                         .getService(Ci.nsIPrefBranch);
     prefService.setBoolPref(BROWSER_SUGGEST_PREF, newSuggestEnabled);
@@ -170,15 +183,11 @@ EngineManagerDialog.prototype = {
         switch(aVerb) {
           case BROWSER_SUGGEST_PREF:
             var value = prefService.getBoolPref(BROWSER_SUGGEST_PREF);
-            document.getElementById("enableSuggest").checked = value;
+            document.getElementById("enableSuggest").setAttribute("checked", value);
             break;
           case SORT_DIRECTION_PREF:
-            gSortDir = prefService.getComplexValue(SORT_DIRECTION_PREF,
-                                                   Ci.nsISupportsString);
-            document.getElementById("engineName").setAttribute("sortDirection",
-                                                               gSortDir);
-            gEngineView.updateCache();
-            gEngineView.invalidate();
+            this.sortBy(prefService.getComplexValue(SORT_DIRECTION_PREF,
+                                                   Ci.nsISupportsString));
             break;
         }
       }
@@ -191,7 +200,7 @@ EngineManagerDialog.prototype = {
         return !gEngineView.engineVisible(e);
       });
     }
-    document.documentElement.getButton("extra2").disabled = !someHidden;
+    document.getElementById("restoreDefault").setAttribute("disabled", !someHidden);
   },
 
   remove: function EngineManager__remove() {
@@ -269,13 +278,14 @@ EngineManagerDialog.prototype = {
   move: function EngineManager__move() {
     var canceled = {value: true}, returnVal = {};
     window.openDialog("chrome://seorganizer/content/moveTo.xul", "_blank",
-                      "resizable,chrome", canceled, returnVal);
+                      "resizable,chrome,modal,dialog", canceled, returnVal);
     if(canceled.value)
       return;
     var target;
     if(returnVal.value == ROOT)
       target = gEngineView._structure;
-    target = gEngineView._structure.find(returnVal.value);
+    else
+      target = gEngineView._structure.find(returnVal.value);
     if(!target)
       return;
 
@@ -291,14 +301,12 @@ EngineManagerDialog.prototype = {
     gEngineView.updateCache();
     gEngineView.invalidate();
     gEngineView.selection.clearSelection();
-    var idx = -1;
+    var indexes = [];
     for each(var item in selected) {
-      if(item) {
-        idx = gEngineView._indexCache.indexOf(item);
-        gEngineView.selection.toggleSelect(idx);
-        this.ensureRowIsVisible(idx);
-      }
+      if(item)
+        indexes.push(gEngineView._indexCache.indexOf(item));
     }
+    gEngineView.select.apply(gEngineView, indexes.concat([true]));
     document.getElementById("engineList").focus();
   },
   editAlias: function EngineManager__editAlias() {
@@ -441,6 +449,33 @@ EngineManagerDialog.prototype = {
     gEngineView.selection.select(treeInsertLoc);
     gEngineView.ensureRowIsVisible(treeInsertLoc);
     document.getElementById("engineList").focus();
+  },
+  selectAll: function EngineManager__selectAll() {
+    gEngineView.selection.rangedSelect(0, gEngineView.lastIndex, false);
+    document.getElementById("engineList").focus();
+  },
+  sortBy: function EngineManager__sortBy(direction) {
+    var col = document.getElementById("engineName");
+    gSortDir = direction;
+    col.setAttribute("sortDirection", direction);
+
+    document.getElementById(direction).setAttribute("checked", "true");
+    switch(direction) {
+      case "ascending":
+      document.getElementById("descending").setAttribute("checked", "false");
+      document.getElementById("natural").setAttribute("checked", "false");
+      break;
+      case "descending":
+      document.getElementById("ascending").setAttribute("checked", "false");
+      document.getElementById("natural").setAttribute("checked", "false");
+      break;
+      default:
+      document.getElementById("ascending").setAttribute("checked", "false");
+      document.getElementById("descending").setAttribute("checked", "false");
+    }
+
+    gEngineView.updateCache();
+    gEngineView.invalidate();
   },
 
   onSelect: function EngineManager__onSelect() {
@@ -883,7 +918,12 @@ EngineView.prototype = {
   },
   get selectedIndexes() {
     var seln = this.selection;
-    var rangeCount = seln.getRangeCount();
+    var indexes = [];
+    for(var i = 0; i < this.rowCount; i++) {
+      if(seln.isSelected(i))
+        indexes.push(i);
+    }
+    /*var rangeCount = seln.getRangeCount();
     var indexes = [], min = { }, max = { };
     for(var i = 0; i <= rangeCount; i++) {
       seln.getRangeAt(i, min, max);
@@ -891,7 +931,7 @@ EngineView.prototype = {
         if(j != -1)
           indexes.push(j);
       }
-    }
+    }*/
     return indexes;
   },
   get selectedItem() {
@@ -914,44 +954,17 @@ EngineView.prototype = {
     }
     return engines;
   },
-  select: function EngineView__select(index0, index1) {
-    /*var seln = gEngineView.selection;
-    seln.clearSelection();
+  select: function EngineView__select(index0, index1, /*..., */ override) {
+    var seln = gEngineView.selection;
+    override = arguments[arguments.length - 1];
+    if(override)
+      seln.clearSelection();
 
-    var range = new Range(index0, index0);
-    for(var i = 1; i < arguments.length; ++i) {
-      try {
-        range.append(arguments[i]);
-      } catch(e) {
-        if(e == Cr.NS_ERROR_INVALID_ARG) {
-          seln.rangedSelect(
-        } else {
-          throw e;
-        }
-      }
+    for(var i = 0; i < arguments.length - 1; ++i) {
+      if(!seln.isSelected(arguments[i]))
+        seln.toggleSelect(arguments[i]);
+      this.ensureRowIsVisible(arguments[i]);
     }
-    seln.
-    function Range(min, max) {
-      this.min = {value: Math.min(min, max)};
-      this.max = {value: Math.max(min, max)};
-    }
-    Range.prototype = {
-      min: null,
-      max: null,
-      inRange: function(num) {
-        return (this.min.value <= num && this.max.value >= num);
-      },
-      append: function(idx) {
-        if(inRange(idx))
-          return;
-        if(this.min.value - 1 == idx) {
-          this.min.value = idx;
-        } else if(this.max.value + 1 == arguments[i]) {
-          this.max.value = arguments[i];
-        }
-        throw Cr.NS_ERROR_INVALID_ARG;
-      }
-    };*/
   },
   invalidate: function EngineView__invalidate() {
     this.updateCache();
@@ -1091,18 +1104,14 @@ EngineView.prototype = {
   cycleHeader: function(col) {
     if(col.id != "engineName")
       return;
-    col = col.element;
+    col = col.element || document.getElementById(col.id);
     var cycle = {
       natural: 'ascending',
       ascending: 'descending',
       descending: 'natural'
     };
 
-    gSortDir = cycle[col.getAttribute("sortDirection")];
-    col.setAttribute("sortDirection", gSortDir);
-
-    this.updateCache();
-    this.invalidate();
+    gEngineManagerDialog.sortBy(cycle[col.getAttribute("sortDirection")]);
   },
   drop: function EngineView__drop(treeDropIndex, orientation) {
     // find out indexes
@@ -1156,12 +1165,12 @@ EngineView.prototype = {
     // update the tree and correct the selection
     this.updateCache();
     this.invalidate();
-    this.selection.clearSelection();
+    var treeDropIndexes = [];
     for(var i = 0; i < items.length; i++) {
-      treeDropIndex = this._indexCache.indexOf(items[i]);
-      this.selection.toggleSelect(treeDropIndex);
-      this.ensureRowIsVisible(treeDropIndex);
+      treeDropIndexes[i] = this._indexCache.indexOf(items[i]);
     }
+    treeDropIndexes.push(true);
+    this.select.apply(this, treeDropIndexes);
     document.getElementById("engineList").focus();
   },
   internalMove: function(item, parent, index) {
@@ -1176,7 +1185,7 @@ EngineView.prototype = {
     if(item.isSeq) {
       var children = item.children;
       item.destroy();
-      item = new Structure__Container(parent, node, children, item.open);
+      item = item.replacedWith = new Structure__Container(parent, node, children, item.open);
     } else {
       item.destroy();
       item = new Structure__Item(parent, node);
@@ -1296,4 +1305,59 @@ function LOG(msg) {
   consoleService.logStringMessage(msg);
   //dump(msg + "\n");
   return msg;*/
+}
+
+var gConstructedViewMenuSortItems = false;
+function fillViewMenu(aEvent) {
+  var popupElement = aEvent.target;
+  var adjacentElement = popupElement.firstChild;
+
+  var bookmarksView = document.getElementById("engineList");
+  var columns = bookmarksView.columns;
+
+  if (!gConstructedViewMenuSortItems) {
+    for (var i = 0; i < columns.length; ++i) {
+      var accesskey = columns[i].accesskey;
+      var menuitem  = document.createElement("menuitem");
+      var name      = BookmarksUtils.getLocaleString("SortMenuItem", columns[i].label);
+      menuitem.setAttribute("label", name);
+      menuitem.setAttribute("accesskey", columns[i].accesskey);
+      menuitem.setAttribute("resource", columns[i].resource);
+      menuitem.setAttribute("id", "sortMenuItem:" + columns[i].resource);
+      menuitem.setAttribute("checked", columns[i].sortActive);
+      menuitem.setAttribute("name", "sortSet");
+      menuitem.setAttribute("type", "radio");
+
+      popupElement.insertBefore(menuitem, adjacentElement);
+    }
+
+    gConstructedViewMenuSortItems = true;
+  }
+
+  const kPrefSvcContractID = "@mozilla.org/preferences-service;1";
+  const kPrefSvcIID = Ci.nsIPrefService;
+  var prefSvc = Cc[kPrefSvcContractID].getService(kPrefSvcIID);
+  var bookmarksSortPrefs = prefSvc.getBranch("browser.bookmarks.sort.");
+
+  if (gConstructedViewMenuSortItems) {
+    var resource = bookmarksSortPrefs.getCharPref("resource");
+    var element = document.getElementById("sortMenuItem:" + resource);
+    if (element)
+      element.setAttribute("checked", "true");
+  }
+
+  var sortAscendingMenu = document.getElementById("ascending");
+  var sortDescendingMenu = document.getElementById("descending");
+  var noSortMenu = document.getElementById("natural");
+  
+  sortAscendingMenu.setAttribute("checked", "false");
+  sortDescendingMenu.setAttribute("checked", "false");
+  noSortMenu.setAttribute("checked", "false");
+  var direction = bookmarksSortPrefs.getCharPref("direction");
+  if (direction == "natural")
+    sortAscendingMenu.setAttribute("checked", "true");
+  else if (direction == "ascending") 
+    sortDescendingMenu.setAttribute("checked", "true");
+  else
+    noSortMenu.setAttribute("checked", "true");
 }

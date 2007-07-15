@@ -7,30 +7,29 @@
 <?xml-stylesheet href="chrome://global/skin/tree.css"?>
 
 <!DOCTYPE dialog [
-  <!ENTITY % browser SYSTEM "chrome://browser/locale/engineManager.dtd">
-  %browser;
+  <!ENTITY % default SYSTEM "chrome://browser/locale/engineManager.dtd">
+  %default;
   <!ENTITY % additional SYSTEM "chrome://seorganizer/locale/engineManager.dtd">
   %additional;
   <!ENTITY % menus SYSTEM "chrome://browser/locale/bookmarks/bookmarks.dtd">
   %menus;
+  <!ENTITY % editmenu SYSTEM "chrome://global/locale/editMenuOverlay.dtd">
+  %editmenu;
 ]>
 
-<dialog id="engineManager"
+<window id="engineManager"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-        buttons="accept,cancel,extra2"
-        buttonlabelextra2="&restoreDefault.label;"
-        buttonaccesskeyextra2="&restoreDefault.accesskey;"
         onload="gEngineManagerDialog.init();"
-        ondialogaccept="gEngineManagerDialog.onOK();"
-        ondialogcancel="gEngineManagerDialog.onCancel();"
-        ondialogextra2="gEngineManagerDialog.newItem(gEngineManagerDialog.NEW_ITEM_RESTORED_DEFAULT_ENGINE);"
         title="&engineManager.title;"
-        style="&engineManager.style; -moz-user-focus: ignore;"
+        style="&engineManager.style;"
         persist="screenX screenY width height"
         windowtype="Browser:SearchManager">
 
-  <stringbundle src="chrome://seorganizer/locale/engineManager.properties" id="strings" />
+  <stringbundleset>
+    <stringbundle src="chrome://seorganizer/locale/engineManager.properties" id="strings" />
+    <stringbundle src="chrome://global/locale/dialog.properties" id="dlg-strings" />
+  </stringbundleset>
 
   <script type="application/x-javascript"
           src="chrome://global/content/globalOverlay.js"/>
@@ -42,7 +41,10 @@
           src="chrome://global/content/nsTransferable.js"/>
 
   <commandset id="generalCommandSet">
-    <command id="cmd_close" oncommand="if(closeWindow(true)) gEngineManagerDialog.onCancel();" />
+    <command id="cmd_cancel" oncommand="closeWindow(true); gEngineManagerDialog.onCancel();" />
+    <command id="cmd_ok" oncommand="closeWindow(true); gEngineManagerDialog.onOK();" />
+
+    <command id="cmd_selectAll" oncommand="gEngineManagerDialog.selectAll();" />
   </commandset>
   <commandset id="engineManagerCommandSet">
     <command id="cmd_remove" oncommand="gEngineManagerDialog.remove();"
@@ -67,8 +69,9 @@
   </commandset>
 
   <keyset id="engineManagerKeyset">
-    <key id="remove" keycode="VK_DELETE" command="cmd_remove"/>
-    <key id="remove" keycode="VK_DELETE" command="cmd_remove"/>
+    <key id="key_remove" keycode="VK_DELETE" command="cmd_remove"/>
+    <key id="key_cancel" keycode="VK_ESCAPE" command="cmd_cancel"/>
+    <key id="key_selectAll" key="A" modifiers="accel" command="cmd_selectAll" />
   </keyset>
 
 
@@ -76,50 +79,52 @@
     <menubar id="main-menubar">
       <menu label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
         <menupopup>
-          <menuitem id="addEngines" label="&addEngine.label;"
-                    oncommand="gEngineManagerDialog.loadAddEngines();" />
           <menuitem label="&menuitem.newFolder.label;" 
                     accesskey="&menuitem.newFolder.accesskey;"
                     command="cmd_bm_newfolder"/>
           <menuitem label="&menuitem.newSeparator.label;"
                     accesskey="&menuitem.newSeparator.accesskey;"
                     command="cmd_bm_newseparator"/>
+          <menuitem id="addEngines" label="&addEngine.label;"
+                    oncommand="gEngineManagerDialog.loadAddEngines();" />
+          <menuitem id="restoreDefault" label="&restoreDefault.label;"
+                    accesskey="&restoreDefault.accesskey;"
+                    oncommand="gEngineManagerDialog.newItem(gEngineManagerDialog.NEW_ITEM_RESTORED_DEFAULT_ENGINE);" />
           <menuseparator/>
-          <menuitem label="&closeCmd.label;" command="cmd_close"
-                    key="key_close" accesskey="&closeCmd.accesskey;"/>
+          <menuitem id="enableSuggest" type="checkbox"
+                    label="&enableSuggest.label;"
+                    accesskey="&enableSuggest.accesskey;"/>
+          <!--<menuseparator/>
+          <menuitem label="&closeCmd.label;" command="cmd_cancel"
+                    key="key_cancel" accesskey="&closeCmd.accesskey;"/>-->
         </menupopup>
       </menu>
-      <menu id="menu_edit">
+      <menu id="menu_edit" label="&editMenu.label;" accesskey="&editMenu.accesskey;">
         <menupopup>
-          <menuitem id="menu_delete" command="cmd_remove" key="remove"
-                    label="&remove.label;" accesskey="&remove.accesskey;" />
-          <menuseparator/>
-          <menuitem id="menu_selectAll"/>
+          <menuitem id="menu_selectAll" label="&selectAllCmd.label;"
+                    accesskey="&selectAllCmd.accesskey;" command="cmd_selectAll"
+                    key="key_selectAll" />
           <menuseparator/>
           <menuitem label="&command.moveBookmark.label;"
                     accesskey="&command.moveBookmark.accesskey;"
                     command="cmd_move-engine"/>
-
-          <menuseparator/>
-          <menuitem label="&command.properties.label;"
-                    key="bm_key_properties" accesskey="&command.properties.accesskey;"
-                    command="cmd_bm_properties"/>
+          <menuitem label="&rename.label;" command="cmd_rename"
+                    accesskey="&rename.accesskey;" />
+          <menuitem id="menu_delete" command="cmd_remove" key="key_remove"
+                    label="&remove.label;" accesskey="&remove.accesskey;" />
         </menupopup>
       </menu>
       <menu label="&viewMenu.label;" accesskey="&viewMenu.accesskey;">
-        <menupopup onpopupshowing="fillViewMenu(event)"
-                   oncommand="onViewMenuSortItemSelected(event);">
+        <menupopup onpopupshowing="fillViewMenu(event);"
+                   oncommand="gEngineManagerDialog.sortBy(event.target.id);">
           <menuitem id="natural" label="&menuitem.view.unsorted.label;"
-                    accesskey="&menuitem.view.unsorted.accesskey;"
-                    type="radio"
-                    resource="direction" name="sortSet"/>
+                    accesskey="&menuitem.view.unsorted.accesskey;" type="radio"
+                    resource="direction" name="sortDirectionSet"/>
           <menuitem id="ascending" label="&sortAscending.label;"
-                    accesskey="&sortAscending.accesskey;"
-                    type="radio"
+                    accesskey="&sortAscending.accesskey;" type="radio"
                     resource="direction" name="sortDirectionSet"/>
           <menuitem id="descending" label="&sortDescending.label;"
-                    accesskey="&sortDescending.accesskey;"
-                    type="radio"
+                    accesskey="&sortDescending.accesskey;" type="radio"
                     resource="direction" name="sortDirectionSet"/>
         </menupopup>
 
@@ -160,7 +165,7 @@
                  persist="width ordinal hidden" />
         <splitter class="tree-splitter"/>
         <treecol id="engineAlias" width="35" label="&aliascol.label;"
-                 hidden="true" persist="width ordinal hidden" />
+                 persist="width ordinal hidden" />
       </treecols>
       <treechildren />
     </tree>
@@ -169,10 +174,9 @@
       <grippy class="visible-grippy" />
     </splitter>
   </hbox>
-  <hbox>
-    <spacer flex="1" />
-    <checkbox id="enableSuggest"
-              label="&enableSuggest.label;"
-              accesskey="&enableSuggest.accesskey;"/>
+
+  <hbox pack="end">
+    <button command="cmd_ok" id="btn_ok" />
+    <button command="cmd_cancel" id="btn_cancel" />
   </hbox>
-</dialog>
+</window>
