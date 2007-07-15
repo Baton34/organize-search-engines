@@ -89,16 +89,6 @@ Window.prototype = {
 var window = new Window();
 window.window = window.self = window.top = window;
 
-function Reporter(e) {
-  return window.Reporter(e);
-}
-
-(function() {
-  var jsLoader = Cc["@mozilla.org/moz/jssubscript-loader;1"]
-                   .getService(Ci.mozIJSSubScriptLoader);
-  jsLoader.loadSubScript("chrome://seorganizer/content/reporter.js", window);
-})();
-
 
 try {
 
@@ -1088,7 +1078,6 @@ FoldersOnly.prototype = {
   }
 };
 } catch(e) {
-  new Reporter(e);
   Components.reportError(e);
 }
 

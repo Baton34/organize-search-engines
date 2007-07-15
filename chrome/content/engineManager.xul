@@ -11,6 +11,8 @@
   %browser;
   <!ENTITY % additional SYSTEM "chrome://seorganizer/locale/engineManager.dtd">
   %additional;
+  <!ENTITY % menus SYSTEM "chrome://browser/locale/bookmarks/bookmarks.dtd">
+  %menus;
 ]>
 
 <dialog id="engineManager"
@@ -31,46 +33,98 @@
   <stringbundle src="chrome://seorganizer/locale/engineManager.properties" id="strings" />
 
   <script type="application/x-javascript"
+          src="chrome://global/content/globalOverlay.js"/>
+  <script type="application/x-javascript"
           src="chrome://seorganizer/content/engineManager.js"/>
-  <!--<script type="application/x-javascript"
-          src="chrome://seorganizer/content/reporter.js"/>-->
   <script type="application/x-javascript"
           src="chrome://global/content/nsDragAndDrop.js"/>
   <script type="application/x-javascript"
           src="chrome://global/content/nsTransferable.js"/>
 
+  <commandset id="generalCommandSet">
+    <command id="cmd_close" oncommand="if(closeWindow(true)) gEngineManagerDialog.onCancel();" />
+  </commandset>
   <commandset id="engineManagerCommandSet">
-    <command id="cmd_remove"
-             oncommand="gEngineManagerDialog.remove();"
+    <command id="cmd_remove" oncommand="gEngineManagerDialog.remove();"
              disabled="true"/>
 
     <command id="cmd_new-folder"
              oncommand="gEngineManagerDialog.newItem(gEngineManagerDialog.NEW_ITEM_TYPE_FOLDER);" />
     <command id="cmd_new-separator"
              oncommand="gEngineManagerDialog.newItem(gEngineManagerDialog.NEW_ITEM_TYPE_SEPARATOR);" />
-    <command id="cmd_editalias"
-             oncommand="gEngineManagerDialog.editAlias();"
+    <command id="cmd_editalias" oncommand="gEngineManagerDialog.editAlias();"
              disabled="true"/>
-    <command id="cmd_rename"
-             oncommand="gEngineManagerDialog.editName();"
+    <command id="cmd_rename" oncommand="gEngineManagerDialog.editName();"
              disabled="true"/>
 
     <command id="cmd_move-engine" oncommand="gEngineManagerDialog.move();"
              disabled="true" />
 
-    <command id="cmd_moveup"
-             oncommand="gEngineManagerDialog.bump(1);"
+    <command id="cmd_moveup" oncommand="gEngineManagerDialog.bump(1);"
              disabled="true"/>
-    <command id="cmd_movedown"
-             oncommand="gEngineManagerDialog.bump(-1);"
+    <command id="cmd_movedown" oncommand="gEngineManagerDialog.bump(-1);"
              disabled="true"/>
   </commandset>
 
   <keyset id="engineManagerKeyset">
     <key id="remove" keycode="VK_DELETE" command="cmd_remove"/>
+    <key id="remove" keycode="VK_DELETE" command="cmd_remove"/>
   </keyset>
 
+
   <toolbox>
+    <menubar id="main-menubar">
+      <menu label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
+        <menupopup>
+          <menuitem id="addEngines" label="&addEngine.label;"
+                    oncommand="gEngineManagerDialog.loadAddEngines();" />
+          <menuitem label="&menuitem.newFolder.label;" 
+                    accesskey="&menuitem.newFolder.accesskey;"
+                    command="cmd_bm_newfolder"/>
+          <menuitem label="&menuitem.newSeparator.label;"
+                    accesskey="&menuitem.newSeparator.accesskey;"
+                    command="cmd_bm_newseparator"/>
+          <menuseparator/>
+          <menuitem label="&closeCmd.label;" command="cmd_close"
+                    key="key_close" accesskey="&closeCmd.accesskey;"/>
+        </menupopup>
+      </menu>
+      <menu id="menu_edit">
+        <menupopup>
+          <menuitem id="menu_delete" command="cmd_remove" key="remove"
+                    label="&remove.label;" accesskey="&remove.accesskey;" />
+          <menuseparator/>
+          <menuitem id="menu_selectAll"/>
+          <menuseparator/>
+          <menuitem label="&command.moveBookmark.label;"
+                    accesskey="&command.moveBookmark.accesskey;"
+                    command="cmd_move-engine"/>
+
+          <menuseparator/>
+          <menuitem label="&command.properties.label;"
+                    key="bm_key_properties" accesskey="&command.properties.accesskey;"
+                    command="cmd_bm_properties"/>
+        </menupopup>
+      </menu>
+      <menu label="&viewMenu.label;" accesskey="&viewMenu.accesskey;">
+        <menupopup onpopupshowing="fillViewMenu(event)"
+                   oncommand="onViewMenuSortItemSelected(event);">
+          <menuitem id="natural" label="&menuitem.view.unsorted.label;"
+                    accesskey="&menuitem.view.unsorted.accesskey;"
+                    type="radio"
+                    resource="direction" name="sortSet"/>
+          <menuitem id="ascending" label="&sortAscending.label;"
+                    accesskey="&sortAscending.accesskey;"
+                    type="radio"
+                    resource="direction" name="sortDirectionSet"/>
+          <menuitem id="descending" label="&sortDescending.label;"
+                    accesskey="&sortDescending.accesskey;"
+                    type="radio"
+                    resource="direction" name="sortDirectionSet"/>
+        </menupopup>
+
+      </menu>
+    </menubar>
     <toolbar id="command-toolbar" tbalign="stretch" class="chromeclass-toolbar">
       <toolbarbutton id="newfolder" command="cmd_new-folder"
                      label="&new-folder.label;" accesskey="&new-folder.accesskey;" />
@@ -86,6 +140,11 @@
                      label="&editalias.label;" accesskey="&editalias.accesskey;" />
       <toolbarbutton id="delete" command="cmd_remove"
                      label="&remove.label;" accesskey="&remove.accesskey;" />
+      <toolbarspacer flex="1" />
+      <toolbaritem id="moveupdown" orient="vertical">
+        <toolbarbutton command="cmd_moveup" id="moveup" label="&up.label;" accesskey="&up.accesskey;" orient="horizontal" />
+        <toolbarbutton command="cmd_movedown" id="movedown" label="&dn.label;" accesskey="&dn.accesskey;" orient="horizontal" />
+      </toolbaritem>
     </toolbar>
   </toolbox>
   <separator class="thin" />
@@ -109,22 +168,8 @@
               resizeafter="closest" id="engine-view-splitter">
       <grippy class="visible-grippy" />
     </splitter>
-    <vbox persist="width collapsed" collapsed="false">
-      <spacer flex="1"/>
-      <button id="up"
-              label="&up.label;"
-              accesskey="&up.accesskey;"
-              command="cmd_moveup" crop="end" />
-      <button id="dn"
-              label="&dn.label;"
-              accesskey="&dn.accesskey;"
-              command="cmd_movedown" crop="end" />
-      <spacer flex="1"/>
-    </vbox>
   </hbox>
   <hbox>
-    <label id="addEngines" class="text-link" value="&addEngine.label;"
-           onclick="gEngineManagerDialog.loadAddEngines();"/>
     <spacer flex="1" />
     <checkbox id="enableSuggest"
               label="&enableSuggest.label;"

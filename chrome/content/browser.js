@@ -45,11 +45,7 @@ SEOrganizer.prototype = {
 
   init: function init() {
     document.getElementById("navigator-toolbox").addEventListener("DOMNodeInserted",
-      function(e) {
-        if(e.target.id == "searchbar") {
-          organizeSE.onCustomizeToolbarFinished();
-        }
-      }, false);
+                                          this.customizeToolbarListener, false);
     this.onCustomizeToolbarFinished();
     var popupset = this.popupset;
 
@@ -65,11 +61,7 @@ SEOrganizer.prototype = {
     popupset.builder.rebuild();
 
     /* make Firefox support search aliases */
-    if("bookmarkService" in window) { // we are on a places-enabled build
-      var searchRegexp = /(shortcutURL = shortcutURI\.spec;)/;
-      var replacement = "$1\n} else {\
-      shortcutURL = organizeSE.SEOrganizer.resolveKeyword(aURL, aPostDataRef);";
-    } else { // plain old rdf bookmark service
+    if(!("bookmarkService" in window)) { // we aren't on a places-enabled build
       var searchRegexp = /(BMSVC\.resolveKeyword\(aURL,\saPostDataRef\))/;
       var replacement =
                "$1 ||\norganizeSE.SEOrganizer.resolveKeyword(aURL, aPostDataRef)";
@@ -80,6 +72,11 @@ SEOrganizer.prototype = {
 
     /**** compatibility to other extensions ****/
     this.extensions = new organizeSE__Extensions();
+  },
+  customizeToolbarListener: function(e) {
+    if(e.target.id == "searchbar") {
+      organizeSE.onCustomizeToolbarFinished();
+    }
   },
   // we have to re-init the searchbar after customizing the toolbar
   onCustomizeToolbarFinished: function() {
@@ -133,8 +130,12 @@ SEOrganizer.prototype = {
     Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService)
       .getBranch(SORT_DIRECTION_PREF).QueryInterface(Ci.nsIPrefBranch2)
       .removeObserver("", organizeSE);
-    delete organizeSE._seo;
     window.removeEventListener("close", uninit, false);
+    document.getElementById("navigator-toolbox").removeEventListener("DOMNodeInserted",
+                                          organizeSE.customizeToolbarListener, false);
+    for(var i in organizeSE)
+      delete organizeSE[i];
+    window.organizeSE = null;
   },
 
   extensions: null,

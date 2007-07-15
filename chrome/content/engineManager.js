@@ -280,33 +280,24 @@ EngineManagerDialog.prototype = {
       return;
 
     var selected = gEngineView.selectedItems;
-    var allAncestors = true, item, itemIndex, node, children;
+    var item, itemIndex, node, children;
     var n = 0;
     for(var i = 0; i < selected.length; i++) {
       if(selected[i].parent != target) {
         selected[i] = gEngineView.internalMove(selected[i], target, -1);
-        if(selected[i])
-          allAncestors = false;
       }
     }
 
-    if(allAncestors) {
-      alert("Damn, that doesn't work this way!");
-    } else {
-      gEngineView.updateCache();
-      gEngineView.invalidate();
-      gEngineView.selection.clearSelection();
-      var idx = -1;
-      for each(var item in selected) {
-        if(item) {
-          idx = gEngineView._indexCache.indexOf(item);
-          gEngineView.selection.toggleSelect(idx);
-          this.ensureRowIsVisible(idx);
-        }
+    gEngineView.updateCache();
+    gEngineView.invalidate();
+    gEngineView.selection.clearSelection();
+    var idx = -1;
+    for each(var item in selected) {
+      if(item) {
+        idx = gEngineView._indexCache.indexOf(item);
+        gEngineView.selection.toggleSelect(idx);
+        this.ensureRowIsVisible(idx);
       }
-      //var startIndex = gEngineView._indexCache.indexOf(selected[0]);
-      //var endIndex = startIndex + selected.length - 1;
-      //gEngineView.selection.rangedSelect(startIndex, endIndex, true);
     }
     document.getElementById("engineList").focus();
   },
@@ -453,7 +444,37 @@ EngineManagerDialog.prototype = {
   },
 
   onSelect: function EngineManager__onSelect() {
-    var index = gEngineView.selectedIndex;
+    var indexes = gEngineView.selectedIndexes;
+    var disableButtons = (!indexes.length);
+    var multipleSelected = (indexes.length > 1);
+    var lastSelected = false, firstSelected = false, writeableSelected = true;
+    var specialSelected = false, onlyEngines = true;
+
+    var index, item, engine;
+    for(var i = 0; i < indexes.length; i++) {
+      index = indexes[i];
+      item = gEngineView._indexCache[index];
+      engine = item.originalEngine;
+      if(item.parent.children.length - 1 == gEngineView.getLocalIndex(index))
+        lastSelected = true;
+      if(!gEngineView.getLocalIndex(index))
+        firstSelected = true;
+      if(item.isSep)
+        onlyEngines = writeableSelected = !(specialSelected = true);
+      else if(item.isSeq)
+        onlyEngines = false;
+      else if(!engine || engine.wrappedJSObject._readOnly)
+        writeableSelected = false;
+    }
+
+    if(disableButtons) {
+      writeableSelected = false;
+      specialSelected = firstSelected = lastSelected = multipleSelected = true;
+    } else if(multipleSelected) {
+      writeableSelected = false;
+      specialSelected = true;
+    }
+    /*var index = gEngineView.selectedIndex;
     var item = gEngineView._indexCache[index];
     var engine = item.originalEngine;
 
@@ -465,22 +486,20 @@ EngineManagerDialog.prototype = {
     var firstSelected = (disableButtons || !gEngineView.getLocalIndex(index));
     var specialSelected = (disableButtons || item.isSep || multipleSelected);
     var writeableSelected = (specialSelected ||
-                             (engine && engine.wrappedJSObject._readOnly));
+                             (engine && engine.wrappedJSObject._readOnly));*/
 
-    document.getElementById("cmd_remove").setAttribute("disabled",
-                                                     onlyOne || disableButtons);
+    document.getElementById("cmd_remove").setAttribute("disabled", disableButtons);
 
     document.getElementById("cmd_rename").setAttribute("disabled",
-                                                       writeableSelected);
-    document.getElementById("cmd_move-engine").setAttribute("disabled",
-                                                            disableButtons);
+                        !onlyEngines || multipleSelected || !writeableSelected);
+    document.getElementById("cmd_move-engine").setAttribute("disabled", disableButtons);
     document.getElementById("cmd_editalias").setAttribute("disabled",
-                                                 specialSelected || item.isSeq);
+                                              !onlyEngines || multipleSelected);
 
     document.getElementById("cmd_moveup").setAttribute("disabled",
-                                                      onlyOne || firstSelected);
+                                                       firstSelected);
     document.getElementById("cmd_movedown").setAttribute("disabled",
-                                                       onlyOne || lastSelected);
+                                                         lastSelected);
   },
 
   loadAddEngines: function EngineManager__loadAddEngines() {
@@ -1269,7 +1288,6 @@ EngineView.prototype = {
 };
 } catch(e) {
   Components.reportError(e);
-  new Reporter(e);
 }
 function LOG(msg) {
   /*msg = "Organize Search Engines:   " + msg;

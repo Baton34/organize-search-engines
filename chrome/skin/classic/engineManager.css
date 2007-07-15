@@ -1,10 +1,8 @@
-@import url(grippy.css);
-
 /*treechildren::-moz-tree-image(primary) {
   list-style-image: url(chrome://global/skin/icons/folder-item.png);
   -moz-image-region: rect(0, 16px, 16px, 0);
   margin-right: 3px;
-  width: 16px; /* cut icons that are too big 
+  width: 16px; /* cut icons that are too big *//*
   height: 16px;
 }
 treechildren::-moz-tree-image(container, closed, primary) {
@@ -30,17 +28,6 @@ treechildren::-moz-tree-image(separator, Name) {
   padding-right: 0;
 }
 
-#engine-view-splitter {
-  border-left: none;
-}
-#engine-view-splitter[state="collapsed"] {
-  border-right: none;
-}
-
-toolbarbutton, treecolpicker {
-  -moz-user-focus: normal;
-}
-
 
 
 
@@ -51,8 +38,18 @@ toolbarbutton {
   min-width: 57px;
   padding: 5px;
 }
-
-toolbarbutton > .toolbarbutton-icon {
+toolbaritem#moveupdown {
+  padding: 0 5px;
+}
+toolbarbutton#moveup, toolbarbutton#movedown {
+  list-style-image: url("chrome://seorganizer/skin/find.png");
+  min-width: 16px;
+  padding: 0;
+}
+toolbarbutton[orient="horizontal"] > label {
+  text-align: start;
+}
+toolbarbutton:not([orient="horizontal"]) > .toolbarbutton-icon {
   -moz-margin-end: 0px;
 }
 
@@ -161,10 +158,29 @@ toolbarbutton#delete:not([disabled="true"]):hover:active {
   -moz-image-region: rect(48px 168px 72px 144px);
 }
 
-#bookmark-folders-view > .bookmarksTree {
-  margin: 0px;
+/* move up */
+toolbarbutton#moveup {
+  -moz-image-region: rect(0px 32px 16px 16px);
+}
+toolbarbutton#moveup:hover {
+  -moz-image-region: rect(16px 32px 32px 16px);
+}
+toolbarbutton#moveup[disabled="true"] {
+  -moz-image-region: rect(32px 32px 48px 16px);
 }
 
-#bookmark-views-splitter {
-  border: none; 
+/* move down */
+toolbarbutton#movedown {
+  -moz-image-region: rect(0px 16px 16px 0px);
+}
+toolbarbutton#movedown:hover {
+  -moz-image-region: rect(16px 16px 32px 0px);
+}
+toolbarbutton#movedown[disabled="true"] {
+  -moz-image-region: rect(32px 16px 48px 0px);
+}
+
+
+#bookmark-folders-view > .bookmarksTree {
+  margin: 0px;
 }

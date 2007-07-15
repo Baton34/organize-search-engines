@@ -1,12 +1,7 @@
-Für OSE (Zukunft):
-x  - mehrfach-Markierungen im Tree des Manage-Fensters
-   - mehrfach-Auswahl von Suchmaschinen
-   - Tags
-
 Priorität 2:
-   - automatisch Searchplugin aktueller Seite auswählen
 x  - Drag & Drop auf Suchleiste:
       + Shift/Alt/Strg als Auswahl
    - Intellente Searchplugins (<-> Keywords)
    - autocomplete suchmaschinenspezifisch + anzeige von history unter/in suchmaschine
    - (Hintergrund-)Farben
+   - Ex-/Import --> separator char: String.fromCharCode(0x1C);
