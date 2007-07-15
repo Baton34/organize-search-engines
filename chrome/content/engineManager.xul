@@ -79,14 +79,14 @@
     <menubar id="main-menubar">
       <menu label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
         <menupopup>
-          <menuitem id="addEngines" label="&addEngine.label;"
-                    oncommand="gEngineManagerDialog.loadAddEngines();" />
           <menuitem label="&menuitem.newFolder.label;" 
                     accesskey="&menuitem.newFolder.accesskey;"
                     command="cmd_bm_newfolder"/>
           <menuitem label="&menuitem.newSeparator.label;"
                     accesskey="&menuitem.newSeparator.accesskey;"
                     command="cmd_bm_newseparator"/>
+          <menuitem id="addEngines" label="&addEngine.label;"
+                    oncommand="gEngineManagerDialog.loadAddEngines();" />
           <menuitem id="restoreDefault" label="&restoreDefault.label;"
                     accesskey="&restoreDefault.accesskey;"
                     oncommand="gEngineManagerDialog.newItem(gEngineManagerDialog.NEW_ITEM_RESTORED_DEFAULT_ENGINE);" />
@@ -95,7 +95,7 @@
                     label="&enableSuggest.label;"
                     accesskey="&enableSuggest.accesskey;"/>
           <!--<menuseparator/>
-          <menuitem label="&closeCmd.label;" command="cmd_"
+          <menuitem label="&closeCmd.label;" command="cmd_cancel"
                     key="key_cancel" accesskey="&closeCmd.accesskey;"/>-->
         </menupopup>
       </menu>
@@ -108,16 +108,14 @@
           <menuitem label="&command.moveBookmark.label;"
                     accesskey="&command.moveBookmark.accesskey;"
                     command="cmd_move-engine"/>
+          <menuitem label="&rename.label;" command="cmd_rename"
+                    accesskey="&rename.accesskey;" />
           <menuitem id="menu_delete" command="cmd_remove" key="key_remove"
                     label="&remove.label;" accesskey="&remove.accesskey;" />
-
-          <menuseparator/>
-          <menuitem label="&command.properties.label;" command="cmd_bm_properties"
-                    key="bm_key_properties" accesskey="&command.properties.accesskey;" />
         </menupopup>
       </menu>
       <menu label="&viewMenu.label;" accesskey="&viewMenu.accesskey;">
-        <menupopup onpopupshowing="//fillViewMenu(event)"
+        <menupopup onpopupshowing="fillViewMenu(event);"
                    oncommand="gEngineManagerDialog.sortBy(event.target.id);">
           <menuitem id="natural" label="&menuitem.view.unsorted.label;"
                     accesskey="&menuitem.view.unsorted.accesskey;" type="radio"

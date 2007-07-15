@@ -1306,3 +1306,58 @@ function LOG(msg) {
   //dump(msg + "\n");
   return msg;*/
 }
+
+var gConstructedViewMenuSortItems = false;
+function fillViewMenu(aEvent) {
+  var popupElement = aEvent.target;
+  var adjacentElement = popupElement.firstChild;
+
+  var bookmarksView = document.getElementById("engineList");
+  var columns = bookmarksView.columns;
+
+  if (!gConstructedViewMenuSortItems) {
+    for (var i = 0; i < columns.length; ++i) {
+      var accesskey = columns[i].accesskey;
+      var menuitem  = document.createElement("menuitem");
+      var name      = BookmarksUtils.getLocaleString("SortMenuItem", columns[i].label);
+      menuitem.setAttribute("label", name);
+      menuitem.setAttribute("accesskey", columns[i].accesskey);
+      menuitem.setAttribute("resource", columns[i].resource);
+      menuitem.setAttribute("id", "sortMenuItem:" + columns[i].resource);
+      menuitem.setAttribute("checked", columns[i].sortActive);
+      menuitem.setAttribute("name", "sortSet");
+      menuitem.setAttribute("type", "radio");
+
+      popupElement.insertBefore(menuitem, adjacentElement);
+    }
+
+    gConstructedViewMenuSortItems = true;
+  }
+
+  const kPrefSvcContractID = "@mozilla.org/preferences-service;1";
+  const kPrefSvcIID = Ci.nsIPrefService;
+  var prefSvc = Cc[kPrefSvcContractID].getService(kPrefSvcIID);
+  var bookmarksSortPrefs = prefSvc.getBranch("browser.bookmarks.sort.");
+
+  if (gConstructedViewMenuSortItems) {
+    var resource = bookmarksSortPrefs.getCharPref("resource");
+    var element = document.getElementById("sortMenuItem:" + resource);
+    if (element)
+      element.setAttribute("checked", "true");
+  }
+
+  var sortAscendingMenu = document.getElementById("ascending");
+  var sortDescendingMenu = document.getElementById("descending");
+  var noSortMenu = document.getElementById("natural");
+  
+  sortAscendingMenu.setAttribute("checked", "false");
+  sortDescendingMenu.setAttribute("checked", "false");
+  noSortMenu.setAttribute("checked", "false");
+  var direction = bookmarksSortPrefs.getCharPref("direction");
+  if (direction == "natural")
+    sortAscendingMenu.setAttribute("checked", "true");
+  else if (direction == "ascending") 
+    sortDescendingMenu.setAttribute("checked", "true");
+  else
+    noSortMenu.setAttribute("checked", "true");
+}
