@@ -1,8 +1,6 @@
 <?xml version="1.0" ?>
 <?xml-stylesheet href="chrome://browser/skin/bookmarks/addBookmark.css"?>
 <!DOCTYPE dialog [
-  <!ENTITY % addBookmarkDTD SYSTEM "chrome://browser/locale/bookmarks/addBookmark.dtd">
-  %addBookmarkDTD;
   <!ENTITY % confirmAddDTD SYSTEM "chrome://seorganizer/locale/confirmAddEngine.dtd">
   %confirmAddDTD;
 ]>

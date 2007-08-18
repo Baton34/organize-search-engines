@@ -1,1 +1,3 @@
 <!ENTITY searchEngines "Search Engines">
+<!ENTITY createin.label             "Create in:">
+<!ENTITY createin.accesskey         "C">
