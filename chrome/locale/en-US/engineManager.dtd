@@ -16,3 +16,20 @@
 <!ENTITY rename.accesskey         "n">
 <!ENTITY editalias.label          "Edit Keyword...">
 <!ENTITY editalias.accesskey      "K">
+
+<!ENTITY fileMenu.label           "File">
+<!ENTITY fileMenu.accesskey       "F">
+<!ENTITY closeCmd.label           "Close">
+<!ENTITY closeCmd.accesskey       "C">
+<!ENTITY viewMenu.label           "View">
+<!ENTITY viewMenu.accesskey       "V">
+<!ENTITY menuitem.view.command.toolbar.label     "Toolbar">
+<!ENTITY menuitem.view.command.toolbar.accesskey "T">
+<!ENTITY menuitem.view.show_columns.label        "Show Columns">
+<!ENTITY menuitem.view.show_columns.accesskey    "S">
+<!ENTITY menuitem.view.unsorted.label            "Unsorted">
+<!ENTITY menuitem.view.unsorted.accesskey        "U">
+<!ENTITY sortAscending.label                     "Ascending">
+<!ENTITY sortAscending.accesskey                 "A">
+<!ENTITY sortDescending.label                    "Descending">
+<!ENTITY sortDescending.accesskey                "D">

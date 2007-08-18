@@ -16,3 +16,16 @@
 <!ENTITY rename.accesskey         "U">
 <!ENTITY editalias.label          "Schlüsselwort...">
 <!ENTITY editalias.accesskey      "S">
+
+<!ENTITY fileMenu.label                          "Datei">
+<!ENTITY fileMenu.accesskey                      "D">
+<!ENTITY viewMenu.label                          "Ansicht">
+<!ENTITY viewMenu.accesskey                      "A">
+<!ENTITY menuitem.view.command.toolbar.label     "Symbolleiste">
+<!ENTITY menuitem.view.command.toolbar.accesskey "S">
+<!ENTITY menuitem.view.show_columns.label        "Spalten Anzeigen">
+<!ENTITY menuitem.view.show_columns.accesskey    "A">
+<!ENTITY menuitem.view.unsorted.label            "Unsortiert">
+<!ENTITY menuitem.view.unsorted.accesskey        "U">
+<!ENTITY sortAscending.label                     "Absteigend">
+<!ENTITY sortDescending.label                    "Aufsteigend">
