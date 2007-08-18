@@ -14,6 +14,7 @@ const seOrganizer_dragObserver = {
       organizeSE.searchbar._textbox.openSearch();
     }
   },
+
   onDragOver: function(event, flavour, session) {
     var target = event.target;
     this.closePopups(target);
@@ -34,7 +35,6 @@ const seOrganizer_dragObserver = {
   onDragExit: function(event, session) {
     var This = this;
     var target = event.target;
-    var now = (new Date()).getTime();
     if(target.nodeName == "menu" || target.nodeName == "menuitem") {
       target.removeAttribute("_moz-menuactive");
     }
