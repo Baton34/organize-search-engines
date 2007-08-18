@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<!DOCTYPE dialog [
+  <!ENTITY % confirmDTD SYSTEM "chrome://seorganizer/locale/reporter-confirmation.dtd">
+  %confirmDTD;
+]>
+<dialog id="confirmReporter"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        title="&window.title;"
+        buttons="accept,cancel" orient="vertical">
+
+  <script type="application/x-javascript" src="reporter-confirmation.js" />
+
+  <description>&text;</description>
+
+  <checkbox label="&rememberChoice.label;" accesskey="&rememberChoice.accesskey;" />
+
+</dialog>

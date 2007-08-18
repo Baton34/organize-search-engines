@@ -1,0 +1,4 @@
+<!ENTITY window.title            "Verschieben">
+<!ENTITY move-to.label           "Verschiebe nach:">
+<!ENTITY move-to.accesskey       "V">
+<!ENTITY search-engines.toplevel "Suchmaschinen">
