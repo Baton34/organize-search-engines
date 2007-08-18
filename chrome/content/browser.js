@@ -65,12 +65,12 @@ SEOrganizer.prototype = {
       var searchRegexp = /(BMSVC\.resolveKeyword\(aURL,\saPostDataRef\))/;
       var replacement =
                "$1 ||\norganizeSE.SEOrganizer.resolveKeyword(aURL, aPostDataRef)";
+      var newFuncString = getShortcutOrURI.toSource()
+                                          .replace(searchRegexp, replacement);
+      eval("getShortcutOrURI = " + newFuncString);
     }
-    var newFuncString = getShortcutOrURI.toSource()
-                                        .replace(searchRegexp, replacement);
-    eval("getShortcutOrURI = " + newFuncString);
 
-    /**** compatibility to other extensions ****/
+    /* compatibility to other extensions */
     this.extensions = new organizeSE__Extensions();
   },
   customizeToolbarListener: function(e) {
@@ -158,7 +158,7 @@ SEOrganizer.prototype = {
     else {
       setTimeout(function () {
         openDialog("chrome://browser/content/search/engineManager.xul",
-                   "_blank", "chrome,dialog,modal,centerscreen,resizable");
+                   "_blank", "chrome,dialog,modal,centerscreen,resizable,all");
       }, 0);
     }
   },
