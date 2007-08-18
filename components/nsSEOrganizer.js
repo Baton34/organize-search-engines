@@ -753,8 +753,8 @@ SEOrganizer.prototype = {
     if(engine != null) {
       keyword = (offset != -1) ? aName.substr(offset + 1) : "";
       submission = engine.getSubmission(keyword, null);
-      aPostData.value = submission.postData;
       if(submission.uri) {
+        aPostData.value = submission.postData;
         return submission.uri.spec;
       }
     }
