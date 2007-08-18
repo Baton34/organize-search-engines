@@ -151,7 +151,7 @@ SEOrganizer.prototype = {
         engines.push(this.getNameByItem(this._indexCache[i]));
       }
     }
-    LOG(engines.join("\n"));
+    LOG(engines.join(",\t"));
     i = 0;
     var ss = Cc["@mozilla.org/browser/search-service;1"]
                .getService(Ci.nsIBrowserSearchService);
@@ -334,21 +334,15 @@ SEOrganizer.prototype = {
       var titleMessage = stringBundle.GetStringFromName("addEngineConfirmTitle");
 
       // Display only the hostname portion of the URL.
-      if(version < 1) {
-        var dialogMessage =
-            stringBundle.formatStringFromName("addEngineConfirmText",
-                                              [this._name, this._uri.host], 2);
-      } else {
-        dialogMessage =
-          stringBundle.formatStringFromName("addEngineConfirmation",
-                                            [this._name, this._uri.host], 2);
-      }
+      var dialogMessage = (version < 1) ? "addEngineConfirmText" : "addEngineConfirmation";
+      dialogMessage = stringBundle.formatStringFromName(dialogMessage,
+                                               [this._name, this._uri.host], 2);
       var checkboxMessage = stringBundle.GetStringFromName("addEngineUseNowText");
       var addButtonLabel =
           stringBundle.GetStringFromName("addEngineAddButtonLabel");
 
-      var args =  Components.classes["@mozilla.org/embedcomp/dialogparam;1"].
-                        createInstance(Components.interfaces.nsIDialogParamBlock);
+      var args =  Cc["@mozilla.org/embedcomp/dialogparam;1"]
+                    .createInstance(Ci.nsIDialogParamBlock);
       args.SetString(12, titleMessage);
       args.SetString(0, dialogMessage);
       args.SetString(1, checkboxMessage);
@@ -379,7 +373,7 @@ SEOrganizer.prototype = {
       return orig.call(this, [].concat(arguments)); // call the original function
     };
     this._searchService.getEngines({});
-    this._searchService = this._searchService.wrappedJSObject;
+    this._searchService = this._searchService;
   },
 
   observe: function observe(aEngine, aTopic, aVerb) {
@@ -403,7 +397,7 @@ SEOrganizer.prototype = {
           else
             this._addMissingEnginesToRDF();
       }
-      // xxx we should notify the rdf observers of a changed icon
+      // we should notify rdf observers
     }
   },
 
@@ -476,9 +470,9 @@ SEOrganizer.prototype = {
 
     for(var i = 0; i < toRemove.length; ++i) {
       aItem = toRemove[i];
-      // remove the underlying search engine file using nsIBrowserSearchService
+      // remove the underlying search engine file using the search service
       var name = this.getNameByItem(aItem);
-      if(name) { // this may be a separator
+      if(name) { // this may be a separator or folder
         var engine = this.getEngineByName(name);
         if(engine && engine instanceof Ci.nsISearchEngine)
           this.removeEngine(engine);
@@ -652,7 +646,6 @@ SEOrganizer.prototype = {
    */
   _iterateAll: function iterateAll(aCallback, aFilter, aRoot) {
     const rdfService = this._rdfService;
-    const searchService = this._searchService;
     const rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
                                 .getService(Ci.nsIRDFContainerUtils);
 
