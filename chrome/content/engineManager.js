@@ -509,24 +509,11 @@ EngineManagerDialog.prototype = {
       writeableSelected = false;
       specialSelected = true;
     }
-    /*var index = gEngineView.selectedIndex;
-    var item = gEngineView._indexCache[index];
-    var engine = item.originalEngine;
-
-    var disableButtons = (gEngineView.selectedIndex === -1);
-    var multipleSelected = (gEngineView.selectedIndexes.length != 1);
-    var onlyOne = (gEngineView.lastIndex === 0);
-    var lastSelected = (disableButtons || (item.parent.children.length - 1 ===
-                                           gEngineView.getLocalIndex(index)));
-    var firstSelected = (disableButtons || !gEngineView.getLocalIndex(index));
-    var specialSelected = (disableButtons || item.isSep || multipleSelected);
-    var writeableSelected = (specialSelected ||
-                             (engine && engine.wrappedJSObject._readOnly));*/
 
     document.getElementById("cmd_remove").setAttribute("disabled", disableButtons);
 
     document.getElementById("cmd_rename").setAttribute("disabled",
-                        !onlyEngines || multipleSelected || !writeableSelected);
+                                        multipleSelected || !writeableSelected);
     document.getElementById("cmd_move-engine").setAttribute("disabled", disableButtons);
     document.getElementById("cmd_editalias").setAttribute("disabled",
                                               !onlyEngines || multipleSelected);
@@ -1299,65 +1286,59 @@ EngineView.prototype = {
   Components.reportError(e);
 }
 function LOG(msg) {
-  /*msg = "Organize Search Engines:   " + msg;
+  msg = "Organize Search Engines:   " + msg;
   var consoleService = Cc["@mozilla.org/consoleservice;1"]
                          .getService(Ci.nsIConsoleService);
   consoleService.logStringMessage(msg);
   //dump(msg + "\n");
-  return msg;*/
+  return msg;
 }
 
-var gConstructedViewMenuSortItems = false;
-function fillViewMenu(aEvent) {
-  var popupElement = aEvent.target;
-  var adjacentElement = popupElement.firstChild;
-
+var gConstructedColumnsMenuItems = false;
+function fillColumnsMenu(aEvent) {
   var bookmarksView = document.getElementById("engineList");
-  var columns = bookmarksView.columns;
+  var columns = bookmarksView.firstChild.childNodes;
+  var i;
 
-  if (!gConstructedViewMenuSortItems) {
-    for (var i = 0; i < columns.length; ++i) {
-      var accesskey = columns[i].accesskey;
-      var menuitem  = document.createElement("menuitem");
-      var name      = BookmarksUtils.getLocaleString("SortMenuItem", columns[i].label);
-      menuitem.setAttribute("label", name);
-      menuitem.setAttribute("accesskey", columns[i].accesskey);
+  if (!gConstructedColumnsMenuItems) {
+    for (i = 0; i < columns.length; ++i) {
+      if(columns[i].nodeName != "treecol")
+        continue;
+      var menuitem = document.createElement("menuitem");
+      if(columns[i].getAttribute("primary") == "true")
+        menuitem.setAttribute("disabled", "true");
+      menuitem.setAttribute("label", columns[i].getAttribute("label"));
       menuitem.setAttribute("resource", columns[i].resource);
-      menuitem.setAttribute("id", "sortMenuItem:" + columns[i].resource);
-      menuitem.setAttribute("checked", columns[i].sortActive);
-      menuitem.setAttribute("name", "sortSet");
-      menuitem.setAttribute("type", "radio");
-
-      popupElement.insertBefore(menuitem, adjacentElement);
+      menuitem.setAttribute("id", "columnMenuItem_" + columns[i].resource);
+      menuitem.setAttribute("type", "checkbox");
+      menuitem.setAttribute("checked", (!columns[i].hidden));
+      menuitem.colIndex = i;
+      aEvent.target.appendChild(menuitem);
     }
 
-    gConstructedViewMenuSortItems = true;
+    gConstructedColumnsMenuItems = true;
   }
-
-  const kPrefSvcContractID = "@mozilla.org/preferences-service;1";
-  const kPrefSvcIID = Ci.nsIPrefService;
-  var prefSvc = Cc[kPrefSvcContractID].getService(kPrefSvcIID);
-  var bookmarksSortPrefs = prefSvc.getBranch("browser.bookmarks.sort.");
-
-  if (gConstructedViewMenuSortItems) {
-    var resource = bookmarksSortPrefs.getCharPref("resource");
-    var element = document.getElementById("sortMenuItem:" + resource);
-    if (element)
-      element.setAttribute("checked", "true");
+  else {
+    for (i = 0; i < columns.length; ++i) {
+      if(columns[i].nodeName != "treecol")
+        continue;
+      var element = document.getElementById("columnMenuItem_" + columns[i].resource);
+      if (element) {
+        if(columns[i].hidden != "true")
+          element.setAttribute("checked", "true");
+        else
+          element.removeAttribute("checked");
+      }
+      element.colIndex = i;
+    }
   }
-
-  var sortAscendingMenu = document.getElementById("ascending");
-  var sortDescendingMenu = document.getElementById("descending");
-  var noSortMenu = document.getElementById("natural");
   
-  sortAscendingMenu.setAttribute("checked", "false");
-  sortDescendingMenu.setAttribute("checked", "false");
-  noSortMenu.setAttribute("checked", "false");
-  var direction = bookmarksSortPrefs.getCharPref("direction");
-  if (direction == "natural")
-    sortAscendingMenu.setAttribute("checked", "true");
-  else if (direction == "ascending") 
-    sortDescendingMenu.setAttribute("checked", "true");
-  else
-    noSortMenu.setAttribute("checked", "true");
+  aEvent.stopPropagation();
+}
+function onViewMenuColumnItemSelected(aEvent) {
+  var bookmarksView = document.getElementById("engineList");
+  var elem = bookmarksView.firstChild.childNodes[aEvent.target.colIndex];
+  elem.hidden = !elem.hidden;
+
+  aEvent.stopPropagation();
 }
