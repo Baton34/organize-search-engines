@@ -11,8 +11,6 @@
   %default;
   <!ENTITY % additional SYSTEM "chrome://seorganizer/locale/engineManager.dtd">
   %additional;
-  <!ENTITY % menus SYSTEM "chrome://browser/locale/bookmarks/bookmarks.dtd">
-  %menus;
   <!ENTITY % editmenu SYSTEM "chrome://global/locale/editMenuOverlay.dtd">
   %editmenu;
 ]>
@@ -22,7 +20,6 @@
         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
         onload="gEngineManagerDialog.init();"
         title="&engineManager.title;"
-        style="&engineManager.style;"
         persist="screenX screenY width height"
         windowtype="Browser:SearchManager">
 
@@ -32,13 +29,15 @@
   </stringbundleset>
 
   <script type="application/x-javascript"
-          src="chrome://global/content/globalOverlay.js"/>
-  <script type="application/x-javascript"
           src="chrome://seorganizer/content/engineManager.js"/>
   <script type="application/x-javascript"
           src="chrome://global/content/nsDragAndDrop.js"/>
   <script type="application/x-javascript"
           src="chrome://global/content/nsTransferable.js"/>
+  <script type="application/x-javascript"
+          src="chrome://browser/content/utilityOverlay.js"/>
+  <script type="application/x-javascript"
+          src="chrome://global/content/globalOverlay.js"/>
 
   <commandset id="generalCommandSet">
     <command id="cmd_cancel" oncommand="closeWindow(true); gEngineManagerDialog.onCancel();" />
@@ -71,6 +70,7 @@
   <keyset id="engineManagerKeyset">
     <key id="key_remove" keycode="VK_DELETE" command="cmd_remove"/>
     <key id="key_cancel" keycode="VK_ESCAPE" command="cmd_cancel"/>
+    <key id="key_ok" key="W" modifiers="accel" command="cmd_ok" />
     <key id="key_selectAll" key="A" modifiers="accel" command="cmd_selectAll" />
   </keyset>
 
@@ -79,12 +79,12 @@
     <menubar id="main-menubar">
       <menu label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
         <menupopup>
-          <menuitem label="&menuitem.newFolder.label;" 
-                    accesskey="&menuitem.newFolder.accesskey;"
-                    command="cmd_bm_newfolder"/>
-          <menuitem label="&menuitem.newSeparator.label;"
-                    accesskey="&menuitem.newSeparator.accesskey;"
-                    command="cmd_bm_newseparator"/>
+          <menuitem label="&new-folder.label;"
+                    accesskey="&new-folder.accesskey;"
+                    command="cmd_new-folder"/>
+          <menuitem label="&new-separator.label;"
+                    accesskey="&new-separator.accesskey;"
+                    command="cmd_new-separator"/>
           <menuitem id="addEngines" label="&addEngine.label;"
                     oncommand="gEngineManagerDialog.loadAddEngines();" />
           <menuitem id="restoreDefault" label="&restoreDefault.label;"
@@ -94,9 +94,9 @@
           <menuitem id="enableSuggest" type="checkbox"
                     label="&enableSuggest.label;"
                     accesskey="&enableSuggest.accesskey;"/>
-          <!--<menuseparator/>
-          <menuitem label="&closeCmd.label;" command="cmd_cancel"
-                    key="key_cancel" accesskey="&closeCmd.accesskey;"/>-->
+          <menuseparator/>
+          <menuitem label="&closeCmd.label;" command="cmd_ok"
+                    key="key_ok" accesskey="&closeCmd.accesskey;"/>
         </menupopup>
       </menu>
       <menu id="menu_edit" label="&editMenu.label;" accesskey="&editMenu.accesskey;">
@@ -105,18 +105,32 @@
                     accesskey="&selectAllCmd.accesskey;" command="cmd_selectAll"
                     key="key_selectAll" />
           <menuseparator/>
-          <menuitem label="&command.moveBookmark.label;"
-                    accesskey="&command.moveBookmark.accesskey;"
+          <menuitem label="&move-engine.label;"
+                    accesskey="&move-engine.accesskey;"
                     command="cmd_move-engine"/>
           <menuitem label="&rename.label;" command="cmd_rename"
                     accesskey="&rename.accesskey;" />
+          <menuitem label="&editalias.label;" command="cmd_editalias"
+                    accesskey="&editalias.accesskey;" />
           <menuitem id="menu_delete" command="cmd_remove" key="key_remove"
                     label="&remove.label;" accesskey="&remove.accesskey;" />
         </menupopup>
       </menu>
       <menu label="&viewMenu.label;" accesskey="&viewMenu.accesskey;">
-        <menupopup onpopupshowing="fillViewMenu(event);"
-                   oncommand="gEngineManagerDialog.sortBy(event.target.id);">
+        <menupopup oncommand="gEngineManagerDialog.sortBy(event.target.id);">
+          <menuitem id="viewCommandToolbar" type="checkbox" class="menuitem-iconic"
+                    label="&menuitem.view.command.toolbar.label;"
+                    accesskey="&menuitem.view.command.toolbar.accesskey;"
+                    oncommand="goToggleToolbar('command-toolbar', 'viewCommandToolbar'); event.stopPropagation();"
+                    checked="true"/>
+
+          <menu id="descending" label="&menuitem.view.show_columns.label;"
+                accesskey="&menuitem.view.show_columns.accesskey;">
+            <menupopup id="columnsPopup" onpopupshowing="fillColumnsMenu(event);"
+                       oncommand="onViewMenuColumnItemSelected(event);"/>
+          </menu>
+          <menuseparator />
+
           <menuitem id="natural" label="&menuitem.view.unsorted.label;"
                     accesskey="&menuitem.view.unsorted.accesskey;" type="radio"
                     resource="direction" name="sortDirectionSet"/>
@@ -155,25 +169,19 @@
   <separator class="thin" />
   <description>&engineManager.intro;</description>
 
-  <hbox flex="1">
-    <tree id="engineList" flex="1" rows="10"
-          enableColumnDrag="true" flags="dont-build-content"
-          onselect="gEngineManagerDialog.onSelect();"
-          ondraggesture="gEngineManagerDialog.startDrag(event);">
-      <treecols>
-        <treecol id="engineName" primary="true" flex="1" label="&namecol.label;"
-                 persist="width ordinal hidden" />
-        <splitter class="tree-splitter"/>
-        <treecol id="engineAlias" width="35" label="&aliascol.label;"
-                 persist="width ordinal hidden" />
-      </treecols>
-      <treechildren />
-    </tree>
-    <splitter collapse="after" persist="state" orient="horizontal"
-              resizeafter="closest" id="engine-view-splitter">
-      <grippy class="visible-grippy" />
-    </splitter>
-  </hbox>
+  <tree id="engineList" flex="1" rows="10"
+        enableColumnDrag="true" flags="dont-build-content"
+        onselect="gEngineManagerDialog.onSelect();"
+        ondraggesture="gEngineManagerDialog.startDrag(event);">
+    <treecols>
+      <treecol id="engineName" primary="true" flex="1" label="&namecol.label;"
+               persist="width ordinal hidden" />
+      <splitter class="tree-splitter"/>
+      <treecol id="engineAlias" width="35" label="&aliascol.label;"
+               persist="width ordinal hidden" />
+    </treecols>
+    <treechildren />
+  </tree>
 
   <hbox pack="end">
     <button command="cmd_ok" id="btn_ok" />
