@@ -967,7 +967,6 @@ EngineView.prototype = {
     gSEOrganizer.beginUpdateBatch();
     for(var i = 0; i < gRemovedEngines.length; ++i) {
       if(gRemovedEngines[i] && gRemovedEngines[i] instanceof Ci.nsIRDFResource) {
-        //gSEOrganizer.removeItem(gRemovedEngines[i]);
         // remove the underlying search engine file using nsIBrowserSearchService
         var name = gSEOrganizer.getNameByItem(gRemovedEngines[i]);
         var engine = gSEOrganizer.getEngineByName(name);
