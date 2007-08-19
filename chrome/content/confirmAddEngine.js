@@ -9,6 +9,8 @@ organizeSE.__proto__ = {
   inCommonDialog: null,
   folderID: "urn:organize-search-engines:folders-root",
   onLoad: function organizeSE__onLoad() {
+    if(!document.getElementById("engineList"))
+      return; // in case the user uses an old version of add to search bar
     this.observer.register();
     if("gCommonDialogParam" in window) {
       this.inCommonDialog = true;
