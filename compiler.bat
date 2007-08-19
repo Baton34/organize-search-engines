@@ -1,14 +1,14 @@
-CALL components.bat
+rem CALL components.bat
 
 SET extShortName=seorganizer
-SET filename=organize-search-engines_1.1rc1pre.xpi
-SET extFolder="D:\Erweiterungen\ose2"
+SET filename=organize-search-engines_1.1rc1.xpi
+SET extFolder="D:\Erweiterungen\organize-search-engines\"
 
 SET path=%extFolder%;%path%
 
 CD /d %extFolder%\chrome
 rem make the jar file (no compression)
-%ProgramFiles%\7-Zip\7z.exe u -tzip %extShortName%.jar -r * -x!*~ -x!*/CVS/* -x!*/CVSROOT/* -x!*/.svn/* -mx=0
+%ProgramFiles%\7-Zip\7z.exe u -tzip %extShortName%.jar -r * -x!*~ -x!*.svn* -mx=0
 
 cd /d %extFolder%
 
