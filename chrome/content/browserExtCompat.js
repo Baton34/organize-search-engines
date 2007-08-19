@@ -329,6 +329,8 @@ organizeSE__Extensions.prototype = {
       for(var i = 0; i < searchbars.length; i++) {
         this.customizeToolbarHandler.call(organizeSE, searchbars[i]);
       }
+      var popupset = document.getElementById("search-popupset");
+      popupset.addEventListener("popupshowing", this, false);
     },
     wait: 0,
     customizeToolbarHandler: function(elem) {
@@ -346,37 +348,31 @@ organizeSE__Extensions.prototype = {
       return (elem.className.split(" ").indexOf("thinger-item") != -1 &&
               elem.getAttribute("thingtype") == "search");
     },
-    modifySelection: function(select, deSelect) {
-      var id = organizeSE.SEOrganizer.getItemByName(deSelect).ValueUTF8;
-      var elem = document.getElementById(id);
-      while(elem && elem.id != "search-popupset") {
-        elem.removeAttribute("selected");
-        elem = elem.parentNode.parentNode; // ignore popups
-      }
-      id = organizeSE.SEOrganizer.getItemByName(select).ValueUTF8;
-      elem = document.getElementById(id);
-      while(elem && elem.id != "search-popupset") {
-        elem.setAttribute("selected", "true");
-        elem = elem.parentNode.parentNode; // ignore popups
-      }
-    },
-    // abuse insert items for updating the selected attributes
-    insertItemsHandler: {
-      pos: "before", // doesn't matter
-      insertMethod: function(popup) {
+    handleEvent: function(event) {
+      if(event.type == "popupshowing") {
         var searchbar = document.popupNode;
         while(searchbar && searchbar.nodeName != "searchbar")
           searchbar = searchbar.parentNode;
         if(!searchbar)
            return;
-        var localSelected = searchbar.currentEngine.name;
-        var selected = popup.selected || this._default;
-        if(selected == localSelected)
-          return;
-        this.modifySelection(localSelected, selected);
-        popup.selected = localSelected;
-      },
-      removeMethod: function() { }
+
+        var popup = event.target;
+        for(var i = 0; i < popup.childNodes.length; i++) {
+          if(popup.childNodes[i].hasAttribute("selected"))
+            popup.childNodes[i].removeAttribute("selected");
+        }
+        var SEOrganizer = organizeSE.SEOrganizer;
+        var name = searchbar.currentEngine.name;
+        var item = SEOrganizer.getItemByName(name);
+        do {
+          var elem = document.getElementById(item.ValueUTF8);
+          if(elem)
+            elem.setAttribute("selected", "true");
+          try {
+            item = SEOrganizer.getParent(item);
+          } catch(e) { break; }
+        } while(item);
+      }
     }
   }
 };
