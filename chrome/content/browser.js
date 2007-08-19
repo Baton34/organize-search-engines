@@ -73,17 +73,18 @@ SEOrganizer.prototype = {
     /* compatibility to other extensions */
     this.extensions = new organizeSE__Extensions();
   },
+  _customizeToolbarListeners: [function(target) {
+                                 if(target.id == "searchbar")
+                                   organizeSE.onCustomizeToolbarFinished();
+                               }],
   customizeToolbarListener: function(e) {
-    if(e.target.id == "searchbar") {
-      organizeSE.onCustomizeToolbarFinished();
+    var listeners = organizeSE._customizeToolbarListeners;
+    for(var i = 0; i < listeners.length; i++) {
+      listeners[i].call(organizeSE, e.target, e);
     }
   },
-  // we have to re-init the searchbar after customizing the toolbar
-  onCustomizeToolbarFinished: function() {
-    var searchbar = this.searchbar;
-    var popup = searchbar._popup;
-
-    // replace Firefox' logic with our own
+  // replaces Firefox' logic with our own
+  _replaceSearchbarProperties: function(searchbar) {
     searchbar.rebuildPopup = this.rebuildPopup;
     searchbar.rebuildPopupDynamic = this.rebuildPopupDynamic;
     searchbar.openManager = this.openManager;
@@ -99,6 +100,13 @@ SEOrganizer.prototype = {
       });
     }
     searchbar._engineButton.setAttribute("popup", "search-popup");
+  },
+  // we have to re-init the searchbar after customizing the toolbar
+  onCustomizeToolbarFinished: function() {
+    var searchbar = this.searchbar;
+    var popup = searchbar._popup;
+
+    this._replaceSearchbarProperties(searchbar);
     // drag 'n' drop stuff:
     seOrganizer_dragObserver.init();
 
@@ -189,19 +197,19 @@ SEOrganizer.prototype = {
           } else {
             handlers[i].insertMethod.call(handlers[i].mod, popup);
           }
-        } catch(e) { }
+        } catch(e) { Components.reportError(e); }
       }
     }
     this.insertManageEngineItems();
     for(var i = 0; i < handlers.length; ++i) {
-      if(handlers[i].pos == "after") {
+      if(handlers[i].pos != "before") {
         try {
           if(!handlers[i].mod) {
             this[handlers[i].insertMethod](popup);
           } else {
             handlers[i].insertMethod.call(handlers[i].mod, popup);
           }
-        } catch(e) { }
+        } catch(e) { Components.reportError(e); }
       }
     }
   },
@@ -219,20 +227,20 @@ SEOrganizer.prototype = {
           else {
             handlers[i].removeMethod.call(handlers[i].mod, popup);
           }
-        } catch(e) { }
+        } catch(e) { Components.reportError(e); }
       }
     }
     this.removeManageEngineItems();
     // call extension handlers for extensions that are inserted /after/ manage
     for(var i = 0; i < handlers.length; ++i) {
-      if(handlers[i].pos == "after") {
+      if(handlers[i].pos != "before") {
         try {
           if(!handlers[i].mod)
             this[handlers[i].removeMethod](popup);
           else {
             handlers[i].removeMethod.call(handlers[i].mod, popup);
           }
-        } catch(e) { }
+        } catch(e) { Components.reportError(e); }
       }
     }
   },
@@ -354,7 +362,11 @@ SEOrganizer.prototype = {
     },
     onCommand: function onCommand(event) {
       const target = event.originalTarget;
-      const searchbar = organizeSE.searchbar;
+      var searchbar = document.popupNode;
+      while(searchbar && searchbar.nodeName != "searchbar")
+        searchbar = searchbar.parentNode;
+      if(!searchbar)
+         return;
       if(target.getAttribute("anonid") == "open-engine-manager") {
         searchbar.openManager(event);
       } else if(target.className.indexOf("addengine-item") != -1 ||
@@ -365,7 +377,7 @@ SEOrganizer.prototype = {
         if("onEnginePopupCommand" in searchbar) // only available in firefox 2.0
           searchbar.onEnginePopupCommand(target);
         else {
-          // this event is only sent on trunk builds - the builds needing it
+          // trunk
           var evt = document.createEvent("XULCommandEvent");
           evt.initCommandEvent("command", true, true, window, 1, false, false,
                                false, false, event);

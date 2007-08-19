@@ -1,5 +1,5 @@
 function organizeSE__Extensions() {
-  return this.init() || this;
+  this.init();
 };
 organizeSE__Extensions.prototype = {
   init: function() {
@@ -9,7 +9,7 @@ organizeSE__Extensions.prototype = {
     }
     var sortDirection = organizeSE.popupset.getAttribute("sortDirection");
     for each(var i in this) {
-      if(i != this.init && typeof i == "object" && i.check) {
+      if(typeof i == "object" && i.check) {
         if("wait" in i)
           setTimeout(applyWrapper, i.wait, i.init, i, []);
         else
@@ -22,6 +22,9 @@ organizeSE__Extensions.prototype = {
         if("insertItemsHandler" in i) {
           i.insertItemsHandler.mod = i;
           organizeSE._insertItemsHandlers.push(i.insertItemsHandler);
+        }
+        if("customizeToolbarHandler" in i) {
+          organizeSE._customizeToolbarListeners.push(i.customizeToolbarHandler);
         }
       }
     }
@@ -49,6 +52,11 @@ organizeSE__Extensions.prototype = {
    **           parameter.                                                    **
    **         @method removeMethod: equivalent to insertMethod, called when   **
    **            you should remove the menuitem from the DOM.                 **
+   **   @optional method customizeToolbarHandler: this is called when some    **
+   **     element in the toolbar is rebuilt, probably because the toolbars    **
+   **     were customized. You have to check yourself whether it was the      **
+   **     searchbar or some other element of your interest. You'll may also   **
+   **     want to call this method from init.                                 **
    ****************************************************************************/
 
   /*** Context Search ***/
@@ -309,6 +317,66 @@ organizeSE__Extensions.prototype = {
       } else {
         popup.style.MozBoxDirection = "";
       }
+    }
+  },
+
+  /*** Thinger ***/
+  thinger: {
+    _xpath: "//xul:toolbar/xul:toolbaritem[@class='thinger-item' and @thingtype='search']",
+    init: function() {
+      this._default = organizeSE.SEOrganizer.currentEngine.name;
+      var searchbars = organizeSE.evalXPath(this._xpath);
+      for(var i = 0; i < searchbars.length; i++) {
+        this.customizeToolbarHandler.call(organizeSE, searchbars[i]);
+      }
+    },
+    wait: 0,
+    customizeToolbarHandler: function(elem) {
+      var This = organizeSE.extensions.thinger;
+      if(This._isThingerSearchbar(elem)) {
+        var anon = document.getAnonymousNodes(elem);
+        if(anon && anon[0])
+          organizeSE._replaceSearchbarProperties(anon[0]);
+      }
+    },
+    get check() {
+      return "thinger" in window;
+    },
+    _isThingerSearchbar: function(elem) {
+      return (elem.className.split(" ").indexOf("thinger-item") != -1 &&
+              elem.getAttribute("thingtype") == "search");
+    },
+    modifySelection: function(select, deSelect) {
+      var id = organizeSE.SEOrganizer.getItemByName(deSelect).ValueUTF8;
+      var elem = document.getElementById(id);
+      while(elem && elem.id != "search-popupset") {
+        elem.removeAttribute("selected");
+        elem = elem.parentNode.parentNode; // ignore popups
+      }
+      id = organizeSE.SEOrganizer.getItemByName(select).ValueUTF8;
+      elem = document.getElementById(id);
+      while(elem && elem.id != "search-popupset") {
+        elem.setAttribute("selected", "true");
+        elem = elem.parentNode.parentNode; // ignore popups
+      }
+    },
+    // abuse insert items for updating the selected attributes
+    insertItemsHandler: {
+      pos: "before", // doesn't matter
+      insertMethod: function(popup) {
+        var searchbar = document.popupNode;
+        while(searchbar && searchbar.nodeName != "searchbar")
+          searchbar = searchbar.parentNode;
+        if(!searchbar)
+           return;
+        var localSelected = searchbar.currentEngine.name;
+        var selected = popup.selected || this._default;
+        if(selected == localSelected)
+          return;
+        this.modifySelection(localSelected, selected);
+        popup.selected = localSelected;
+      },
+      removeMethod: function() { }
     }
   }
 };
