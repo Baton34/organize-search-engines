@@ -1,24 +1,26 @@
-<!ENTITY namecol.label            "Name">
-<!ENTITY aliascol.label           "Schlüsselwort">
+<!ENTITY namecol.label                           "Name">
+<!ENTITY aliascol.label                          "Schlüsselwort">
 
-<!ENTITY restoreDefault.label     "Vorgabe wiederherstellen">
-<!ENTITY restoreDefault.accesskey "V">
+<!ENTITY restoreDefault.label                    "Vorgabe wiederherstellen">
+<!ENTITY restoreDefault.accesskey                "V">
 
-<!ENTITY new-folder.label         "Neuer Ordner...">
-<!ENTITY new-folder.accesskey     "N">
-<!ENTITY new-separator.label      "Neue Trennlinie">
-<!ENTITY new-separator.accesskey  "T">
+<!ENTITY new-folder.label                        "Neuer Ordner...">
+<!ENTITY new-folder.accesskey                    "N">
+<!ENTITY new-separator.label                     "Neue Trennlinie">
+<!ENTITY new-separator.accesskey                 "T">
 
-<!ENTITY move-engine.label        "Verschieben...">
-<!ENTITY move-engine.accesskey    "V">
+<!ENTITY move-engine.label                       "Verschieben...">
+<!ENTITY move-engine.accesskey                   "V">
 
-<!ENTITY rename.label             "Umbenennen...">
-<!ENTITY rename.accesskey         "U">
-<!ENTITY editalias.label          "Schlüsselwort...">
-<!ENTITY editalias.accesskey      "S">
+<!ENTITY rename.label                            "Umbenennen...">
+<!ENTITY rename.accesskey                        "U">
+<!ENTITY editalias.label                         "Schlüsselwort...">
+<!ENTITY editalias.accesskey                     "S">
 
 <!ENTITY fileMenu.label                          "Datei">
 <!ENTITY fileMenu.accesskey                      "D">
+<!ENTITY closeCmd.label                          "Beenden">
+<!ENTITY closeCmd.accesskey                      "B">
 <!ENTITY viewMenu.label                          "Ansicht">
 <!ENTITY viewMenu.accesskey                      "A">
 <!ENTITY menuitem.view.command.toolbar.label     "Symbolleiste">
@@ -28,4 +30,6 @@
 <!ENTITY menuitem.view.unsorted.label            "Unsortiert">
 <!ENTITY menuitem.view.unsorted.accesskey        "U">
 <!ENTITY sortAscending.label                     "Absteigend">
+<!ENTITY sortAscending.accesskey                 "b">
 <!ENTITY sortDescending.label                    "Aufsteigend">
+<!ENTITY sortDescending.accesskey                "f">
