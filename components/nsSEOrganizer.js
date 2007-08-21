@@ -131,6 +131,7 @@ SEOrganizer.prototype = {
 
     this._setUpWrappedJSObject();
     this._replaceAddEngineConfirmation();
+    this._replaceUpdateHandling();
   },
 
   saveChanges: function SEOrganizer__saveChanges() {
@@ -280,11 +281,13 @@ SEOrganizer.prototype = {
         } else {
           container = rootContainer;
         }
-        var current = this._getAnonymousResource();
-        var currentName = rdfService.GetLiteral(engines[i].name);
-        this.Assert(current, name, currentName, true);
-        container.AppendElement(current);
-        modified = true;
+        try {
+          var current = this._getAnonymousResource();
+          var currentName = rdfService.GetLiteral(engines[i].name);
+          this.Assert(current, name, currentName, true);
+          container.AppendElement(current);
+          modified = true;
+        } catch(e) {}
       }
     }
     return modified;
@@ -361,6 +364,21 @@ SEOrganizer.prototype = {
       return {confirmed: !args.GetInt(0), useNow: args.GetInt(1)};
     };
   },
+  // we want to persist the user-chosen name and alias through an update
+  _replaceUpdateHandling: function() {
+    var ss = this._searchService.wrappedJSObject;
+    var orig = ss._addEngineToStore;
+    ss._addEngineToStore = function(aEngine) {
+      var oldEngine = aEngine._engineToUpdate;
+      if(oldEngine &&
+         (aEngine.name != oldEngine.name || aEngine.alias != oldEngine.alias)) {
+        aEngine._name = oldEngine.name;
+        aEngine._alias = oldEngine.alias;
+        aEngine._serializeToFile();
+      }
+      orig.apply(this, arguments);
+    };
+  },
 
   _setUpWrappedJSObject: function() {
     var topLevel = this.defaultEngine.wrappedJSObject.__parent__;
@@ -373,7 +391,6 @@ SEOrganizer.prototype = {
       return orig.call(this, [].concat(arguments)); // call the original function
     };
     this._searchService.getEngines({});
-    this._searchService = this._searchService;
   },
 
   observe: function observe(aEngine, aTopic, aVerb) {
@@ -389,13 +406,24 @@ SEOrganizer.prototype = {
           // The current engine was changed.  Do nothing special.
           break;
         case "engine-changed":
-          // An engine was hidden or unhidden or moved, or an icon was
-          // changed.  We have to remove or add it from/to the RDF for the 
+          // An engine was hidden or unhidden or moved or updated, or an icon
+          // was changed.  We have to remove or add it from/to the RDF for the
           // case it was hidden/unhidden (this doesn't call removed/added).
           if(aEngine.hidden)
             this._removeNonExisting();
           else
             this._addMissingEnginesToRDF();
+        /*case "engine-loaded":
+          // An engine was just downloaded. In case of a new installation, we
+          // don't do anything, but for updates, we want to preserve the name.
+          
+          aEngine = aEngine.QueryInterface(Ci.nsISearchEngine).wrappedJSObject;
+          if(aEngine._engineToUpdate) {
+            aEngine.name = aEngine._engineToUpdate.name;
+            
+            aEngine._serializeToFile();
+          }
+          break;*/
       }
       // we should notify rdf observers
     }
@@ -507,7 +535,11 @@ SEOrganizer.prototype = {
     const rdfService = this._rdfService;
 
     var predicate = rdfService.GetResource(NS + "Name");
-    var object = rdfService.GetLiteral(aName);
+    try {
+      var object = rdfService.GetLiteral(aName);
+    } catch(e) {
+      return false;
+    }
 
     if(this.hasArcIn(object, predicate)) {
       var ids = this.GetSources(predicate, object, true), id;
@@ -780,7 +812,12 @@ SEOrganizer.prototype = {
     return this._searchService.getVisibleEngines(engineCount);
   },
   moveEngine: function nsIBrowserSearchService__moveEngine(engine, newIndex) {
-    return this._searchService.moveEngine(engine, newIndex);
+    try {
+      return this._searchService.moveEngine(engine, newIndex);
+    } catch(e) {
+      LOG(e.message + "\n"+ engine.name +"\t"+ newIndex);
+      return e.code;
+    }
   },
   removeEngine: function nsIBrowserSearchService__removeEngine(engine) {
     return this._searchService.removeEngine(engine);
@@ -963,32 +1000,52 @@ function FoldersOnly() {
                      .createInstance(Ci.nsIRDFInMemoryDataSource)
                      .QueryInterface(Ci.nsIRDFDataSource);
   this._datasource = datasource;
-  var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
-                       .getService(Ci.nsIRDFService);
-  var rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
-                            .getService(Ci.nsIRDFContainerUtils);
-  var seOrganizer = Cc[CONTRACT_ID].createInstance(Ci.nsISEOrganizer)
-                      .wrappedJSObject;
 
-  var root = rdfService.GetResource(FOLDERS_ROOT);
-  var rootContainer = rdfContainerUtils.MakeSeq(datasource, root);
+  this._update();
 
-  try {
-    var item = seOrganizer.getItemByIndex(0), i = 0;
-    while(item) {
-      if(seOrganizer.isFolder(item)) {
-        rootContainer.AppendElement(item);
-      }
-      if(++i < seOrganizer._indexCache.length)
-        item = seOrganizer.getItemByIndex(i);
-      else
-        break;
-    }
-  } catch(e) {}
+  var os = Cc["@mozilla.org/observer-service;1"]
+            .getService(Ci.nsIObserverService);
+  os.addObserver(this, "browser-search-engine-modified", false);
 }
 FoldersOnly.prototype = {
   _datasource: null,
 
+  _update: function() {
+    var datasource = this._datasource;
+    var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
+                         .getService(Ci.nsIRDFService);
+    var rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
+                              .getService(Ci.nsIRDFContainerUtils);
+    var seOrganizer = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer)
+                        .wrappedJSObject;
+
+    var root = rdfService.GetResource(FOLDERS_ROOT);
+    var rootContainer = rdfContainerUtils.MakeSeq(datasource, root);
+
+    // clean old stuff
+    var elements = rootContainer.GetElements();
+    while(elements.hasMoreElements()) // only renumber once
+      rootContainer.RemoveElement(elements.getNext(), !elements.hasMoreElements());
+
+    try {
+      var item = seOrganizer.getItemByIndex(0), i = 0;
+      while(item) {
+        if(seOrganizer.isFolder(item)) {
+          rootContainer.AppendElement(item);
+          
+        }
+        if(++i < seOrganizer._indexCache.length)
+          item = seOrganizer.getItemByIndex(i);
+        else
+          break;
+      }
+    } catch(e) {}
+  },
+  observe: function(aEngine, aTopic, aVerb) {
+    if(aVerb == "-engines-organized") {
+      this._update();
+    }
+  },
   get URI() {
     return this._datasource.URI;
   },
@@ -1002,14 +1059,14 @@ FoldersOnly.prototype = {
     return this._datasource.ArcLabelsOut(node);
   },
   Assert: function nsIRDFDataSource__Assert(source, property, target, truthValue) {
-    throw Cr.NS_ERROR_NOT_IMPLEMENTED;
+    //throw Cr.NS_ERROR_NOT_IMPLEMENTED;
     return this._datasource.Assert(source, property, target, truthValue);
   },
   beginUpdateBatch: function nsIRDFDataSource__beginUpdateBatch() {
     return this._datasource.beginUpdateBatch();
   },
   Change: function nsIRDFDataSouce__Change(source, property, oldTarget, newTarget) {
-    throw Cr.NS_ERROR_NOT_IMPLEMENTED;
+    //throw Cr.NS_ERROR_NOT_IMPLEMENTED;
     return this._datasource.Change(source, property, oldTarget, newTarget);
   },
   DoCommand: function nsIRDFDataSouce__DoCommand(sources, command, arguments) {
@@ -1053,19 +1110,20 @@ FoldersOnly.prototype = {
     return this._datasource.IsCommandEnabled(sources, command, arguments);
   },
   Move: function nsIRDFDataSource__Move(oldSource, newSource, property, target) {
-    throw Cr.NS_ERROR_NOT_IMPLEMENTED;
+    //throw Cr.NS_ERROR_NOT_IMPLEMENTED;
     return this._datasource.Move(oldSource, newSource, property, target);
   },
   RemoveObserver: function nsIRDFDataSource__RemoveObserver(observer) {
     return this._datasource.RemoveObserver(observer);
   },
   Unassert: function nsIRDFDataSource__Unassert(source, property, target) {
-    throw Cr.NS_ERROR_NOT_IMPLEMENTED;
+    //throw Cr.NS_ERROR_NOT_IMPLEMENTED;
     return this._datasource.Unassert(source, property, target);
   },
 
   QueryInterface: function QueryInterface(aIID) {
-    if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsIRDFDataSource))
+    if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsIRDFDataSource) ||
+       aIID.equals(Ci.nsIObserver))
       return this;
     throw Cr.NS_ERROR_NO_INTERFACE;
   }
