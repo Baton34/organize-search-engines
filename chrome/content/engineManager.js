@@ -204,8 +204,7 @@ EngineManagerDialog.prototype = {
   },
 
   remove: function EngineManager__remove() {
-    // we want the indexes in reversed order as we're changing indexes...
-    var indexes = gEngineView.selectedIndexes.sort(compareNumbers).reverse();
+    var indexes = gEngineView.selectedIndexes;
     var index, item, parent, localIndex;
     gEngineView.selection.clearSelection();
 
@@ -244,11 +243,9 @@ EngineManagerDialog.prototype = {
     this.showRestoreDefaults();
   },
   bump: function EngineManager__bump(direction) {
-    var indexes = gEngineView.selectedIndexes.sort(compareNumbers);
+    var indexes = gEngineView.selectedIndexes;
     var index, item, localIndex, newLocalIndex, children, newChildren, newIndex;
     gEngineView.selection.clearSelection();
-    if(direction == -1)
-      indexes.reverse();
 
     for(var i = 0; i < indexes.length; i++) {
       index = indexes[i];
@@ -313,6 +310,7 @@ EngineManagerDialog.prototype = {
     document.getElementById("engineList").focus();
     var index = gEngineView.selectedIndex;
     var item = gEngineView.selectedItem;
+    item.modified = true;
 
     var alias = { value: item.alias };
     var name =  { value: item.name  };
@@ -705,10 +703,23 @@ Structure__Item.prototype = {
   commit: function Structure__Item__commit() {
     var engine = this.originalEngine;
     if(this.modified && engine) {
+      if(this.alias != engine.alias) {
+        engine.alias = this.alias;
+      }
       if(engine.name !== this.name) {
         var oldName = engine.name;
+
         engine = engine.wrappedJSObject;
-        var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
+        var realSearchService = gSEOrganizer._searchService.wrappedJSObject;
+        delete realSearchService._engines[oldName];
+        realSearchService._engines[this.name] = engine;
+        engine._name = this.name;
+        engine._serializeToFile();
+        var os = Cc["@mozilla.org/observer-service;1"]
+                   .getService(Ci.nsIObserverService);
+        os.notifyObservers(this.originalEngine, SEARCH_ENGINE_TOPIC, "engine-changed");
+
+        /*var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                            .getService(Ci.nsIRDFService);
         var namePred = rdfService.GetResource(NS + "Name");
         oldName = rdfService.GetLiteral(oldName);
@@ -716,31 +727,9 @@ Structure__Item.prototype = {
                             rdfService.GetLiteral(this.name), true);
         try {
           gSEOrganizer.Unassert(this.node, namePred, oldName);
-        } catch(e) {}
-        // we pretend the engine would have been updated - otherwise it'd need
-        // a restart for Firefox to completely realize the engine changed
-        var clone = {};
-        for(var p in engine) {
-          if(!(engine.__lookupGetter__(p) || engine.__lookupSetter__(p)))
-            clone[p] = engine[p];
-        }
-        engine._name = this.name;
-        engine._serializeToFile();
-        engine._useNow = false;
-        engine._engineToUpdate = clone;
-        // we temporarily remove our service's observer so we don't end with
-        // this engine being twice in the rdf
-        var os = Cc["@mozilla.org/observer-service;1"]
-                   .getService(Ci.nsIObserverService);
-        //os.removeObserver(gSEOrganizer, SEARCH_ENGINE_TOPIC);
-        os.notifyObservers(engine, SEARCH_ENGINE_TOPIC, "engine-loaded");
-        //os.addObserver(gSEOrganizer, SEARCH_ENGINE_TOPIC, false);
-
-        // update the orig search service's cache
-        var realSearchService = gSEOrganizer._searchService;
-        realSearchService.wrappedJSObject._engines[engine.name] = engine;
+        } catch(e) {}*/
       }
-      if(gSEOrganizer.getNameByItem(this.node) !== this.name) {
+      if(gSEOrganizer.getNameByItem(this.node) != this.name) {
         var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                            .getService(Ci.nsIRDFService);
         var namePred = rdfService.GetResource(NS + "Name");
@@ -751,9 +740,6 @@ Structure__Item.prototype = {
         } catch(e) {}
         gSEOrganizer.Assert(this.node, namePred,
                             rdfService.GetLiteral(this.name), true);
-      }
-      if(this.alias != engine.alias) {
-        engine.alias = this.alias;
       }
     }
   }
@@ -780,7 +766,7 @@ Structure__Container.prototype.insertAt = Structure.prototype.insertAt =
            function Structure__General__insertAt(idx, item) {
   this.modified = true;
   item.parent = this;
-  if(idx === -1 || idx > this.children.length) {
+  if(idx === -1 || idx >= this.children.length) {
     this.children.push(item);
   } else if(idx === 0) {
     this.children = [item].concat(this.children);
@@ -910,16 +896,7 @@ EngineView.prototype = {
       if(seln.isSelected(i))
         indexes.push(i);
     }
-    /*var rangeCount = seln.getRangeCount();
-    var indexes = [], min = { }, max = { };
-    for(var i = 0; i <= rangeCount; i++) {
-      seln.getRangeAt(i, min, max);
-      for(var j = min.value; j <= max.value; j++) {
-        if(j != -1)
-          indexes.push(j);
-      }
-    }*/
-    return indexes;
+    return indexes.reverse();
   },
   get selectedItem() {
     return this._indexCache[this.selectedIndex];
@@ -1023,11 +1000,11 @@ EngineView.prototype = {
     return this._indexCache[idx].parent.children.indexOf(this._indexCache[idx]);
   },
   getSourceIndexesFromDrag: function getSourceIndexesFromDrag() {
-    var dragService = Cc["@mozilla.org/widget/dragservice;1"].
-                      getService().QueryInterface(Ci.nsIDragService);
+    var dragService = Cc["@mozilla.org/widget/dragservice;1"]
+                        .getService().QueryInterface(Ci.nsIDragService);
     var dragSession = dragService.getCurrentSession();
-    var transfer = Cc["@mozilla.org/widget/transferable;1"].
-                   createInstance(Ci.nsITransferable);
+    var transfer = Cc["@mozilla.org/widget/transferable;1"]
+                     .createInstance(Ci.nsITransferable);
 
     transfer.addDataFlavor(ENGINE_FLAVOR);
     dragSession.getData(transfer, 0);
@@ -1168,14 +1145,18 @@ EngineView.prototype = {
     if(treeParentIndex != -1 && !this.isContainerOpen(treeParentIndex))
       this.toggleOpenState(treeParentIndex);
     var node = item.node;
+    var old = item;
     if(item.isSeq) {
       var children = item.children;
       item.destroy();
-      item = item.replacedWith = new Structure__Container(parent, node, children, item.open);
+      item = new Structure__Container(parent, node, children, item.open);
     } else {
       item.destroy();
       item = new Structure__Item(parent, node);
+      item.alias = old.alias;
     }
+    item.modified = old.modified;
+    item.name = old.name;
     parent.insertAt(index, item);
     return item;
   },
