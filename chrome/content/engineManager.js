@@ -706,7 +706,7 @@ Structure__Item.prototype = {
       if(this.alias != engine.alias) {
         engine.alias = this.alias;
       }
-      if(engine.name !== this.name) {
+      if(engine.name != this.name) {
         var oldName = engine.name;
 
         engine = engine.wrappedJSObject;
@@ -717,7 +717,9 @@ Structure__Item.prototype = {
         engine._serializeToFile();
         var os = Cc["@mozilla.org/observer-service;1"]
                    .getService(Ci.nsIObserverService);
+        os.removeObserver(gSEOrganizer, SEARCH_ENGINE_TOPIC);
         os.notifyObservers(this.originalEngine, SEARCH_ENGINE_TOPIC, "engine-changed");
+        os.addObserver(gSEOrganizer, SEARCH_ENGINE_TOPIC, false);
 
         /*var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                            .getService(Ci.nsIRDFService);
