@@ -409,6 +409,8 @@ SEOrganizer.prototype = {
           // An engine was hidden or unhidden or moved or updated, or an icon
           // was changed.  We have to remove or add it from/to the RDF for the
           // case it was hidden/unhidden (this doesn't call removed/added).
+          if(aEngine.wrappedJSObject._engineToUpdate)
+            return;
           if(aEngine.hidden)
             this._removeNonExisting();
           else
