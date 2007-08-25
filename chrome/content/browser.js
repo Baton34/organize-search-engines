@@ -105,6 +105,8 @@ SEOrganizer.prototype = {
   onCustomizeToolbarFinished: function() {
     var searchbar = this.searchbar;
     var popup = searchbar._popup;
+    if(!("XUL_NS" in window))
+      const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
     this._replaceSearchbarProperties(searchbar);
     // drag 'n' drop stuff:
