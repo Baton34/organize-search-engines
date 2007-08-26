@@ -8,7 +8,7 @@
         <em:id>organize-search-engines@maltekraus.de</em:id>
 
         <em:name>Organize Search Engines</em:name>
-        <em:version>1.1rc1</em:version>
+        <em:version>1.1rc2</em:version>
         <em:description>Organize your search engines with separators and folders.</em:description>
 
         <em:optionsURL>chrome://browser/content/search/engineManager.xul</em:optionsURL>
