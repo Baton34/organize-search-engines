@@ -1,4 +1,5 @@
 var organizeSE;
+const OSE_XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 function SEOrganizer() {
   window.addEventListener("load", function(e) { organizeSE.init(e); }, false);
   window.addEventListener("close", this.uninit, false);
@@ -29,7 +30,7 @@ SEOrganizer.prototype = {
           return "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
         case "xul":
         default:
-          return "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+          return OSE_XUL_NS;
       }
     };
     var scope = aScope || document;
@@ -105,15 +106,13 @@ SEOrganizer.prototype = {
   onCustomizeToolbarFinished: function() {
     var searchbar = this.searchbar;
     var popup = searchbar._popup;
-    if(!("XUL_NS" in window))
-      const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
     this._replaceSearchbarProperties(searchbar);
     // drag 'n' drop stuff:
     seOrganizer_dragObserver.init();
 
     // now lets copy the manage engines items to where we need it
-    var container =  document.createElementNS(XUL_NS, "box");
+    var container =  document.createElementNS(OSE_XUL_NS, "box");
     container.id = "searchpopup-bottom-container";
     if(!document.getElementById("manage-engines-item")) {
       container.insertBefore(popup.lastChild.cloneNode(true), container.firstChild);
@@ -266,13 +265,11 @@ SEOrganizer.prototype = {
   insertAddEngineItems: function insertAddEngineItems() {
     const popup = this.popup;
     var addengines = getBrowser().mCurrentBrowser.engines;
-    const kXULNS =
-                "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
     if(!addengines || !addengines.length)
       return;
 
-    const separator = document.createElementNS(kXULNS, "menuseparator");
+    const separator = document.createElementNS(OSE_XUL_NS, "menuseparator");
     separator.className = "addengine-separator";
     popup.appendChild(separator);
 
@@ -283,7 +280,7 @@ SEOrganizer.prototype = {
       var labelStr =
            this.searchbar._stringBundle.getFormattedString("cmd_addFoundEngine",
                                                            [engineInfo.title]);
-      menuitem = document.createElementNS(kXULNS, "menuitem");
+      menuitem = document.createElementNS(OSE_XUL_NS, "menuitem");
       menuitem.className = "menuitem-iconic addengine-item";
       menuitem.setAttribute("label", labelStr);
       menuitem.setAttribute("uri", engineInfo.uri);
