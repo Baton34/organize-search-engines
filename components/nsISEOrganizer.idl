@@ -19,7 +19,7 @@ interface nsISEOrganizer : nsISupports {
    *
    * @return The new Folder.
    */
-  nsIRDFResource newFolder(in AUTF8String name, in nsISupports parent);
+  nsIRDFResource newFolder(in AString name, in nsISupports parent);
 
   /* Check whether a node is a separator. */
   boolean isSeparator(in nsIRDFResource separator);
@@ -42,17 +42,17 @@ interface nsISEOrganizer : nsISupports {
 
   /**** Item/Name/Index handling ****/
   /* Returns whether an item with a specific name exists. */
-  boolean itemWithNameExists(in AUTF8String name);
+  boolean itemWithNameExists(in AString name);
   /* Returns the (string) name of a given item. */
-  AUTF8String getNameByItem(in nsIRDFResource item);
+  AString getNameByItem(in nsIRDFResource item);
   /* Returns the item with a given name.            *
    * @return The item or null if it does not exist. */
-  nsIRDFResource getItemByName(in AUTF8String name);
+  nsIRDFResource getItemByName(in AString name);
 
   /* Get an item from a given index. */
   nsIRDFResource getItemByIndex(in long index);
   /* Returns the icon URI of the engine with a given index. */
-  AUTF8String getIconByIndex(in long index);
+  AString getIconByIndex(in long index);
   /**
    * Determine the index of an item.
    *
