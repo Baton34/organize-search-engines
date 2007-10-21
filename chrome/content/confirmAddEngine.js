@@ -22,8 +22,8 @@ organizeSE.__proto__ = {
         const CONTRACT_ID =
          "@mozilla.org/rdf/datasource;1?name=organized-internet-search-engines";
         var seo = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer).wrappedJSObject;
-        seo._engineFolders[document.getElementById("name").value] =
-                                                            organizeSE.folderID;
+        var name = document.getElementById("name").value.replace(/\s+$/g, "");
+        seo._engineFolders[name] = organizeSE.folderID;
         origOnDialogAccept(e);
       }
     }

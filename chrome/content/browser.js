@@ -105,9 +105,11 @@ SEOrganizer.prototype = {
   // we have to re-init the searchbar after customizing the toolbar
   onCustomizeToolbarFinished: function() {
     var searchbar = this.searchbar;
-    var popup = searchbar._popup;
+    if(searchbar) {
+      var popup = searchbar._popup;
 
-    this._replaceSearchbarProperties(searchbar);
+      this._replaceSearchbarProperties(searchbar);
+    }
     // drag 'n' drop stuff:
     seOrganizer_dragObserver.init();
 
@@ -420,30 +422,18 @@ SEOrganizer.prototype = {
   },
 
   searchObserve: function observe(aEngine, aTopic, aVerb) {
-    if (aTopic == "browser-search-engine-modified") {
-      switch (aVerb) {
-        case "engine-removed":
-        this.offerNewEngine(aEngine);
-        break;
-      case "engine-added":
-        this.hideNewEngine(aEngine);
-        break;
-      case "engine-current":
-        // The current engine was changed.
-        this._popup.hidePopup();
-        this.updateDisplay();
-        this.rebuildPopup(); // updates the engine marked in bold
-        break;
-      case "engine-changed":
-        // An engine was removed (or hidden) or added, or an icon was
-        // changed.  Update the display in case name or icon changed.
-        this.updateDisplay();
-        break;
-      case "-engines-organized":
-        this.rebuildPopup();
-        break;
-      }
+    if(aTopic != "browser-search-engine-modified")
+      return;
+
+    if(aVerb == "engine-removed") {
+      this.offerNewEngine(aEngine);
+    } else if(aVerb == "engine-added") {
+      this.hideNewEngine(aEngine);
+    } else if(aVerb == "engine-current" || aVerb == "engine-changed") {
+      this.updateDisplay();
     }
+    this._popup.hidePopup();
+    this.rebuildPopup();
   }
 };
 organizeSE = new SEOrganizer();

@@ -19,7 +19,7 @@ var gRemovedEngines = [], gAddedEngines = [], gSortDir = "natural";
 
 const CONTRACT_ID =
          "@mozilla.org/rdf/datasource;1?name=organized-internet-search-engines";
-var gSEOrganizer = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer).wrappedJSObject;
+var gSEOrganizer;
 
 function gResort(orig) {
   function sortCallback(item1, item2) {
@@ -75,6 +75,7 @@ function EngineManagerDialog() {
 EngineManagerDialog.prototype = {
   init: function EngineManager__init() {
     gStrings = document.getElementById("strings");
+    gSEOrganizer = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer).wrappedJSObject;
 
     var prefService = Cc["@mozilla.org/preferences-service;1"]
                         .getService(Ci.nsIPrefService).getBranch("");
@@ -244,6 +245,8 @@ EngineManagerDialog.prototype = {
   },
   bump: function EngineManager__bump(direction) {
     var indexes = gEngineView.selectedIndexes;
+    if(direction > 0)
+      indexes = indexes.reverse();
     var index, item, localIndex, newLocalIndex, children, newChildren, newIndex;
     gEngineView.selection.clearSelection();
 
@@ -685,7 +688,7 @@ function Structure__Item(parent, node, engine) {
   this.originalEngine = engine;
   if(engine) {
     this.alias = engine.alias;
-    this.iconURI = engine.iconURI.spec;
+    this.iconURI = (engine.iconURI || {spec: ""}).spec;
   }
 }
 Structure__Item.prototype = {
@@ -946,33 +949,15 @@ EngineView.prototype = {
     gSEOrganizer.beginUpdateBatch();
     for(var i = 0; i < gRemovedEngines.length; ++i) {
       if(gRemovedEngines[i] && gRemovedEngines[i] instanceof Ci.nsIRDFResource) {
-        // remove the underlying search engine file using nsIBrowserSearchService
+        // remove the search engine, the rest is done by our observers
         var name = gSEOrganizer.getNameByItem(gRemovedEngines[i]);
         var engine = gSEOrganizer.getEngineByName(name);
         if(engine && engine instanceof Ci.nsISearchEngine) {
           if(engine == gSEOrganizer.currentEngine)
             gSEOrganizer.currentEngine = gSEOrganizer.defaultEngine;
           gSEOrganizer.removeEngine(engine);
-        }
-
-        /* remove everything from the rdf tree */
-        // remove everything this item references to
-        var predicates = gSEOrganizer.ArcLabelsIn(gRemovedEngines[i]), parent, pred;
-        while(predicates.hasMoreElements()) {
-          pred = predicates.getNext();
-          parent = gSEOrganizer.GetSources(pred, gRemovedEngines[i], true);
-          while(parent.hasMoreElements()) {
-            gSEOrganizer.Unassert(parent.getNext(), pred, gRemovedEngines[i], true);
-          }
-        }
-        // remove all references to this item
-        var predicates = gSEOrganizer.ArcLabelsOut(gRemovedEngines[i]), object;
-        while(predicates.hasMoreElements()) {
-          pred = predicates.getNext();
-          object = gSEOrganizer.GetTargets(gRemovedEngines[i], pred, true);
-           while(object.hasMoreElements()) {
-            gSEOrganizer.Unassert(gRemovedEngines[i], pred, object.getNext(), true);
-          }
+        } else {
+          gSEOrganizer.removeItem(gRemovedEngines[i]);
         }
       }
     }
@@ -1087,7 +1072,7 @@ EngineView.prototype = {
     switch(orientation) {
       case Ci.nsITreeView.DROP_ON:
         treeParentIndex = treeDropIndex;
-        dropIndex = -1;
+        dropIndex = this._indexCache[treeParentIndex].children.length;
         break;
       case Ci.nsITreeView.DROP_BEFORE:
         var dropParent = this._indexCache[treeDropIndex].parent;
@@ -1109,18 +1094,19 @@ EngineView.prototype = {
 
     // now that we have the indexes, do the moving
     var parent = this._indexCache[treeParentIndex];
-    var items = [], tempDropIndex;
+    var items = [], tempDropIndex, relative = 0;
     for(var i = 0; i < treeSourceIndexes.length; i++) {
       var item = this._indexCache[treeSourceIndexes[i]];
-      tempDropIndex = dropIndex;
-      if(tempDropIndex != 0) {
+      tempDropIndex = dropIndex + relative;
+      if(treeDropIndex > treeSourceIndexes[i] && dropParent == item.parent)
+        relative -= 1;
+      if(tempDropIndex) {
         if(orientation == Ci.nsITreeView.DROP_BEFORE &&
-           (treeDropIndex > treeSourceIndexes[i] || dropParent == item.parent)) {
-          tempDropIndex = tempDropIndex - 1;
+           (treeDropIndex > treeSourceIndexes[i] && dropParent == item.parent)) {
+          tempDropIndex -= 1;
         } else if(orientation == Ci.nsITreeView.DROP_AFTER &&
-                  (treeDropIndex < treeSourceIndexes[i] ||
-                   dropParent != item.parent)) {
-          tempDropIndex = tempDropIndex + 1;
+                  (treeDropIndex < treeSourceIndexes[i] || dropParent != item.parent)) {
+            tempDropIndex += 1;
         }
       }
       items[i] = this.internalMove(item, parent, tempDropIndex);

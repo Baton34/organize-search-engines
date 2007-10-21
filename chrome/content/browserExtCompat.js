@@ -363,14 +363,16 @@ organizeSE__Extensions.prototype = {
         var SEOrganizer = organizeSE.SEOrganizer;
         var name = searchbar.currentEngine.name;
         var item = SEOrganizer.getItemByName(name);
-        do {
+        while(item) {
           var elem = document.getElementById(item.ValueUTF8);
           if(elem)
             elem.setAttribute("selected", "true");
           try {
             item = SEOrganizer.getParent(item);
-          } catch(e) { break; }
-        } while(item);
+          } catch(e) {
+            item = null;
+          }
+        }
       }
     }
   }

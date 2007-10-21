@@ -30,65 +30,17 @@ function LOG(msg) {
   return msg;
 }
 
-function Window () {};
-Window.prototype = {
-  setTimeout: function setTimeout(callback, timeout) {
-    var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-    var obj = { notify: callback };
-    timer.initWithCallback(obj, timeout, Ci.nsITimer.TYPE_ONE_SHOT);
-    return timer;
-  },
-  setInterval: function setInterval(callback, timeout) {
-    var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-    var obj = { notify: callback };
-    timer.initWithCallback(obj, timeout, Ci.nsITimer.TYPE_REPEATING_PRECISE);
-    return timer;
-  },
-  clearTimeout: function clearTimeout(timer) {
-    timer.cancel();
-  },
-  openDialog: function openDialog() {
-    var args = [];
-    for(var i = 0; i < arguments.length; ++i)
-      args.push(arguments[i]);
-    var win = this._getMostRecentWindow();
-    if(win) {
-      try {
-        return win.openDialog.apply(win, args);
-      } catch(e) { }
-    }
-    throw Cr.NS_ERROR_NOT_AVAILABLE;
-  },
-  open: function open() {
-    var args = [];
-    for(var i = 0; i < arguments.length; ++i)
-      args.push(arguments[i]);
-    var win = this._getMostRecentWindow();
-    if(win) {
-      try {
-        return win.open.apply(win, args);
-      } catch(e) { }
-    }
-    throw Cr.NS_ERROR_NOT_AVAILABLE;
-  },
-  _getMostRecentWindow: function _getMostRecentWindow() {
-    var mediator = Cc["@mozilla.org/appshell/window-mediator;1"]
-                     .getService(Ci.nsIWindowMediator);
-    return mediator.getMostRecentWindow("");
-  },
-  get document() {
-    if(!this._document) {
-      var origDoc = this._getMostRecentWindow().document;
-      this._document = origDoc.implementation.createDocument("", "", null);
-    }
-    return this._document;
-  },
-  parent: null,
-  faked: true
-};
-var window = new Window();
-window.window = window.self = window.top = window;
-
+function setTimeout(callback, timeout) {
+  var args = [];
+  for(var i = 2; i < arguments.length; i++)
+    args.push(arguments[i]);
+  var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+  var obj = { notify: function() {
+    return callback.apply(this, args);
+  }};
+  timer.initWithCallback(obj, timeout, Ci.nsITimer.TYPE_ONE_SHOT);
+  return timer;
+}
 
 try {
 
@@ -124,9 +76,8 @@ SEOrganizer.prototype = {
                .getService(Ci.nsIObserverService);
     os.addObserver(this, "browser-search-engine-modified", false);
 
-    var added = this._addMissingEnginesToRDF();
-    var removed = this._removeNonExisting();
-    if(added || removed)
+    // call *both* and save if at least one returned true
+    if(this._addMissingEnginesToRDF() | this._removeNonExisting())
       this.saveChanges();
 
     this._setUpWrappedJSObject();
@@ -134,101 +85,74 @@ SEOrganizer.prototype = {
     this._replaceUpdateHandling();
   },
 
-  saveChanges: function SEOrganizer__saveChanges() {
+  saveChanges: function SEOrganizer__saveChanges(dontResort) {
     this.Flush();
 
-    // tell the normal search service the right order
-    // but we do it with some delays so we don't block the UI thread for ages
-    if(this.indexOutOfDate)
-      this._updateIndexCache();
-    var instance = this;
-    var os = Cc["@mozilla.org/observer-service;1"]
-               .getService(Ci.nsIObserverService);
-    os.removeObserver(this, "browser-search-engine-modified");
-    var engines = [];
-    for(var i = 0; i < this._indexCache.length; ++i) {
-      if(!this.isFolder(this._indexCache[i]) &&
-         !this.isSeparator(this._indexCache[i])) {
-        engines.push(this.getNameByItem(this._indexCache[i]));
+    if(!dontResort) {
+      // tell the normal search service the right order
+      // but we do it with some delays so we don't block the UI thread for ages
+      if(this.indexOutOfDate)
+        this._updateIndexCache();
+      var instance = this;
+      var os = Cc["@mozilla.org/observer-service;1"]
+                 .getService(Ci.nsIObserverService);
+      try {
+        os.removeObserver(this, "browser-search-engine-modified");
+        var addObserver = true;
+      } catch(e) {
+        var addObserver = false;
       }
-    }
-    LOG(engines.join(",\t"));
-    i = 0;
-    var ss = Cc["@mozilla.org/browser/search-service;1"]
-               .getService(Ci.nsIBrowserSearchService);
-    var obj = {
-      notify: function notify() {
-        if(i >= engines.length) {
-          timer.cancel();
-          os.addObserver(instance, "browser-search-engine-modified", false);
-          os.removeObserver(quit, "quit-application");
-          timer = null;
-          return;
+      var engines = [];
+      for(var i = 0; i < this._indexCache.length; ++i) {
+        if(!this.isFolder(this._indexCache[i]) &&
+           !this.isSeparator(this._indexCache[i])) {
+          engines.push(this.getNameByItem(this._indexCache[i]));
         }
-        var engineName = engines[i];
-        if(engineName) {
-          var engine = ss.getEngineByName(engineName);
-          if(engine instanceof Ci.nsISearchEngine) {
-            try {
-              instance.moveEngine(engine, i);
-            } catch(e) {
-              Components.reportError(e);
+      }
+      i = 0;
+      var ss = Cc["@mozilla.org/browser/search-service;1"]
+                 .getService(Ci.nsIBrowserSearchService);
+      var obj = {
+        notify: function notify() {
+          if(i >= engines.length) {
+            timer.cancel();
+            if(addObserver)
+              os.addObserver(instance, "browser-search-engine-modified", false);
+            os.removeObserver(quit, "quit-application");
+            timer = null;
+            return;
+          }
+          var engineName = engines[i];
+          if(engineName) {
+            var engine = ss.getEngineByName(engineName);
+            if(engine instanceof Ci.nsISearchEngine) {
+              try {
+                instance.moveEngine(engine, i);
+              } catch(e) {
+                Components.reportError(e);
+              }
             }
           }
+          i = i + 1;
         }
-        i = i + 1;
-      }
-    };
-    var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-    timer.initWithCallback(obj, 3, Ci.nsITimer.TYPE_REPEATING_PRECISE);
-
-    // it might happen that Firefox is exiting while we are still trying to tell
-    // the search service of the right order. If so, let's freeze Firefox!
-    var quit = {
-      observe: function observe() {
-        while(timer) {
-          obj.notify();
+      };
+      var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+      timer.initWithCallback(obj, 3, Ci.nsITimer.TYPE_REPEATING_PRECISE);
+  
+      // it might happen that Firefox is exiting while we are still trying to tell
+      // the search service of the right order. If so, let's freeze Firefox!
+      var quit = {
+        observe: function observe() {
+          while(timer) {
+            obj.notify();
+          }
         }
-      }
-    };
-    os.addObserver(quit, "quit-application", false);
+      };
+      os.addObserver(quit, "quit-application", false);
+    }
   },
 
   reload: function SEOrganizer__reload() {
-    // circumvent a bug crashing firefox when a Seq has no children
-    // xxx this is awfully slow!
-    /*var modified = false;
-    var file = this._saveFile;
-    var inStream = Cc["@mozilla.org/network/file-input-stream;1"]
-                     .createInstance(Ci.nsIFileInputStream);
-    inStream.init(file, 0x01, 0666, Ci.nsIFileInputStream.CLOSE_ON_EOF);
-    var parser = Cc["@mozilla.org/xmlextras/domparser;1"]
-                   .createInstance(Ci.nsIDOMParser);
-    var doc = parser.parseFromStream(inStream, "UTF-8", file.fileSize,
-                                     "application/xml");
-    inStream.close();
-    doc.normalize();
-    var elems = doc.getElementsByTagNameNS(NS_RDF, "Seq");
-    for(var i = elems.length; i--;) {
-      if(elems[i].firstChild == elems[i].lastChild &&
-         elems[i].firstChild.nodeType == Ci.nsIDOMNode.TEXT_NODE) {
-        var node = doc.createElementNS(NS_RDF, "li");
-        node.setAttributeNS(NS_RDF, "resource", "rdf:null");
-        elems[i].appendChild(node);
-        modified = true;
-      }
-    }
-    if(modified) {
-      var serializer = Cc["@mozilla.org/xmlextras/xmlserializer;1"]
-                         .createInstance(Ci.nsIDOMSerializer);
-      var foStream = Cc["@mozilla.org/network/file-output-stream;1"]
-                       .createInstance(Ci.nsIFileOutputStream);
-      foStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0);
-      serializer.serializeToStream(doc, foStream, "");
-      foStream.close();
-    }*/
-    // end circumvent crasher
-
     //this.Refresh(true); // crashes when there is an empty folder
     this.beginUpdateBatch();
     this._datasource = this._rdfService.GetDataSourceBlocking(this._saveURI)
@@ -236,10 +160,10 @@ SEOrganizer.prototype = {
     for(var i = 0; i < this._observers.length; ++i) {
       this._datasource.AddObserver(this._observers[i]);
     }
-    this.endUpdateBatch();
     this.indexOutOfDate = true;
     this._addMissingEnginesToRDF();
     this._removeNonExisting();
+    this.endUpdateBatch();
 
     // notify observers
     var os = Cc["@mozilla.org/observer-service;1"].
@@ -250,7 +174,7 @@ SEOrganizer.prototype = {
 
   _engineFolders: {},
   // check if every installed (and visible) engine is in the rdf
-  _addMissingEnginesToRDF: function addMissing() {
+  _addMissingEnginesToRDF: function addMissing(save) {
     var rdfService = this._rdfService;
     var rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
                               .getService(Ci.nsIRDFContainerUtils);
@@ -265,7 +189,8 @@ SEOrganizer.prototype = {
     var modified = false;
     for(var i = 0; i < engines.length; ++i) {
       if(!this.itemWithNameExists(engines[i].name)) {
-        if(engines[i].name in this._engineFolders) {
+        container = null;
+        if(engines[i].name.replace(/\s+$/g, "") in this._engineFolders) {
           var parent = this._engineFolders[engines[i].name];
           if(parent == FOLDERS_ROOT)
             parent = ROOT;
@@ -275,25 +200,27 @@ SEOrganizer.prototype = {
             container = Cc["@mozilla.org/rdf/container;1"]
                           .createInstance(Ci.nsIRDFContainer);
             container.Init(this, parent);
-          } catch(e) {
-            container = rootContainer;
-          }
-        } else {
-          container = rootContainer;
+          } catch(e) { }
         }
         try {
           var current = this._getAnonymousResource();
+          (container || rootContainer).AppendElement(current);
           var currentName = rdfService.GetLiteral(engines[i].name);
-          this.Assert(current, name, currentName, true);
-          container.AppendElement(current);
+          var observers = this._observers.concat([]);
+            this.Assert(current, name, currentName, true);
           modified = true;
         } catch(e) {}
       }
     }
+    if(modified) {
+      this.indexOutOfDate = true;
+      if(save)
+        this.saveChanges(true);
+    }
     return modified;
   },
   // remove engines from the rdf that do not exist (anymore)
-  _removeNonExisting: function removeNonExisting() {
+  _removeNonExisting: function removeNonExisting(save) {
     var modified = false;
     for(var i = this.getChildCount(this.getRoot()); i--;) {
       try {
@@ -308,6 +235,8 @@ SEOrganizer.prototype = {
         }
       } catch(e) { }
     }
+    if(save && modified)
+      this.saveChanges(true);
     return modified;
   },
 
@@ -388,47 +317,52 @@ SEOrganizer.prototype = {
     ss.getEngines = function(a) {
       this.wrappedJSObject = this; // NOW we have a .wrappedJSObject
       this.getEngines = orig; // restore the original function
-      return orig.call(this, [].concat(arguments)); // call the original function
+      return orig.call(this, arguments); // call the original function, just to be sure
     };
     this._searchService.getEngines({});
   },
 
   observe: function observe(aEngine, aTopic, aVerb) {
     if(aTopic === "browser-search-engine-modified") {
+      this.beginUpdateBatch();
       switch(aVerb) {
         case "engine-removed":
-          this._removeNonExisting();
+          if(this._removeNonExisting(true)) {
+            this.notifyObservers();
+          }
+          if(aEngine == this.currentEngine)
+            aEngine = this.defaultEngine;
           break;
         case "engine-added":
-          this._addMissingEnginesToRDF();
-          break;
-        case "engine-current":
-          // The current engine was changed.  Do nothing special.
+          if(this._addMissingEnginesToRDF(true)) {
+            this.notifyObservers();
+          }
           break;
         case "engine-changed":
           // An engine was hidden or unhidden or moved or updated, or an icon
           // was changed.  We have to remove or add it from/to the RDF for the
           // case it was hidden/unhidden (this doesn't call removed/added).
-          if(aEngine.wrappedJSObject._engineToUpdate)
+          if(aEngine.wrappedJSObject._engineToUpdate || !this.itemWithNameExists(aEngine.name))
             return;
           if(aEngine.hidden)
-            this._removeNonExisting();
+            var changed = this._removeNonExisting(true);
           else
-            this._addMissingEnginesToRDF();
-        /*case "engine-loaded":
-          // An engine was just downloaded. In case of a new installation, we
-          // don't do anything, but for updates, we want to preserve the name.
-          
-          aEngine = aEngine.QueryInterface(Ci.nsISearchEngine).wrappedJSObject;
-          if(aEngine._engineToUpdate) {
-            aEngine.name = aEngine._engineToUpdate.name;
-            
-            aEngine._serializeToFile();
-          }
-          break;*/
+            var changed = this._addMissingEnginesToRDF(true);
+          if(changed)
+            this.notifyObservers();
+        case "engine-current": // The current engine was changed.
+        case "engine-loaded": // An engine's/icon's download was completed.
+          break;
       }
+      this.endUpdateBatch();
       // we should notify rdf observers
     }
+  },
+
+  notifyObservers: function() {
+    var os = Cc["@mozilla.org/observer-service;1"]
+               .getService(Ci.nsIObserverService);
+    os.notifyObservers(null, "browser-search-engine-modified", "-engines-organized");
   },
 
   isFolder: function SEOrganizer__isFolder(aResource) {
@@ -588,7 +522,7 @@ SEOrganizer.prototype = {
     if(predicates.hasMoreElements()) {
       return this.GetSource(predicates.getNext(), aItem, true);
     }
-    return Cr.NS_ERROR_INVALID_ARG;
+    return null;
   },
 
   _indexCache: [],
@@ -597,7 +531,7 @@ SEOrganizer.prototype = {
       this._updateIndexCache();
     if(this._indexCache.hasOwnProperty(aIndex))
       return this._indexCache[aIndex];
-    throw Cr.NS_ERROR_ILLEGAL_VALUE;
+    return null;
   },
   _updateIndexCache: function _updateIndexCache() {
     if(this._updateBatchRunning)
@@ -618,9 +552,9 @@ SEOrganizer.prototype = {
     return this._indexCache = cache;
   },
   indexOf: function SEOrganizer__indexOf(aItem, aGlobal) {
-    if(this.indexOutOfDate)
-      this._updateIndexCache();
     if(aGlobal) {
+      if(this.indexOutOfDate)
+        this._updateIndexCache();
       return this._indexCache.indexOf(aItem);
     } else {
       var parent = this.getParent(aItem);
@@ -628,7 +562,6 @@ SEOrganizer.prototype = {
                         .createInstance(Ci.nsIRDFContainer);
       container.Init(this, parent);
       return container.IndexOf(aItem);
-      //return this._indexCache.indexOf(aItem) - this._indexCache.indexOf(parent);
     }
   },
   getChildCount: function SEOrganizer__getChildCount(aItem) {
@@ -666,7 +599,7 @@ SEOrganizer.prototype = {
     return true;
   },
   _iterateAllCallback_FilterSeparators: function callback(aNode) {
-    return !(this.isSeparator(aNode));
+    return !this.isSeparator(aNode);
   },
   /**
    * Iterates through all items and calls a callback function for each.
@@ -849,7 +782,8 @@ SEOrganizer.prototype = {
     this._datasource.FlushTo(URI);
   },
   Refresh: function nsIRDFRemoteDataSource__Refresh(blocking) {
-    this._datasource.Refresh(blocking);
+    //this._datasource.Refresh(blocking);
+    throw Cr.NS_ERROR_NOT_IMPLEMENTED;
   },
 
   /* nsIRDFDataSource */
@@ -885,6 +819,7 @@ SEOrganizer.prototype = {
   },
   endUpdateBatch: function nsIRDFDataSouce__endUpdateBatch() {
     this._updateBatchRunning = false;
+    
     return this._datasource.endUpdateBatch();
   },
   GetAllCmds: function nsIRDFDataSource__GetAllCmds(source) {
@@ -930,7 +865,7 @@ SEOrganizer.prototype = {
       }
     } else if(property.Value == NS + "Name" && this.isSeparator(source)
               && truthValue) {
-      try { // makes the built-in sorting mechanism work
+      try { // make the built-in sorting mechanism work
         var parent = Cc["@mozilla.org/rdf/container;1"]
                        .createInstance(Ci.nsIRDFContainer);
         parent.Init(this, this.getParent(source));
@@ -944,7 +879,7 @@ SEOrganizer.prototype = {
           var prevItem = this._datasource.GetTarget(parent.Resource, arc, true);
           var prevName = this.GetTarget(prevItem, property, true);
           prevName.QueryInterface(Ci.nsIRDFLiteral);
-          return this._rdfService.GetLiteral(prevName.Value + "ZZZZZZZZZZZZZZ");
+          return this._rdfService.GetLiteral(prevName.Value + "ZZZZZZZZZZZZZZ"); // bah!
         }
       } catch(e) {
         return this._rdfService.GetLiteral("");
@@ -978,7 +913,9 @@ SEOrganizer.prototype = {
   },
   RemoveObserver: function nsIRDFDataSource__RemoveObserver(observer) {
     var obs = this._observers;
-    this._observers = obs.splice(obs.indexOf(observer), 1);
+    var index = obs.indexOf(observer);
+    if(index != -1)
+      this._observers.splice(index, 1);
     return this._datasource.RemoveObserver(observer);
   },
   Unassert: function nsIRDFDataSource__Unassert(source, property, target) {
@@ -1013,6 +950,7 @@ FoldersOnly.prototype = {
   _datasource: null,
 
   _update: function() {
+    this.beginUpdateBatch();
     var datasource = this._datasource;
     var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                          .getService(Ci.nsIRDFService);
@@ -1024,10 +962,10 @@ FoldersOnly.prototype = {
     var root = rdfService.GetResource(FOLDERS_ROOT);
     var rootContainer = rdfContainerUtils.MakeSeq(datasource, root);
 
-    // clean old stuff
-    var elements = rootContainer.GetElements();
-    while(elements.hasMoreElements()) // only renumber once
-      rootContainer.RemoveElement(elements.getNext(), !elements.hasMoreElements());
+    // clean up old stuff
+    var elements = rootContainer.GetElements(), hasMore = elements.hasMoreElements();
+    while(hasMore) // only renumber once
+      rootContainer.RemoveElement(elements.getNext(), !(hasMore = elements.hasMoreElements()));
 
     try {
       var item = seOrganizer.getItemByIndex(0), i = 0;
@@ -1042,6 +980,7 @@ FoldersOnly.prototype = {
           break;
       }
     } catch(e) {}
+    this.endUpdateBatch();
   },
   observe: function(aEngine, aTopic, aVerb) {
     if(aVerb == "-engines-organized") {
