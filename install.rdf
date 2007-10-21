@@ -9,7 +9,7 @@
   <RDF:Description RDF:about="urn:mozilla:install-manifest"
                    em:id="organize-search-engines@maltekraus.de"
                    em:name="Organize Search Engines"
-                   em:version="1.1rc2"
+                   em:version="1.1rc3"
                    em:description="Organize your search engines with separators and folders."
                    em:optionsURL="chrome://browser/content/search/engineManager.xul"
                    em:homepageURL="http://maltekraus.de/Firefox/search-tools/"
