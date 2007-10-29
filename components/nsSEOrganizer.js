@@ -710,7 +710,7 @@ SEOrganizer.prototype = {
     var alias = aName.substr(0, offset).toLowerCase();
     var engine = ss.getEngineByAlias(alias);
     var submission, keyword;
-    if(engine != null) {
+    if(engine != null && engine.alias == alias) {
       keyword = (offset != -1) ? aName.substr(offset + 1) : "";
       submission = engine.getSubmission(keyword, null);
       if(submission.uri) {
