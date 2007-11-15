@@ -67,7 +67,7 @@ const seOrganizer_dragObserver = {
           submission = engine.getSubmission(dropData.data, null);
           if(submission) {
             // load the first search in the current tab if the alt key was pressed
-            if(!i && (event.altKey) || content.location.href == "about:blank"))
+            if(!i && (event.altKey) || content.location.href == "about:blank")
               loadURI(submission.uri.spec, null, submission.postData, false);
             else
               getBrowser().loadOneTab(submission.uri.spec, null, null,
