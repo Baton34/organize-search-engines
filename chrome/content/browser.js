@@ -65,7 +65,7 @@ SEOrganizer.prototype = {
     if(!("bookmarkService" in window)) { // we aren't on a places-enabled build
       var searchRegexp = /(BMSVC\.resolveKeyword\(aURL,\saPostDataRef\))/;
       var replacement =
-               "$1 ||\norganizeSE.SEOrganizer.resolveKeyword(aURL, aPostDataRef)";
+             "$1 ||\norganizeSE.SEOrganizer.resolveKeyword(aURL, aPostDataRef)";
       var newFuncString = getShortcutOrURI.toSource()
                                           .replace(searchRegexp, replacement);
       eval("getShortcutOrURI = " + newFuncString);
@@ -105,11 +105,11 @@ SEOrganizer.prototype = {
   // we have to re-init the searchbar after customizing the toolbar
   onCustomizeToolbarFinished: function() {
     var searchbar = this.searchbar;
-    if(searchbar) {
-      var popup = searchbar._popup;
+    if(!searchbar)
+      return;
 
-      this._replaceSearchbarProperties(searchbar);
-    }
+    var popup = searchbar._popup;
+    this._replaceSearchbarProperties(searchbar);
     // drag 'n' drop stuff:
     seOrganizer_dragObserver.init();
 
@@ -394,7 +394,8 @@ SEOrganizer.prototype = {
       popup.addEventListener("command", this.onCommand, false);
       popup.addEventListener("popuphidden", this.popupHidden, false);
       popup.addEventListener("popupshowing", this.popupShowing, false);
-      organizeSE.searchbar._engines = organizeSE.SEOrganizer.getVisibleEngines({});
+      if(organizeSE.searchbar)
+        organizeSE.searchbar._engines = organizeSE.SEOrganizer.getVisibleEngines({});
     },
     willRebuild: function observe__willRebuild() {
     },

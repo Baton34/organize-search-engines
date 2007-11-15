@@ -1,6 +1,9 @@
 const seOrganizer_dragObserver = {
   init: function() {
-    const button = organizeSE.searchbar._engineButton;
+    var searchbar = organizeSE.searchbar;
+    if(!searchbar)
+      return;
+    var button = searchbar._engineButton;
     button.setAttribute("ondragenter", "seOrganizer_dragObserver.onDragEnter(event);");
     button.setAttribute("ondragover", "nsDragAndDrop.dragOver(event, seOrganizer_dragObserver);");
     button.setAttribute("ondragexit", "nsDragAndDrop.dragExit(event, seOrganizer_dragObserver);");
@@ -33,14 +36,16 @@ const seOrganizer_dragObserver = {
     }
   },
   onDragExit: function(event, session) {
-    var This = this;
     var target = event.target;
     if(target.nodeName == "menu" || target.nodeName == "menuitem") {
       target.removeAttribute("_moz-menuactive");
     }
   },
   onDrop: function(event, dropData, session) {
+    this.onDragExit(event, session);
     organizeSE.popup.hidePopup();
+    if(dropData instanceof Ci.nsIFile)
+      dropData = { data: dropData.leafName };
     if(!dropData.data)
       return;
     if(this.overButton(event.target)) {
@@ -61,7 +66,8 @@ const seOrganizer_dragObserver = {
         if(engine) {
           submission = engine.getSubmission(dropData.data, null);
           if(submission) {
-            if((!i && event.altKey) || content.location.href == "about:blank")
+            // load the first search in the current tab if the alt key was pressed
+            if(!i && (event.altKey) || content.location.href == "about:blank"))
               loadURI(submission.uri.spec, null, submission.postData, false);
             else
               getBrowser().loadOneTab(submission.uri.spec, null, null,
