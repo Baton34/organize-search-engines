@@ -163,8 +163,8 @@ EngineManagerDialog.prototype = {
 
   observe: function EngineManager__observe(aSubject, aTopic, aVerb) {
     window.setTimeout(function() {
-      if(aTopic === "browser-search-engine-modified") {
-        var aEngine = aSubject.QueryInterface(Ci.nsISearchEngine)
+      if(aTopic === "browser-search-engine-modified" &&
+         aEngine instanceof Ci.nsISearchEngine) {
         switch (aVerb) {
           case "engine-added":
             gEngineView.addEngine(aEngine);
@@ -568,7 +568,7 @@ gDragObserver = new DragObserver();
 function Structure() {
   var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                      .getService(Ci.nsIRDFService);
-  Structure__Container.apply(this, [null, rdfService.GetResource(ROOT)]);
+  Structure__Container.call(this, null, rdfService.GetResource(ROOT));
   this.modified = false;
 }
 Structure.prototype = {
@@ -1061,18 +1061,18 @@ EngineView.prototype = {
       return;
     col = col.element || document.getElementById(col.id);
     var cycle = {
-      natural: 'ascending',
-      ascending: 'descending',
-      descending: 'natural'
+      "natural":    "ascending",
+      "ascending":  "descending",
+      "descending": "natural"
     };
 
     gEngineManagerDialog.sortBy(cycle[col.getAttribute("sortDirection")]);
   },
   drop: function EngineView__drop(treeDropIndex, orientation) {
-    // find out indexes
+    // find out the indexes
     var treeSourceItems = this.getSourceItemsFromDrag(), treeSourceIndexes = [];
     for(var i = 0; i < treeSourceItems.length; i++) {
-      treeSourceIndexes.push(this._indexCache.indexOf(treeSourceItems));
+      treeSourceIndexes.push(this._indexCache.indexOf(treeSourceItems[i]));
     }
     this.clearSourceIndexes();
     var treeParentIndex = this.getParentIndex(treeDropIndex);
@@ -1103,9 +1103,11 @@ EngineView.prototype = {
 
     // now that we have the indexes, do the moving
     var parent = this._indexCache[treeParentIndex];
+    if(!parent || !parent.children)
+      return;
     var items = [], tempDropIndex, relative = 0;
     for(var i = 0; i < treeSourceIndexes.length; i++) {
-      var item = this._indexCache[treeSourceIndexes[i]];
+      var item = treeSourceItems[i];
       tempDropIndex = dropIndex + relative;
       if(treeDropIndex > treeSourceIndexes[i] && dropParent == item.parent)
         relative -= 1;
@@ -1125,7 +1127,6 @@ EngineView.prototype = {
     // update the tree and correct the selection
     this.updateCache();
     this.invalidate();
-    var treeDropIndexes = [];
     this.select(true); // clear selection
     for(var i = 0; i < items.length; i++) {
       this.select(this._indexCache.indexOf(items[i]), false);
