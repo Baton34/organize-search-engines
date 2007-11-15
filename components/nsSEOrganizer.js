@@ -709,10 +709,9 @@ SEOrganizer.prototype = {
     var offset = aName.indexOf(" ");
     var alias = aName.substr(0, offset).toLowerCase();
     var engine = ss.getEngineByAlias(alias);
-    var submission, keyword;
-    if(engine != null && engine.alias == alias) {
-      keyword = (offset != -1) ? aName.substr(offset + 1) : "";
-      submission = engine.getSubmission(keyword, null);
+    if(engine != null && engine.alias == alias && alias && !engine.hidden) {
+      var searchTerm = (offset != -1) ? aName.substr(offset + 1) : "";
+      var submission = engine.getSubmission(searchTerm, null); // we want HTML
       if(submission.uri) {
         aPostData.value = submission.postData;
         return submission.uri.spec;
