@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <?xml-stylesheet href="chrome://browser/skin/bookmarks/addBookmark.css"?>
-<!DOCTYPE dialog [
+<!DOCTYPE overlay [
   <!ENTITY % confirmAddDTD SYSTEM "chrome://seorganizer/locale/confirmAddEngine.dtd">
   %confirmAddDTD;
 ]>

@@ -6,7 +6,7 @@
 
 <?xml-stylesheet href="chrome://global/skin/tree.css"?>
 
-<!DOCTYPE dialog [
+<!DOCTYPE window [
   <!ENTITY % default SYSTEM "chrome://browser/locale/engineManager.dtd">
   %default;
   <!ENTITY % additional SYSTEM "chrome://seorganizer/locale/engineManager.dtd">
