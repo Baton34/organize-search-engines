@@ -538,18 +538,19 @@ EngineManagerDialog.prototype = {
 };
 gEngineManagerDialog = new EngineManagerDialog();
 
-
+var _dragData = {};
 function DragObserver() {
 }
 DragObserver.prototype = {
   onDragStart: function (aEvent, aXferData, aDragAction) {
-    var selectedIndexes = window.gEngineView.selectedIndexes;
-    if (!selectedIndexes.length)
+    var selected = gEngineView.selectedItems;
+    if (!selected.length)
       return;
 
-    var data = selectedIndexes.join(FLAVOR_SEPARATOR);
+    var random = Math.random().toString();
+    _dragData[random] = selected;
     aXferData.data = new TransferData();
-    aXferData.data.addDataForFlavour(ENGINE_FLAVOR, data);
+    aXferData.data.addDataForFlavour(ENGINE_FLAVOR, random);
 
     aDragAction.action = Ci.nsIDragService.DRAGDROP_ACTION_MOVE;
   },
@@ -986,7 +987,8 @@ EngineView.prototype = {
   getLocalIndex: function getLocalIndex(idx) {
     return this._indexCache[idx].parent.children.indexOf(this._indexCache[idx]);
   },
-  getSourceIndexesFromDrag: function getSourceIndexesFromDrag() {
+  _lastSourceItems: null,
+  getSourceItemsFromDrag: function getSourceItemsFromDrag() {
     var dragService = Cc["@mozilla.org/widget/dragservice;1"]
                         .getService().QueryInterface(Ci.nsIDragService);
     var dragSession = dragService.getCurrentSession();
@@ -998,20 +1000,23 @@ EngineView.prototype = {
 
     var dataObj = {};
     var len = {};
-    var sourceIndexes = [];
+    var sourceItems = [];
     try {
       transfer.getAnyTransferData({}, dataObj, len);
     } catch (ex) {}
 
     if (dataObj.value) {
-      sourceIndexes = dataObj.value.QueryInterface(Ci.nsISupportsString).data;
-      sourceIndexes = sourceIndexes.substring(0, len.value).split(FLAVOR_SEPARATOR);
-      for(var i = 0; i < sourceIndexes.length; i++) {
-        sourceIndexes[i] = parseInt(sourceIndexes[i]);
-      }
+      sourceItems = dataObj.value.QueryInterface(Ci.nsISupportsString).data;
+      sourceItems = sourceItems.substring(0, len.value);
+      this._lastSourceItems = sourceItems;
+      sourceItems = window._dragData[sourceItems];
     }
 
-    return sourceIndexes;
+    return sourceItems;
+  },
+  clearSourceIndexes: function() {
+    if(_dragData[this._lastSourceItems])
+      delete _dragData[this._lastSourceItems];
   },
 
   /* attempts to be compatible to the original code */
@@ -1025,12 +1030,12 @@ EngineView.prototype = {
   },
   selection: null,
   canDrop: function EngineView__canDrop(index, orientation) {
-    var sourceIndexes = this.getSourceIndexesFromDrag();
-    if(!sourceIndexes.length)
+    var sourceItems = this.getSourceItemsFromDrag();
+    if(!sourceItems.length)
       return false;
-    for(var i = 0; i < sourceIndexes.length; i++) {
-      var sourceIndex = sourceIndexes[i];
-      var sourceItem = this._indexCache[sourceIndex];
+    for(var i = 0; i < sourceItems.length; i++) {
+      var sourceItem = sourceItems[i];
+      var sourceIndex = this._indexCache.indexOf(sourceItem);
       var dropItem = this._indexCache[index];
 
       var dropOnNext = (sourceIndex !== index + orientation ||
@@ -1065,7 +1070,11 @@ EngineView.prototype = {
   },
   drop: function EngineView__drop(treeDropIndex, orientation) {
     // find out indexes
-    var treeSourceIndexes = this.getSourceIndexesFromDrag();
+    var treeSourceItems = this.getSourceItemsFromDrag(), treeSourceIndexes = [];
+    for(var i = 0; i < treeSourceItems.length; i++) {
+      treeSourceIndexes.push(this._indexCache.indexOf(treeSourceItems));
+    }
+    this.clearSourceIndexes();
     var treeParentIndex = this.getParentIndex(treeDropIndex);
     var dropIndex;
 
@@ -1117,11 +1126,10 @@ EngineView.prototype = {
     this.updateCache();
     this.invalidate();
     var treeDropIndexes = [];
+    this.select(true); // clear selection
     for(var i = 0; i < items.length; i++) {
-      treeDropIndexes[i] = this._indexCache.indexOf(items[i]);
+      this.select(this._indexCache.indexOf(items[i]), false);
     }
-    treeDropIndexes.push(true);
-    this.select.apply(this, treeDropIndexes);
     document.getElementById("engineList").focus();
   },
   internalMove: function(item, parent, index) {
