@@ -29,7 +29,7 @@
 <!ENTITY menuitem.view.show_columns.accesskey    "A">
 <!ENTITY menuitem.view.unsorted.label            "Unsortiert">
 <!ENTITY menuitem.view.unsorted.accesskey        "U">
-<!ENTITY sortAscending.label                     "Absteigend">
-<!ENTITY sortAscending.accesskey                 "b">
-<!ENTITY sortDescending.label                    "Aufsteigend">
-<!ENTITY sortDescending.accesskey                "f">
+<!ENTITY sortAscending.label                     "Aufsteigend">
+<!ENTITY sortAscending.accesskey                 "f">
+<!ENTITY sortDescending.label                    "Absteigend">
+<!ENTITY sortDescending.accesskey                "b">
