@@ -1,14 +1,13 @@
-cd "D:\Erweiterungen\organize-search-engines\"
+cd "D:\Erweiterungen\"
 
 
-copy components\nsISEOrganizer.idl ..\xpidl
+copy organize-search-engines\components\nsISEOrganizer.idl xpidl
 
-cd ..\xpidl
-
+cd xpidl
 xpidl -w -m typelib nsISEOrganizer.idl
 
 move /Y nsISEOrganizer.xpt "..\organize-search-engines\components"
-move /Y nsISEOrganizer.idl "..\organize-search-engines\components"
+del nsISEOrganizer.idl
 
 del D:\fx\Profiles\Ext-Dev\compreg.dat
 del D:\fx\Profiles\Ext-Dev\xpti.dat
