@@ -5,15 +5,14 @@
                xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
                windowtype="Browser:SearchManager">
 
-    <tree id="engineList" flex="1" rows="10"
-           ref="urn:organize-search-engines:root"
-              datasources="rdf:organized-internet-search-engines"
-              sortResource="urn:organize-search-engines#Name"
-              sortDirection="natural" hidecolumnpicker="true">
+    <tree id="engineList" flex="1" rows="10" hidecolumnpicker="true"
+          sortDirection="natural" ref="urn:organize-search-engines:root"
+          datasources="rdf:organized-internet-search-engines"
+          sortResource="urn:organize-search-engines#Name">
 
       <treecols>
         <treecol id="engineName" primary="true" flex="1" hideheader="true"
-                  type="checkbox" editable="true" />
+                 type="checkbox" editable="true" />
         <treecol id="engineAlias" width="35" hideheader="true" />
       </treecols>
       <template>
