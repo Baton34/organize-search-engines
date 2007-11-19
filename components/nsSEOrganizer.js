@@ -1,6 +1,40 @@
-const Ci = Components.interfaces;
-const Cc = Components.classes;
-const Cr = Components.results;
+/* ***** BEGIN LICENSE BLOCK *****
+Version: MPL 1.1/GPL 2.0/LGPL 2.1
+
+The contents of this file are subject to the Mozilla Public License Version
+1.1 (the "License"); you may not use this file except in compliance with
+the License. You may obtain a copy of the License at
+http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+for the specific language governing rights and limitations under the
+License.
+
+The Original Code is Organize Search Engines.
+
+The Initial Developer of the Original Code is
+Malte Kraus.
+Portions created by the Initial Developer are Copyright (C) 2006-2007
+the Initial Developer. All Rights Reserved.
+
+Contributor(s):
+  Malte Kraus <mails@maltekraus.de> (Original author)
+
+ Alternatively, the contents of this file may be used under the terms of
+ either the GNU General Public License Version 2 or later (the "GPL"), or
+ the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ in which case the provisions of the GPL or the LGPL are applicable instead
+ of those above. If you wish to allow use of your version of this file only
+ under the terms of either the GPL or the LGPL, and not to allow others to
+ use your version of this file under the terms of the MPL, indicate your
+ decision by deleting the provisions above and replace them with the notice
+ and other provisions required by the GPL or the LGPL. If you do not delete
+ the provisions above, a recipient may use your version of this file under
+ the terms of any one of the MPL, the GPL or the LGPL.
+***** END LICENSE BLOCK ***** */
+
+const Ci = Components.interfaces, Cc = Components.classes, Cr = Components.results;
 /***********************************************************
 constants
 ***********************************************************/
@@ -14,12 +48,10 @@ const CLASS_ID2 = Components.ID("{f2fa3794-eb73-11db-9d18-00ffd1e32fc4}");
 // description
 const CLASS_NAME = "For Organizing search engines in folders.";
 
-const NS_RDF_DATASOURCE_PROGID_PREFIX = "@mozilla.org/rdf/datasource;1?name=";
+const NS_RDF_DATASOURCE_PRE = "@mozilla.org/rdf/datasource;1?name=";
 // textual unique identifier
-const CONTRACT_ID = NS_RDF_DATASOURCE_PROGID_PREFIX +
-                    "organized-internet-search-engines";
-const CONTRACT_ID2 = NS_RDF_DATASOURCE_PROGID_PREFIX +
-                    "organized-internet-search-folders";
+const CONTRACT_ID = NS_RDF_DATASOURCE_PRE + "organized-internet-search-engines";
+const CONTRACT_ID2 = NS_RDF_DATASOURCE_PRE + "organized-internet-search-folders";
 
 function LOG(msg) {
   msg = "Organize Search Engines:   " + msg;
@@ -30,19 +62,37 @@ function LOG(msg) {
   return msg;
 }
 
+function _timer(callback, timeout, type, args) {
+  var obj = { notify: function() {
+    return callback.apply(timer, args);
+  }};
+  obj.wrappedJSObject = obj;
+  var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+  timer.initWithCallback(obj, timeout, type);
+  return {t:timer};
+}
 function setTimeout(callback, timeout) {
   var args = [];
   for(var i = 2; i < arguments.length; i++)
     args.push(arguments[i]);
-  var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-  var obj = { notify: function() {
-    return callback.apply(this, args);
-  }};
-  timer.initWithCallback(obj, timeout, Ci.nsITimer.TYPE_ONE_SHOT);
-  return timer;
+  return _timer(callback, timeout, Ci.nsITimer.TYPE_ONE_SHOT, args);
 }
+function clearTimeout(timeout) {
+  var timer = timeout.t;
+  timer.cancel();
+  // prevent cycle references:
+  timer.callback.wrappedJSObject.notify = null;
+  delete timeout.t;
+}
+function setInterval(callback, interval) {
+  var args = [];
+  for(var i = 2; i < arguments.length; i++)
+    args.push(arguments[i]);
+  return _timer(callback, interval, Ci.nsITimer.TYPE_REPEATING_SLACK, args);
+}
+var clearInterval = clearTimeout;
 
-try {
+/*try {*/
 
 const FILENAME = "organize-search-engines.rdf";
 const UUID = "organize-search-engines@maltekraus.de";
@@ -112,33 +162,35 @@ SEOrganizer.prototype = {
       i = 0;
       var ss = Cc["@mozilla.org/browser/search-service;1"]
                  .getService(Ci.nsIBrowserSearchService);
-      var obj = {
-        notify: function notify() {
+      /*var obj = {
+        notify:*/var notify = function notify() {
           if(i >= engines.length) {
-            timer.cancel();
+            //timer.cancel();
+            clearTimeout(timer);
             if(addObserver)
               os.addObserver(instance, "browser-search-engine-modified", false);
             os.removeObserver(quit, "quit-application");
             timer = null;
-            return;
-          }
-          var engineName = engines[i];
-          if(engineName) {
-            var engine = ss.getEngineByName(engineName);
-            if(engine instanceof Ci.nsISearchEngine) {
-              try {
-                instance.moveEngine(engine, i);
-              } catch(e) {
-                Components.reportError(e);
+          } else {
+            var engineName = engines[i];
+            if(engineName) {
+              var engine = ss.getEngineByName(engineName);
+              if(engine instanceof Ci.nsISearchEngine) {
+                try {
+                  instance.moveEngine(engine, i);
+                } catch(e) {
+                  Components.reportError(e);
+                }
               }
             }
+            i = i + 1;
           }
-          i = i + 1;
-        }
-      };
+        };
+      /*};
       var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-      timer.initWithCallback(obj, 3, Ci.nsITimer.TYPE_REPEATING_PRECISE);
-  
+      timer.initWithCallback(obj, 3, Ci.nsITimer.TYPE_REPEATING_PRECISE);*/
+      var timer = setInterval(notify, 3);
+
       // it might happen that Firefox is exiting while we are still trying to tell
       // the search service of the right order. If so, let's freeze Firefox!
       var quit = {
@@ -270,8 +322,7 @@ SEOrganizer.prototype = {
       dialogMessage = stringBundle.formatStringFromName(dialogMessage,
                                                [this._name, this._uri.host], 2);
       var checkboxMessage = stringBundle.GetStringFromName("addEngineUseNowText");
-      var addButtonLabel =
-          stringBundle.GetStringFromName("addEngineAddButtonLabel");
+      var addButtonLabel = stringBundle.GetStringFromName("addEngineAddButtonLabel");
 
       var args =  Cc["@mozilla.org/embedcomp/dialogparam;1"]
                     .createInstance(Ci.nsIDialogParamBlock);
@@ -367,9 +418,8 @@ SEOrganizer.prototype = {
 
   isFolder: function SEOrganizer__isFolder(aResource) {
     const rdfService = this._rdfService;
-    var property = rdfService.GetResource(NS_RDF + "instanceOf");
-    var folder = rdfService.GetResource(NS_RDF + "Seq");
-    return this.HasAssertion(aResource, property, folder, true);
+    return this.HasAssertion(aResource, rdfService.GetResource(NS_RDF + "instanceOf"),
+                             rdfService.GetResource(NS_RDF + "Seq"), true);
   },
   newFolder: function SEOrganizer__newFolder(aFolderName, aParentFolder) {
     const rdfService = this._rdfService;
@@ -394,10 +444,8 @@ SEOrganizer.prototype = {
 
   isSeparator: function SEOrganizer__isSeparator(aResource) {
     const rdfService = this._rdfService;
-
-    var type = rdfService.GetResource(NS_RDF + "type");
-    var separator = rdfService.GetResource(NS + "separator");
-    return this.HasAssertion(aResource, type, separator, true);
+    return this.HasAssertion(aResource, rdfService.GetResource(NS_RDF + "type"),
+                             rdfService.GetResource(NS + "separator"), true);
   },
   newSeparator: function SEOrganizer__newSeparator(aParentFolder) {
     const rdfService = this._rdfService;
@@ -468,19 +516,16 @@ SEOrganizer.prototype = {
     return this._rdfService.GetResource(ROOT);
   },
   itemWithNameExists: function SEOrganizer__itemExists(aName) {
-    const rdfService = this._rdfService;
-
-    var predicate = rdfService.GetResource(NS + "Name");
-    try {
-      var object = rdfService.GetLiteral(aName);
-    } catch(e) {
+    if(!aName)
       return false;
-    }
 
+    const rdfService = this._rdfService;
+    var predicate = rdfService.GetResource(NS + "Name");
+    var object = rdfService.GetLiteral(aName);
     if(this.hasArcIn(object, predicate)) {
-      var ids = this.GetSources(predicate, object, true), id;
+      var ids = this.GetSources(predicate, object, true);
       while(ids.hasMoreElements()) {
-        id = ids.getNext();
+        var id = ids.getNext();
         if(this.ArcLabelsIn(id).hasMoreElements()) {
           return true;
         }
@@ -490,15 +535,13 @@ SEOrganizer.prototype = {
   },
   getNameByItem: function SEOrganizer__getNameByItem(aItem) {
     const rdfService = this._rdfService;
-
-    var predicate = rdfService.GetResource(NS + "Name");
-    var name = this.GetTarget(aItem, predicate, true);
+    var name = this.GetTarget(aItem, rdfService.GetResource(NS + "Name"), true);
     if(name instanceof Ci.nsIRDFLiteral)
       return name.Value;
     return "";
   },
   getIconByIndex: function SEOrganizer__getIconByIndex(aIndex) {
-    if(aIndex !== -1) {
+    if(aIndex != -1) {
       var predicate = this._rdfService.GetResource(NS + "Icon");
       var item = this.getItemByIndex(aIndex);
 
@@ -510,11 +553,8 @@ SEOrganizer.prototype = {
   },
   getItemByName: function SEOrganizer__getItemByName(aName) {
     const rdfService = this._rdfService;
-
-    var predicate = rdfService.GetResource(NS + "Name");
-    var object = rdfService.GetLiteral(aName);
-
-    return this.GetSource(predicate, object, true);
+    return this.GetSource(rdfService.GetResource(NS + "Name"),
+                          rdfService.GetLiteral(aName), true);
   },
 
   getParent: function SEOrganizer__getParent(aItem) {
@@ -540,13 +580,13 @@ SEOrganizer.prototype = {
     var cache = [];
     cache[-1] = this.getRoot();
 
-    var count = -1;
+    var count = 0;
     function callback(current) {
-      cache[++count] = current;
+      cache[count++] = current;
       return false;
     }
     try {
-      this._iterateAll(function(){}, callback);
+      this._iterateAll(callback, this._iterateAllCallback_FilterNothing);
     } catch(e) { }
     this.indexOutOfDate = false;
     return this._indexCache = cache;
@@ -568,7 +608,6 @@ SEOrganizer.prototype = {
     const rdfService = this._rdfService;
     const rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
                                 .getService(Ci.nsIRDFContainerUtils);
-
 
     var container = Cc["@mozilla.org/rdf/container;1"]
                       .createInstance(Ci.nsIRDFContainer);
@@ -624,6 +663,7 @@ SEOrganizer.prototype = {
     var name = rdfService.GetResource(NS + "Name");
 
     function Enumerator(nsISimpleEnumerator) {
+      Array.call(this);
       if(nsISimpleEnumerator instanceof Ci.nsISimpleEnumerator) {
         while(nsISimpleEnumerator.hasMoreElements()) {
           this.push(nsISimpleEnumerator.getNext());
@@ -654,12 +694,9 @@ SEOrganizer.prototype = {
             throw e;
 
           switch(e.message) {
-            case "_iterateAll::succeeded":
-              return true;
-            case "_iterateAll::abort":
-              return false;
-            default:
-              throw e;
+            case "_iterateAll::succeeded": return true;
+            case "_iterateAll::abort": return false;
+            default: throw e;
           }
         }
         children[last] = children[last].slice(0, l);
@@ -707,7 +744,7 @@ SEOrganizer.prototype = {
   resolveKeyword: function(aName, aPostData) {
     var ss = this._searchService;
     var offset = aName.indexOf(" ");
-    var alias = aName.substr(0, offset).toLowerCase();
+    var alias = aName.substr(0, offset == -1 ? aName.length : offset).toLowerCase();
     var engine = ss.getEngineByAlias(alias);
     if(engine != null && engine.alias == alias && alias && !engine.hidden) {
       var searchTerm = (offset != -1) ? aName.substr(offset + 1) : "";
@@ -982,7 +1019,7 @@ FoldersOnly.prototype = {
     this.endUpdateBatch();
   },
   observe: function(aEngine, aTopic, aVerb) {
-    if(aVerb == "-engines-organized") {
+    if(aTopic == "browser-search-engine-modified" && aVerb == "-engines-organized") {
       this._update();
     }
   },
@@ -1068,9 +1105,9 @@ FoldersOnly.prototype = {
     throw Cr.NS_ERROR_NO_INTERFACE;
   }
 };
-} catch(e) {
+/*} catch(e) {
   Components.reportError(e);
-}
+}*/
 
 /***********************************************************
 class factory
