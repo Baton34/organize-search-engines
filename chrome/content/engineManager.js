@@ -256,9 +256,13 @@ EngineManagerDialog.prototype = {
         for(var i = 0; i < items.length; ++i) {
           for(var j = 0; j < items[i].length; ++j) {
             gRemovedEngines.push(items[i][j].node);
-            ++removedCount;
-            if(items[i][j].isSeq)
+            if(items[i].open)
+              ++removedCount;
+            if(items[i][j].isSeq) {
               items.push(items[i][j].children);
+              if(!items[i].open)
+                items[i][j].open = false;
+            }
           }
         }
       }
@@ -822,7 +826,7 @@ Structure__Container.prototype.commit = Structure.prototype.commit =
            function Structure__General__commit() {
   if(this.modified) {
     if(this instanceof Structure__Container) {
-      if(gSEOrganizer.getNameByItem(this.node) !== this.name) {
+      if(gSEOrganizer.getNameByItem(this.node) != this.name) {
         var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                            .getService(Ci.nsIRDFService);
         var namePred = rdfService.GetResource(NS + "Name");
@@ -984,6 +988,8 @@ EngineView.prototype = {
   commit: function commit() {
     gSEOrganizer.beginUpdateBatch();
     this._structure.commit();
+    /*gSEOrganizer.endUpdateBatch();
+    gSEOrganizer.beginUpdateBatch();*/
     for(var i = 0; i < gRemovedEngines.length; ++i) {
       if(gRemovedEngines[i] && gRemovedEngines[i] instanceof Ci.nsIRDFResource) {
         // remove the search engine, the rest is done by our observers
@@ -994,7 +1000,7 @@ EngineView.prototype = {
             gSEOrganizer.currentEngine = gSEOrganizer.defaultEngine;
           gSEOrganizer.removeEngine(engine);
         } else {
-          gSEOrganizer.removeItem(gRemovedEngines[i]);
+          gSEOrganizer.removeItem(gRemovedEngines[i], false);
         }
       }
     }
