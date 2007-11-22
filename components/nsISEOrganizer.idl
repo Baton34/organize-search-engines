@@ -71,9 +71,11 @@ interface nsISEOrganizer : nsISupports {
   /**
    * Removes an engine/separator/folder and all references to it.
    *
-   * @param item The item to remove.
+   * @param item     The item to remove.
+   * @param recourse Also remove children? If false, the caller has to make sure
+   *                 no unwanted engines are duplicated or removed
    */
-  void removeItem(in nsIRDFResource item);
+  void removeItem(in nsIRDFResource item, in boolean recourse);
 
 
   /**** Item/Name/Index handling ****/

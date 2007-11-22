@@ -281,7 +281,7 @@ SEOrganizer.prototype = {
         if(!this.isSeparator(item) && !this.isFolder(item)) {
           var engine = this.getEngineByName(engineName);
           if(!engine || engine.hidden) {
-            this.removeItem(item);
+            this._interalRemove(item);
             modified = true;
           }
         }
@@ -465,49 +465,58 @@ SEOrganizer.prototype = {
     return separator;
   },
 
-  removeItem: function SEOrganizer__removeItem(aItem) {
+  removeItem: function SEOrganizer__removeItem(aItem, aRecurse) {
     var toRemove = [aItem];
-    if(this.isFolder(aItem)) {
+
+    if(this.isFolder(aItem) && aRecurse) { // find (grand-)children of this folder and remove them as well
       const rdfService = this._rdfService;
       const rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
                                   .getService(Ci.nsIRDFContainerUtils);
       var container = Cc["@mozilla.org/rdf/container;1"]
                         .createInstance(Ci.nsIRDFContainer);
       container.Init(this, aItem);
-      var count = container.GetCount();
-      for(var i = 0; ++i <= count;) {
-        toRemove.push(this.GetTarget(aItem, rdfService.GetResource(NS_RDF + "_" + i), true));
+      var containers = [{node: aItem, count: container.GetCount()}];
+      for(var i = 0; i < containers.length; i++) {
+        for(var j = 1; j <= containers[i].count; j++) {
+          var item = this.GetTarget(containers[i].node,
+                                    rdfService.GetResource(NS_RDF + "_" + j), true);
+          toRemove.push(item);
+          if(this.isFolder(item))
+            containers.push({node: item, count: container.Init(this, item).GetCount()});
+        }
       }
     }
 
     for(var i = 0; i < toRemove.length; ++i) {
-      aItem = toRemove[i];
       // remove the underlying search engine file using the search service
-      var name = this.getNameByItem(aItem);
-      if(name) { // this may be a separator or folder
+      var name = this.getNameByItem(toRemove[i]);
+      if(name) { // this may be a separator
         var engine = this.getEngineByName(name);
-        if(engine && engine instanceof Ci.nsISearchEngine)
+        if(engine && engine instanceof Ci.nsISearchEngine) { // or folder
           this.removeEngine(engine);
-      }
-
-      /* remove everything from the rdf tree */
-      // remove everything this item references to
-      var predicates = this.ArcLabelsIn(aItem), parent, pred;
-      while(predicates.hasMoreElements()) {
-        pred = predicates.getNext();
-        parent = this.GetSources(pred, aItem, true);
-        while(parent.hasMoreElements()) {
-          this.Unassert(parent.getNext(), pred, aItem, true);
+          continue; // our observers already call _interalRemove!
         }
       }
-      // remove all references to this item
-      var predicates = this.ArcLabelsOut(aItem), object;
-      while(predicates.hasMoreElements()) {
-        pred = predicates.getNext();
-        object = this.GetTargets(aItem, pred, true);
-        while(object.hasMoreElements()) {
-          this.Unassert(aItem, pred, object.getNext(), true);
-        }
+      this._interalRemove(toRemove[i]);
+    }
+  },
+  _interalRemove: function(aItem) { /* wipe aItem from the rdf tree */
+    // remove everything this item does reference to
+    var predicates = this.ArcLabelsIn(aItem), parent, pred;
+    while(predicates.hasMoreElements()) {
+      pred = predicates.getNext();
+      parent = this.GetSources(pred, aItem, true);
+      while(parent.hasMoreElements()) {
+        this.Unassert(parent.getNext(), pred, aItem, true);
+      }
+    }
+    // remove all references to this item
+    var predicates = this.ArcLabelsOut(aItem), object;
+    while(predicates.hasMoreElements()) {
+      pred = predicates.getNext();
+      object = this.GetTargets(aItem, pred, true);
+      while(object.hasMoreElements()) {
+        this.Unassert(aItem, pred, object.getNext(), true);
       }
     }
   },
@@ -914,8 +923,9 @@ SEOrganizer.prototype = {
           var arc = contUtils.IndexToOrdinalResource(idx - 1);
           var prevItem = this._datasource.GetTarget(parent.Resource, arc, true);
           var prevName = this.GetTarget(prevItem, property, true);
-          prevName.QueryInterface(Ci.nsIRDFLiteral);
-          return this._rdfService.GetLiteral(prevName.Value + "ZZZZZZZZZZZZZZ"); // bah!
+          if(!(prevName instanceof Ci.nsIRDFLiteral)) // separator is at top
+            return this._rdfService.GetLiteral("AAAAAAAAAAAAAA"); // bah!
+          return this._rdfService.GetLiteral(prevName.Value + "ZZZZZZZZZZZZZZ");
         }
       } catch(e) {
         return this._rdfService.GetLiteral("");
