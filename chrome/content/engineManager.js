@@ -983,6 +983,7 @@ EngineView.prototype = {
   },
   commit: function commit() {
     gSEOrganizer.beginUpdateBatch();
+    this._structure.commit();
     for(var i = 0; i < gRemovedEngines.length; ++i) {
       if(gRemovedEngines[i] && gRemovedEngines[i] instanceof Ci.nsIRDFResource) {
         // remove the search engine, the rest is done by our observers
@@ -997,7 +998,6 @@ EngineView.prototype = {
         }
       }
     }
-    this._structure.commit();
     gSEOrganizer.endUpdateBatch();
     gSEOrganizer.saveChanges();
   },
