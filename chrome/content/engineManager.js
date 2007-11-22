@@ -145,6 +145,8 @@ EngineManagerDialog.prototype = {
     document.getElementById("engineList").focus();
   },
   onOK: function EngineManager__onOK() {
+    this.onClose();
+
     // Set the preference
     var newSuggestEnabled = document.getElementById("enableSuggest")
                                     .getAttribute("checked");
@@ -159,10 +161,10 @@ EngineManagerDialog.prototype = {
 
     // Commit the changes
     gEngineView.commit();
-
-    this.onClose();
   },
   onCancel: function EngineManager__onCancel() {
+    this.onClose();
+
     gSEOrganizer.reload();
     gSEOrganizer.beginUpdateBatch();
     var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
@@ -177,7 +179,6 @@ EngineManagerDialog.prototype = {
     }
     gSEOrganizer.saveChanges();
     gSEOrganizer.endUpdateBatch();
-    this.onClose();
   },
   onClose: function EngineManager__onClose() {
     // Remove the observers
@@ -363,7 +364,7 @@ EngineManagerDialog.prototype = {
     if(!abort)
       return;
 
-    item.alias = alias.value.toLowerCase();
+    item.alias = alias.value.toLowerCase().replace(/ /g, "");
 
     gEngineView.rowCountChanged(index, -1);
     gEngineView.rowCountChanged(index, 1);
