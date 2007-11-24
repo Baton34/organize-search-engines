@@ -9,14 +9,13 @@
   <RDF:Description RDF:about="urn:mozilla:install-manifest"
                    em:id="organize-search-engines@maltekraus.de"
                    em:name="Organize Search Engines"
-                   em:version="1.1"
+                   em:version="1.1.1"
                    em:description="Organize your search engines with separators and folders."
                    em:optionsURL="chrome://browser/content/search/engineManager.xul"
                    em:homepageURL="http://maltekraus.de/Firefox/search-tools/"
                    em:iconURL="chrome://seorganizer/skin/ose.png"
                    em:creator="Malte Kraus"
-                   em:contributor="ReVox: help sorting out a crasher"
-                   em:updateKey="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCr1C+8TDnGriT0MoUuO0SrFqBJv1PMxcHIAT6RC/NW+59ZdviJMaKBvNHb9wPWtlTqBmnkEsAuQjqcrdpgPSVtym6UA2X4VOc1D5fsAHxqe5OuAE9cwmNQIjYoKPpxRR4Renjit6g1IijplD+4+K9xse0oYtQoUalis6+3cOx+WwIDAQAB">
+                   em:contributor="ReVox: help sorting out a crasher">
     <em:targetApplication RDF:resource="rdf:#$CzzNi2"/>
   </RDF:Description>
 </RDF:RDF>
