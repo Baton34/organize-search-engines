@@ -166,37 +166,42 @@ EngineManagerDialog.prototype = {
     this.onClose();
 
     gSEOrganizer.reload();
-    gSEOrganizer.beginUpdateBatch();
-    var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
-                       .getService(Ci.nsIRDFService);
-    var rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
-                              .getService(Ci.nsIRDFContainerUtils);
-    var container, parent;
-    for(var i = 0; i < gAddedEngines.length; ++i) {
-      parent = gSEOrganizer.getParent(gAddedEngines[i]);
-      container = rdfContainerUtils.MakeSeq(gSEOrganizer, parent);
-      container.RemoveElement(gAddedEngines[i], true);
+    if(gAddedEngines.length) {
+      gSEOrganizer.beginUpdateBatch();
+      for(var i = 0; i < gAddedEngines.length; ++i) {
+        //gSEOrganizer.removeItem(gAddedEngines[i]);
+        gSEOrganizer._internalRemove(gAddedEngines[i]);
+      }
+      gSEOrganizer.saveChanges();
+      gSEOrganizer.endUpdateBatch();
     }
-    gSEOrganizer.saveChanges();
-    gSEOrganizer.endUpdateBatch();
   },
   onClose: function EngineManager__onClose() {
-    // Remove the observers
-    var os = Cc["@mozilla.org/observer-service;1"].
-             getService(Ci.nsIObserverService);
-    os.removeObserver(this, "browser-search-engine-modified");
+    var This = this;
+    var body = function() {
+      // Remove the observers
+      var os = Cc["@mozilla.org/observer-service;1"].
+               getService(Ci.nsIObserverService);
+      os.removeObserver(This, "browser-search-engine-modified");
 
-    var branch = Cc["@mozilla.org/preferences-service;1"]
-                   .getService(Ci.nsIPrefService).getBranch("");
-    branch.QueryInterface(Ci.nsIPrefBranch2);
-    branch.removeObserver("", this);
+      var branch = Cc["@mozilla.org/preferences-service;1"]
+                     .getService(Ci.nsIPrefService).getBranch("");
+      branch.QueryInterface(Ci.nsIPrefBranch2);
+      branch.removeObserver("", This);
 
-    // notify observers
-    os.notifyObservers(null, "browser-search-engine-modified",
-                       "-engines-organized");
+      // notify observers
+      os.notifyObservers(null, "browser-search-engine-modified",
+                         "-engines-organized");
+    };
+    if(window && !window.closed)
+      window.setTimeout(body, 0);
+    else
+      body();
   },
 
   observe: function EngineManager__observe(aSubject, aTopic, aVerb) {
+    if(!window || window.closed)
+      this.onClose();
     window.setTimeout(function() {
       if(aTopic === "browser-search-engine-modified" &&
          aSubject instanceof Ci.nsISearchEngine) {
@@ -1191,7 +1196,7 @@ EngineView.prototype = {
       item = new Structure__Container(parent, node, children, item.open);
     } else {
       item.destroy();
-      item = new Structure__Item(parent, node);
+      item = new Structure__Item(parent, node, item.originalEngine);
       item.alias = old.alias;
     }
     item.modified = old.modified;
