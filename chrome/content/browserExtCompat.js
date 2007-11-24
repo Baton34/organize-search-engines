@@ -103,11 +103,8 @@ organizeSE__Extensions.prototype = {
     sortDirectionHandler: function sortDirectionHandler(newVal) {
       contextsearch.contextitem.setAttribute("sortDirection", newVal);
     },
-    rebuildmenu: function() {
-      this.contextitem.builder.rebuild();
-    },
     init: function() {
-      contextsearch.rebuildmenu = this.rebuildmenu;
+      contextsearch.rebuildmenu = function() { };
       const menu = document.getElementById("context-searchmenu");
       menu.addEventListener("popupshowing", this.onPopupShowing, true);
       contextsearch.search = this.getSearch();
@@ -117,13 +114,13 @@ organizeSE__Extensions.prototype = {
       return function (aEvent) {
         const target = aEvent.target;
         target.engine = organizeSE.SEOrganizer.getEngineByName(target.label);
-        origSearch.call(this, aEvent);
+        origSearch.apply(this, arguments);
       };
     },
     onPopupShowing: function(event) {
-      const menu = contextsearch.contextitem;
-      if(event.target.parentNode.id === "context-searchmenu") {
+      if(event.target == event.currentTarget) {
         event.target.id = "context-searchpopup";
+        contextsearch.contextitem.builder.rebuild();
       } else {
         event.stopPropagation();
       }
