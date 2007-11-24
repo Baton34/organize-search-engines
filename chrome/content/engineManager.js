@@ -168,8 +168,6 @@ EngineManagerDialog.prototype = {
     gSEOrganizer.reload();
     if(gAddedEngines.length) {
       gSEOrganizer.beginUpdateBatch();
-      for(var i = 0; i < gAddedEngines.length; ++i) {
-        //gSEOrganizer.removeItem(gAddedEngines[i]);
         gSEOrganizer._internalRemove(gAddedEngines[i]);
       }
       gSEOrganizer.saveChanges();
@@ -307,7 +305,8 @@ EngineManagerDialog.prototype = {
       newChildren = newChildren.concat(children.slice(Math.max(newLocalIndex,
                                                                localIndex) + 1));
       item.parent.children = newChildren;
-      item.parent.modified = true;
+      if(!item.parent.modified)
+        item.parent.modified = 1;
 
       gEngineView.updateCache();
       // as there are folders, the new index could be virtually anywhere:
@@ -357,7 +356,8 @@ EngineManagerDialog.prototype = {
     document.getElementById("engineList").focus();
     var index = gEngineView.selectedIndex;
     var item = gEngineView.selectedItem;
-    item.modified = true;
+    if(!item.modified)
+       item.modified = 1;
 
     var alias = { value: item.alias };
     var name =  { value: item.name  };
@@ -458,30 +458,28 @@ EngineManagerDialog.prototype = {
           defaultNames[i] = defaults[i].name;
         }
         var selection = {};
-        var cancel = prompts.select(window, gStrings.getString("restore.title"),
-                                    gStrings.getString("restore.content"),
-                                    defaultNames.length, defaultNames, selection);
-        if(!cancel)
+        var cancel = !prompts.select(window, gStrings.getString("restore.title"),
+                                     gStrings.getString("restore.content"),
+                                     defaultNames.length, defaultNames, selection);
+        if(cancel)
           return;
         var engine = defaults[selection.value];
-        if(engine.hidden)
-          engine.hidden = false;
+        /*if(engine.hidden)
+          engine.hidden = false;*/
         node = gSEOrganizer.getItemByName(engine.name);
         var idx = gRemovedEngines.indexOf(node);
         if(node && idx != -1) {
           gRemovedEngines = gRemovedEngines.slice(0, idx)
                                         .concat(gRemovedEngines.slice(idx + 1));
         }
-        node = gSEOrganizer.getItemByName(engine.name);
         if(!node) {
           node = gSEOrganizer._getAnonymousResource();
         }
         item = new Structure__Item(parent, node, engine);
-        item.modified = true;
-        this.showRestoreDefaults(defaults.length !== 1);
+        this.showRestoreDefaults(defaults.length != 1);
         break;
     }
-    item.modified = true;
+    item.modified = 2;
     parent.insertAt(insertLoc, item);
     gAddedEngines.push(node);
 
@@ -614,7 +612,7 @@ function Structure() {
   var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                      .getService(Ci.nsIRDFService);
   Structure__Container.call(this, null, rdfService.GetResource(ROOT));
-  this.modified = false;
+  this.modified = 0;
 }
 Structure.prototype = {
   node: null,
@@ -625,7 +623,7 @@ Structure.prototype = {
   isSeq: true,
   children: null,
   alias: "",
-  modified: false,
+  modified: 0,
   destroy: function Structure__destroy() {
     this.node = null;
     this.parent = null;
@@ -685,20 +683,20 @@ function Structure__Container(parent, node, children, open) {
       }
     }
   }
-  this.modified = false;
+  this.modified = 0;
 }
 Structure__Container.prototype = {
   node: null,
   parent: null,
   _name: "",
   get name() { return this._name; },
-  set name(name) { this.modified = true; return this._name = name },
+  set name(name) { if(!this.modified) this.modified = 1; return this._name = name },
   children: null,
   open: false,
   isSep: false,
   isSeq: true,
   alias: "",
-  modified: false,
+  modified: 0,
   set iconURI() {
     Structure.prototype.reloadIcons.call(this);
   },
@@ -707,7 +705,7 @@ Structure__Container.prototype = {
 function Structure__Item(parent, node, engine) {
   this.parent = parent;
   this.node = node;
-  this.modified = false;
+  this.modified = 0;
   if(!engine || !(engine instanceof Ci.nsISearchEngine))
     engine = null;
 
@@ -727,7 +725,7 @@ function Structure__Item(parent, node, engine) {
   this.isSep = gSEOrganizer.HasAssertion(node, type, separator, true);
 
   if(engine)
-    this.modified = true;
+    this.modified = 1;
   else
     engine = gSEOrganizer.getEngineByName(this.name);
 
@@ -742,7 +740,7 @@ Structure__Item.prototype = {
   parent: null,
   _name: "",
   get name() { return this._name; },
-  set name(name) { this.modified = true; return this._name = name },
+  set name(name) { if(!this.modified) this.modified = 1; return this._name = name },
   iconURI: "",
   isSep: false,
   isSeq: false,
@@ -751,6 +749,19 @@ Structure__Item.prototype = {
   alias: "",
   commit: function Structure__Item__commit() {
     var engine = this.originalEngine;
+    if(this.modified == 2) {
+      var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
+                         .getService(Ci.nsIRDFService);
+      if(this.isSep) {
+        var type = rdfService.GetResource(NS_RDF + "type");
+        var separator = rdfService.GetResource(NS + "separator");
+        gSEOrganizer.Assert(this.node, type, separator, true);
+      } else {
+        var namePred = rdfService.GetResource(NS + "Name");
+        gSEOrganizer.Assert(this.node, namePred, rdfService.GetLiteral(this.name), true);
+        engine.hidden = false;
+      }
+    }
     if(this.modified && engine) {
       if(this.alias != engine.alias) {
         engine.alias = this.alias;
@@ -805,17 +816,20 @@ Structure__Item.prototype.destroy = Structure__Container.prototype.destroy =
   var idx = this.parent.children.indexOf(this);
   this.parent.children = this.parent.children.slice(0, idx)
                              .concat(this.parent.children.slice(idx + 1));
-  this.parent.modified = true;
+  if(!this.parent.modified)
+    this.parent.modified = 1;
   this.node = this.parent = this.children = this.modified = null;
 };
 Structure__Container.prototype.push = Structure.prototype.push =
            function Structure__General__push(what) {
-  this.modified = true;
+  if(!this.modified)
+    this.modified = 1;
   this.children.push.apply(this.children, arguments);
 };
 Structure__Container.prototype.insertAt = Structure.prototype.insertAt =
            function Structure__General__insertAt(idx, item) {
-  this.modified = true;
+  if(!this.modified)
+    this.modified = 1;
   item.parent = this;
   if(idx === -1 || idx >= this.children.length) {
     this.children.push(item);
@@ -831,17 +845,16 @@ Structure__Container.prototype.insertAt = Structure.prototype.insertAt =
 Structure__Container.prototype.commit = Structure.prototype.commit =
            function Structure__General__commit() {
   if(this.modified) {
-    if(this instanceof Structure__Container) {
-      if(gSEOrganizer.getNameByItem(this.node) != this.name) {
-        var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
-                           .getService(Ci.nsIRDFService);
-        var namePred = rdfService.GetResource(NS + "Name");
-        var oldName = gSEOrganizer.GetTarget(this.node, namePred, true);
-        gSEOrganizer.Assert(this.node, namePred, rdfService.GetLiteral(this.name),
-                            true);
-        if(oldName instanceof Ci.nsIRDFLiteral)
-          gSEOrganizer.Unassert(this.node, namePred, oldName);
-      }
+    if(this instanceof Structure__Container &&
+       (gSEOrganizer.getNameByItem(this.node) != this.name || this.modified == 2)) {
+      var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
+                         .getService(Ci.nsIRDFService);
+      var namePred = rdfService.GetResource(NS + "Name");
+      var oldName = gSEOrganizer.GetTarget(this.node, namePred, true);
+      gSEOrganizer.Assert(this.node, namePred, rdfService.GetLiteral(this.name),
+                          true);
+      if(oldName instanceof Ci.nsIRDFLiteral)
+        gSEOrganizer.Unassert(this.node, namePred, oldName);
     }
     var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                        .getService(Ci.nsIRDFService);
