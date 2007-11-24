@@ -105,6 +105,7 @@ interface nsISEOrganizer : nsISupports {
    * nsIRDFContainer.)                                                        */
   long getChildCount(in nsIRDFResource item);
 
+  /* returns item's parent folder */
   nsIRDFResource getParent(in nsIRDFResource item);
 
   /* Provides the API to use search aliases in Firefox. Has to be in the xpcom *
