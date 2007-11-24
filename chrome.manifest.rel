@@ -6,5 +6,6 @@ content seorganizer       jar:chrome/seorganizer.jar!/content/
 
 locale  seorganizer       en-US           jar:chrome/seorganizer.jar!/locale/en-US/
 locale  seorganizer       de              jar:chrome/seorganizer.jar!/locale/de/
+locale  seorganizer       it              jar:chrome/seorganizer.jar!/locale/it/
 
 skin    seorganizer       classic/1.0     jar:chrome/seorganizer.jar!/skin/classic/
