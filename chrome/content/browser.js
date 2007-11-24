@@ -48,7 +48,7 @@ SEOrganizer.prototype = {
   getChildItems: function(parent) {
     if(parent.getElementsByClassName) { // minefield only
       return parent.getElementsByClassName('searchbar-engine-menuitem');
-    } else { // else fall back on xpath
+    } else { // fall back on xpath
       var xpath = "descendant::xul:menuitem[contains(concat(' ', @class, ' '),\
                                             ' searchbar-engine-menuitem ')]";
       return this.evalXPath(xpath, parent);
