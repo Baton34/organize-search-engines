@@ -1,0 +1,30 @@
+<!ENTITY namecol.label "Név">
+<!ENTITY aliascol.label "Kulcsszó">
+<!ENTITY restoreDefault.label "Alapértelmezett kereső visszaállítása">
+<!ENTITY restoreDefault.accesskey "A">
+<!ENTITY new-folder.label "Új mappa...">
+<!ENTITY new-folder.accesskey "j">
+<!ENTITY new-separator.label "Új elválasztó">
+<!ENTITY new-separator.accesskey "v">
+<!ENTITY move-engine.label "Áthelyezés...">
+<!ENTITY move-engine.accesskey "h">
+<!ENTITY rename.label "Átnevezés...">
+<!ENTITY rename.accesskey "t">
+<!ENTITY editalias.label "Módosítás...">
+<!ENTITY editalias.accesskey "M">
+<!ENTITY fileMenu.label "Fájl">
+<!ENTITY fileMenu.accesskey "F">
+<!ENTITY closeCmd.label "Bezárás">
+<!ENTITY closeCmd.accesskey "B">
+<!ENTITY viewMenu.label "Nézet">
+<!ENTITY viewMenu.accesskey "N">
+<!ENTITY menuitem.view.command.toolbar.label "Eszköztár">
+<!ENTITY menuitem.view.command.toolbar.accesskey "E">
+<!ENTITY menuitem.view.show_columns.label "Oszlopok megjelenítése">
+<!ENTITY menuitem.view.show_columns.accesskey "O">
+<!ENTITY menuitem.view.unsorted.label "Természetes sorrend">
+<!ENTITY menuitem.view.unsorted.accesskey "T">
+<!ENTITY sortAscending.label "Növekvő sorrend">
+<!ENTITY sortAscending.accesskey "N">
+<!ENTITY sortDescending.label "Csökkenő sorrend">
+<!ENTITY sortDescending.accesskey "C">
