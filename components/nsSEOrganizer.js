@@ -156,7 +156,13 @@ SEOrganizer.prototype = {
       for(var i = 0; i < this._indexCache.length; ++i) {
         if(!this.isFolder(this._indexCache[i]) &&
            !this.isSeparator(this._indexCache[i])) {
-          engines.push(this.getNameByItem(this._indexCache[i]));
+          var name = this.getNameByItem(this._indexCache[i]);
+          var engine = this.getEngineByName(name);
+          if(engine instanceof Ci.nsISearchEngine && !engine.hidden) {
+            engines.push(name);
+          } else {
+            this._removeNonExisting();
+          }
         }
       }
       i = 0;
@@ -173,15 +179,10 @@ SEOrganizer.prototype = {
             timer = null;
           } else {
             var engineName = engines[i];
-            if(engineName) {
-              var engine = ss.getEngineByName(engineName);
-              if(engine instanceof Ci.nsISearchEngine) {
-                try {
-                  instance.moveEngine(engine, i);
-                } catch(e) {
-                  Components.reportError(e);
-                }
-              }
+            try {
+              instance.moveEngine(engine, i);
+            } catch(e) {
+              Components.reportError(e);
             }
             i = i + 1;
           }
@@ -795,8 +796,7 @@ SEOrganizer.prototype = {
     try {
       return this._searchService.moveEngine(engine, newIndex);
     } catch(e) {
-      LOG(e.message + "\n"+ engine.name +"\t"+ newIndex);
-      return e.code;
+      throw e.code;
     }
   },
   removeEngine: function nsIBrowserSearchService__removeEngine(engine) {
