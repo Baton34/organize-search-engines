@@ -281,7 +281,7 @@ SEOrganizer.prototype = {
         if(!this.isSeparator(item) && !this.isFolder(item)) {
           var engine = this.getEngineByName(engineName);
           if(!engine || engine.hidden) {
-            this._interalRemove(item);
+            this._internalRemove(item);
             modified = true;
           }
         }
@@ -492,15 +492,15 @@ SEOrganizer.prototype = {
       var name = this.getNameByItem(toRemove[i]);
       if(name) { // this may be a separator
         var engine = this.getEngineByName(name);
-        if(engine && engine instanceof Ci.nsISearchEngine) { // or folder
+        if(engine && engine instanceof Ci.nsISearchEngine) {
           this.removeEngine(engine);
-          continue; // our observers already call _interalRemove!
+          continue; // our observers already call _internalRemove!
         }
       }
-      this._interalRemove(toRemove[i]);
+      this._internalRemove(toRemove[i]);
     }
   },
-  _interalRemove: function(aItem) { /* wipe aItem from the rdf tree */
+  _internalRemove: function(aItem) { /* wipe aItem from the rdf tree */
     // remove everything this item does reference to
     var predicates = this.ArcLabelsIn(aItem), parent, pred;
     while(predicates.hasMoreElements()) {
@@ -972,7 +972,8 @@ SEOrganizer.prototype = {
 
   QueryInterface: function QueryInterface(aIID) {
     if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsIRDFDataSource) ||
-       aIID.equals(Ci.nsISEOrganizer) || aIID.equals(Ci.nsIBrowserSearchService)) {
+       aIID.equals(Ci.nsISEOrganizer) || aIID.equals(Ci.nsIBrowserSearchService) ||
+       aIID.equals(Ci.nsIObserver)) {
       return this;
     } else {
       throw Cr.NS_ERROR_NO_INTERFACE;
