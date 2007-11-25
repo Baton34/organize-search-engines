@@ -375,7 +375,7 @@ SEOrganizer.prototype = {
   },
 
   observe: function observe(aEngine, aTopic, aVerb) {
-    if(aTopic === "browser-search-engine-modified") {
+    if(aTopic == "browser-search-engine-modified") {
       this.beginUpdateBatch();
       switch(aVerb) {
         case "engine-removed":
@@ -755,13 +755,16 @@ SEOrganizer.prototype = {
     var ss = this._searchService;
     var offset = aName.indexOf(" ");
     var alias = aName.substr(0, offset == -1 ? aName.length : offset).toLowerCase();
-    var engine = ss.getEngineByAlias(alias);
-    if(engine != null && engine.alias == alias && alias && !engine.hidden) {
-      var searchTerm = (offset != -1) ? aName.substr(offset + 1) : "";
-      var submission = engine.getSubmission(searchTerm, null); // we want HTML
-      if(submission.uri) {
-        aPostData.value = submission.postData;
-        return submission.uri.spec;
+    if(alias) {
+      var engine = ss.getEngineByAlias(alias);
+      if(engine != null && engine instanceof Ci.nsISearchEnige &&
+         engine.alias.toLowerCase() == alias && !engine.hidden) {
+        var searchTerm = (offset != -1) ? aName.substr(offset + 1) : "";
+        var submission = engine.getSubmission(searchTerm, null); // we want HTML
+        if(submission.uri) {
+          aPostData.value = submission.postData;
+          return submission.uri.spec;
+        }
       }
     }
     return null;
