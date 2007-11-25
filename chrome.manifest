@@ -2,14 +2,14 @@ override  chrome://browser/content/search/engineManager.xul   chrome://seorganiz
 overlay   chrome://browser/content/browser.xul                chrome://seorganizer/content/browser.xul
 overlay   chrome://addtosearchbox/content/engineInfos.xul     chrome://seorganizer/content/addToSearchbarCompat.xul
 
-content   seorganizer               chrome/locale/content/
-skin      seorganizer  classic/1.0  chrome/locale/skin/classic/
+content   seorganizer               chrome/content/
+skin      seorganizer  classic/1.0  chrome/skin/classic/
 
-locale    seorganizer  en-US        chrome/locale/locale/en-US/
-locale    seorganizer  de           chrome/locale/locale/de-DE/
-locale    seorganizer  it           chrome/locale/locale/it-IT/
-locale    seorganizer  hu           chrome/locale/locale/hu-HU/
-locale    seorganizer  fr           chrome/locale/locale/fr-FR/
-locale    seorganizer  he           chrome/locale/locale/he-IL/
-locale    seorganizer  nl           chrome/locale/locale/nl-NL/
-locale    seorganizer  pl           chrome/locale/locale/pl-PL/
+locale    seorganizer  en-US        chrome/locale/en-US/
+locale    seorganizer  de           chrome/locale/de-DE/
+locale    seorganizer  it           chrome/locale/it-IT/
+locale    seorganizer  hu           chrome/locale/hu-HU/
+locale    seorganizer  fr           chrome/locale/fr-FR/
+locale    seorganizer  he           chrome/locale/he-IL/
+locale    seorganizer  nl           chrome/locale/nl-NL/
+locale    seorganizer  pl           chrome/locale/pl-PL/
