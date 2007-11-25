@@ -38,10 +38,7 @@ Contributor(s):
 <?xml-stylesheet href="chrome://browser/skin/bookmarks/addBookmark.css"?>
 <?xml-stylesheet href="chrome://global/skin/tree.css"?>
 
-<!DOCTYPE dialog [
-  <!ENTITY % moveDTD SYSTEM "chrome://seorganizer/locale/moveTo.dtd">
-  %moveDTD;
-]>
+<!DOCTYPE dialog SYSTEM "chrome://seorganizer/locale/moveTo.dtd">
 
 <dialog id="moveToDialog" title="&window.title;"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
@@ -65,7 +62,8 @@ Contributor(s):
 
   <vbox id="engineListContainer" flex="1">
 
-    <label id="engineListLabel" value="&move-to.label;" accesskey="&move-to.accesskey;" control="engineList" />
+    <label id="engineListLabel" value="&move-to.label;"
+           accesskey="&move-to.accesskey;" control="engineList" />
     <tree id="engineList" flex="1" rows="6"
           seltype="single" ref="urn:organize-search-engines:root"
           datasources="rdf:organized-internet-search-engines"
