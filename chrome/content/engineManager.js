@@ -168,6 +168,7 @@ EngineManagerDialog.prototype = {
     gSEOrganizer.reload();
     if(gAddedEngines.length) {
       gSEOrganizer.beginUpdateBatch();
+      for(var i = 0; i < gAddedEngines.length; ++i) {
         gSEOrganizer._internalRemove(gAddedEngines[i]);
       }
       gSEOrganizer.saveChanges();
