@@ -120,6 +120,7 @@ Contributor(s):
                     accesskey="&new-separator.accesskey;"
                     command="cmd_new-separator"/>
           <menuitem id="addEngines" label="&addEngine.label;"
+                    accesskey="&addEngine.accesskey;"
                     oncommand="gEngineManagerDialog.loadAddEngines();" />
           <menuitem id="restoreDefault" label="&restoreDefault.label;"
                     accesskey="&restoreDefault.accesskey;"
@@ -127,7 +128,7 @@ Contributor(s):
           <menuseparator/>
           <menuitem id="enableSuggest" type="checkbox"
                     label="&enableSuggest.label;"
-                    accesskey="&enableSuggest.accesskey;"/>
+                    accesskey="&noconflict.enableSuggest.accesskey;"/>
           <menuseparator/>
           <menuitem label="&closeCmd.label;" command="cmd_ok"
                     key="key_ok" accesskey="&closeCmd.accesskey;"/>
@@ -147,7 +148,7 @@ Contributor(s):
           <menuitem label="&editalias.label;" command="cmd_editalias"
                     accesskey="&editalias.accesskey;" />
           <menuitem id="menu_delete" command="cmd_remove" key="key_remove"
-                    label="&remove.label;" accesskey="&remove.accesskey;" />
+                    label="&remove.label;" accesskey="&noconflict.remove.accesskey;" />
         </menupopup>
       </menu>
       <menu label="&viewMenu.label;" accesskey="&viewMenu.accesskey;">
@@ -192,11 +193,11 @@ Contributor(s):
       <toolbarbutton id="editalias" command="cmd_editalias"
                      label="&editalias.label;" accesskey="&editalias.accesskey;" />
       <toolbarbutton id="delete" command="cmd_remove"
-                     label="&remove.label;" accesskey="&remove.accesskey;" />
+                     label="&remove.label;" accesskey="&noconflict.remove.accesskey;" />
       <toolbarspacer flex="1" />
       <toolbaritem id="moveupdown" orient="vertical">
-        <toolbarbutton command="cmd_moveup" id="moveup" label="&up.label;" accesskey="&up.accesskey;" orient="horizontal" />
-        <toolbarbutton command="cmd_movedown" id="movedown" label="&dn.label;" accesskey="&dn.accesskey;" orient="horizontal" />
+        <toolbarbutton command="cmd_moveup" id="moveup" label="&up.label;" accesskey="&noconflict.up.accesskey;" orient="horizontal" />
+        <toolbarbutton command="cmd_movedown" id="movedown" label="&dn.label;" accesskey="&noconflict.dn.accesskey;" orient="horizontal" />
       </toolbaritem>
     </toolbar>
   </toolbox>

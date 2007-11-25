@@ -1,6 +1,7 @@
 <!ENTITY namecol.label                           "Name">
 <!ENTITY aliascol.label                          "Schlüsselwort">
 
+<!ENTITY addEngine.accesskey                     "M">
 <!ENTITY restoreDefault.label                    "Vorgabe wiederherstellen">
 <!ENTITY restoreDefault.accesskey                "V">
 
@@ -13,9 +14,15 @@
 <!ENTITY move-engine.accesskey                   "V">
 
 <!ENTITY rename.label                            "Umbenennen...">
-<!ENTITY rename.accesskey                        "U">
+<!ENTITY rename.accesskey                        "n">
 <!ENTITY editalias.label                         "Schlüsselwort...">
 <!ENTITY editalias.accesskey                     "S">
+
+<!ENTITY noconflict.enableSuggest.accesskey      "&enableSuggest.accesskey;">
+<!ENTITY noconflict.remove.accesskey             "&remove.accesskey;">
+<!ENTITY noconflict.up.accesskey                 "&up.accesskey;">
+<!ENTITY noconflict.dn.accesskey                 "&dn.accesskey;">
+
 
 <!ENTITY fileMenu.label                          "Datei">
 <!ENTITY fileMenu.accesskey                      "D">
