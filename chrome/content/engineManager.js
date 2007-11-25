@@ -370,7 +370,25 @@ EngineManagerDialog.prototype = {
     if(!abort)
       return;
 
-    item.alias = alias.value.toLowerCase().replace(/ /g, "");
+    alias = alias.value.toLowerCase().replace(/ /g, "");
+    item.alias = alias;
+
+    for(var i = 0; i < gEngineView._indexCache.length; i++) {
+      if(gEngineView._indexCache[i].alias == alias) {
+        gEngineView._indexCache[i].alias = "";
+        gEngineView.rowCountChanged(i, -1);
+        gEngineView.rowCountChanged(i, 1);
+      }
+    }
+
+    // the engine is hidden, so its alias is ignored anyways
+    var hiddenDefaults = gSEOrganizer.getDefaultEngines({}).filter(function(e) {
+      return !gEngineView.engineVisible(e);
+    });
+    hiddenDefaults.forEach(function(engine) {
+      if(engine.alias == alias)
+        engine.alias = "";
+    });
 
     gEngineView.rowCountChanged(index, -1);
     gEngineView.rowCountChanged(index, 1);
@@ -1008,8 +1026,6 @@ EngineView.prototype = {
   commit: function commit() {
     gSEOrganizer.beginUpdateBatch();
     this._structure.commit();
-    /*gSEOrganizer.endUpdateBatch();
-    gSEOrganizer.beginUpdateBatch();*/
     for(var i = 0; i < gRemovedEngines.length; ++i) {
       if(gRemovedEngines[i] && gRemovedEngines[i] instanceof Ci.nsIRDFResource) {
         // remove the search engine, the rest is done by our observers
