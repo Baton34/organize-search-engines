@@ -1,12 +1,15 @@
-override    chrome://browser/content/search/engineManager.xul       chrome://seorganizer/content/engineManager.xul
-overlay     chrome://browser/content/browser.xul                    chrome://seorganizer/content/browser.xul
-overlay     chrome://addtosearchbox/content/engineInfos.xul         chrome://seorganizer/content/addToSearchbarCompat.xul
+override  chrome://browser/content/search/engineManager.xul   chrome://seorganizer/content/engineManager.xul
+overlay   chrome://browser/content/browser.xul                chrome://seorganizer/content/browser.xul
+overlay   chrome://addtosearchbox/content/engineInfos.xul     chrome://seorganizer/content/addToSearchbarCompat.xul
 
-content seorganizer       jar:chrome/seorganizer.jar!/content/
+content   seorganizer               jar:chrome/seorganizer.jar!/content/
+skin      seorganizer  classic/1.0  jar:chrome/seorganizer.jar!/skin/classic/
 
-locale  seorganizer       en-US           jar:chrome/seorganizer.jar!/locale/en-US/
-locale  seorganizer       de              jar:chrome/seorganizer.jar!/locale/de/
-locale  seorganizer       it              jar:chrome/seorganizer.jar!/locale/it/
-locale  seorganizer       hu              jar:chrome/seorganizer.jar!/locale/hu/
-
-skin    seorganizer       classic/1.0     jar:chrome/seorganizer.jar!/skin/classic/
+locale    seorganizer  en-US        jar:chrome/seorganizer.jar!/locale/en-US/
+locale    seorganizer  de           jar:chrome/seorganizer.jar!/locale/de-DE/
+locale    seorganizer  it           jar:chrome/seorganizer.jar!/locale/it-IT/
+locale    seorganizer  hu           jar:chrome/seorganizer.jar!/locale/hu-HU/
+locale    seorganizer  fr           jar:chrome/seorganizer.jar!/locale/fr-FR/
+locale    seorganizer  he           jar:chrome/seorganizer.jar!/locale/he-IL/
+locale    seorganizer  nl           jar:chrome/seorganizer.jar!/locale/nl-NL/
+locale    seorganizer  pl           jar:chrome/seorganizer.jar!/locale/pl-PL/
