@@ -1,0 +1,4 @@
+<!ENTITY window.title            "Scegli cartella">
+<!ENTITY move-to.label           "Sposta in:">
+<!ENTITY move-to.accesskey       "n">
+<!ENTITY search-engines.toplevel "Motori di ricerca">

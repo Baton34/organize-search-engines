@@ -1,4 +1,41 @@
+/* ***** BEGIN LICENSE BLOCK *****
+Version: MPL 1.1/GPL 2.0/LGPL 2.1
+
+The contents of this file are subject to the Mozilla Public License Version
+1.1 (the "License"); you may not use this file except in compliance with
+the License. You may obtain a copy of the License at
+http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+for the specific language governing rights and limitations under the
+License.
+
+The Original Code is Organize Search Engines.
+
+The Initial Developer of the Original Code is
+Malte Kraus.
+Portions created by the Initial Developer are Copyright (C) 2006-2007
+the Initial Developer. All Rights Reserved.
+
+Contributor(s):
+  Malte Kraus <mails@maltekraus.de> (Original author)
+
+ Alternatively, the contents of this file may be used under the terms of
+ either the GNU General Public License Version 2 or later (the "GPL"), or
+ the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ in which case the provisions of the GPL or the LGPL are applicable instead
+ of those above. If you wish to allow use of your version of this file only
+ under the terms of either the GPL or the LGPL, and not to allow others to
+ use your version of this file under the terms of the MPL, indicate your
+ decision by deleting the provisions above and replace them with the notice
+ and other provisions required by the GPL or the LGPL. If you do not delete
+ the provisions above, a recipient may use your version of this file under
+ the terms of any one of the MPL, the GPL or the LGPL.
+***** END LICENSE BLOCK ***** */
+
 var organizeSE;
+const OSE_XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 function SEOrganizer() {
   window.addEventListener("load", function(e) { organizeSE.init(e); }, false);
   window.addEventListener("close", this.uninit, false);
@@ -11,7 +48,7 @@ SEOrganizer.prototype = {
   getChildItems: function(parent) {
     if(parent.getElementsByClassName) { // minefield only
       return parent.getElementsByClassName('searchbar-engine-menuitem');
-    } else { // else fall back on xpath
+    } else { // fall back on xpath
       var xpath = "descendant::xul:menuitem[contains(concat(' ', @class, ' '),\
                                             ' searchbar-engine-menuitem ')]";
       return this.evalXPath(xpath, parent);
@@ -29,7 +66,7 @@ SEOrganizer.prototype = {
           return "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
         case "xul":
         default:
-          return "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+          return OSE_XUL_NS;
       }
     };
     var scope = aScope || document;
@@ -64,7 +101,7 @@ SEOrganizer.prototype = {
     if(!("bookmarkService" in window)) { // we aren't on a places-enabled build
       var searchRegexp = /(BMSVC\.resolveKeyword\(aURL,\saPostDataRef\))/;
       var replacement =
-               "$1 ||\norganizeSE.SEOrganizer.resolveKeyword(aURL, aPostDataRef)";
+             "$1 ||\norganizeSE.SEOrganizer.resolveKeyword(aURL, aPostDataRef)";
       var newFuncString = getShortcutOrURI.toSource()
                                           .replace(searchRegexp, replacement);
       eval("getShortcutOrURI = " + newFuncString);
@@ -104,14 +141,16 @@ SEOrganizer.prototype = {
   // we have to re-init the searchbar after customizing the toolbar
   onCustomizeToolbarFinished: function() {
     var searchbar = this.searchbar;
-    var popup = searchbar._popup;
+    if(!searchbar)
+      return;
 
+    var popup = searchbar._popup;
     this._replaceSearchbarProperties(searchbar);
     // drag 'n' drop stuff:
     seOrganizer_dragObserver.init();
 
     // now lets copy the manage engines items to where we need it
-    var container =  document.createElementNS(XUL_NS, "box");
+    var container =  document.createElementNS(OSE_XUL_NS, "box");
     container.id = "searchpopup-bottom-container";
     if(!document.getElementById("manage-engines-item")) {
       container.insertBefore(popup.lastChild.cloneNode(true), container.firstChild);
@@ -264,13 +303,11 @@ SEOrganizer.prototype = {
   insertAddEngineItems: function insertAddEngineItems() {
     const popup = this.popup;
     var addengines = getBrowser().mCurrentBrowser.engines;
-    const kXULNS =
-                "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
     if(!addengines || !addengines.length)
       return;
 
-    const separator = document.createElementNS(kXULNS, "menuseparator");
+    const separator = document.createElementNS(OSE_XUL_NS, "menuseparator");
     separator.className = "addengine-separator";
     popup.appendChild(separator);
 
@@ -281,7 +318,7 @@ SEOrganizer.prototype = {
       var labelStr =
            this.searchbar._stringBundle.getFormattedString("cmd_addFoundEngine",
                                                            [engineInfo.title]);
-      menuitem = document.createElementNS(kXULNS, "menuitem");
+      menuitem = document.createElementNS(OSE_XUL_NS, "menuitem");
       menuitem.className = "menuitem-iconic addengine-item";
       menuitem.setAttribute("label", labelStr);
       menuitem.setAttribute("uri", engineInfo.uri);
@@ -393,7 +430,8 @@ SEOrganizer.prototype = {
       popup.addEventListener("command", this.onCommand, false);
       popup.addEventListener("popuphidden", this.popupHidden, false);
       popup.addEventListener("popupshowing", this.popupShowing, false);
-      organizeSE.searchbar._engines = organizeSE.SEOrganizer.getVisibleEngines({});
+      if(organizeSE.searchbar)
+        organizeSE.searchbar._engines = organizeSE.SEOrganizer.getVisibleEngines({});
     },
     willRebuild: function observe__willRebuild() {
     },
@@ -421,30 +459,18 @@ SEOrganizer.prototype = {
   },
 
   searchObserve: function observe(aEngine, aTopic, aVerb) {
-    if (aTopic == "browser-search-engine-modified") {
-      switch (aVerb) {
-        case "engine-removed":
-        this.offerNewEngine(aEngine);
-        break;
-      case "engine-added":
-        this.hideNewEngine(aEngine);
-        break;
-      case "engine-current":
-        // The current engine was changed.
-        this._popup.hidePopup();
-        this.updateDisplay();
-        this.rebuildPopup(); // updates the engine marked in bold
-        break;
-      case "engine-changed":
-        // An engine was removed (or hidden) or added, or an icon was
-        // changed.  Update the display in case name or icon changed.
-        this.updateDisplay();
-        break;
-      case "-engines-organized":
-        this.rebuildPopup();
-        break;
-      }
+    if(aTopic != "browser-search-engine-modified")
+      return;
+
+    if(aVerb == "engine-removed") {
+      this.offerNewEngine(aEngine);
+    } else if(aVerb == "engine-added") {
+      this.hideNewEngine(aEngine);
+    } else if(aVerb == "engine-current" || aVerb == "engine-changed") {
+      this.updateDisplay();
     }
+    this._popup.hidePopup();
+    this.rebuildPopup();
   }
 };
 organizeSE = new SEOrganizer();

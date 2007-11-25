@@ -1,6 +1,45 @@
+/* ***** BEGIN LICENSE BLOCK *****
+Version: MPL 1.1/GPL 2.0/LGPL 2.1
+
+The contents of this file are subject to the Mozilla Public License Version
+1.1 (the "License"); you may not use this file except in compliance with
+the License. You may obtain a copy of the License at
+http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+for the specific language governing rights and limitations under the
+License.
+
+The Original Code is Organize Search Engines.
+
+The Initial Developer of the Original Code is
+Malte Kraus.
+Portions created by the Initial Developer are Copyright (C) 2006-2007
+the Initial Developer. All Rights Reserved.
+
+Contributor(s):
+  Malte Kraus <mails@maltekraus.de> (Original author)
+
+ Alternatively, the contents of this file may be used under the terms of
+ either the GNU General Public License Version 2 or later (the "GPL"), or
+ the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ in which case the provisions of the GPL or the LGPL are applicable instead
+ of those above. If you wish to allow use of your version of this file only
+ under the terms of either the GPL or the LGPL, and not to allow others to
+ use your version of this file under the terms of the MPL, indicate your
+ decision by deleting the provisions above and replace them with the notice
+ and other provisions required by the GPL or the LGPL. If you do not delete
+ the provisions above, a recipient may use your version of this file under
+ the terms of any one of the MPL, the GPL or the LGPL.
+***** END LICENSE BLOCK ***** */
+
 const seOrganizer_dragObserver = {
   init: function() {
-    const button = organizeSE.searchbar._engineButton;
+    var searchbar = organizeSE.searchbar;
+    if(!searchbar)
+      return;
+    var button = searchbar._engineButton;
     button.setAttribute("ondragenter", "seOrganizer_dragObserver.onDragEnter(event);");
     button.setAttribute("ondragover", "nsDragAndDrop.dragOver(event, seOrganizer_dragObserver);");
     button.setAttribute("ondragexit", "nsDragAndDrop.dragExit(event, seOrganizer_dragObserver);");
@@ -33,14 +72,16 @@ const seOrganizer_dragObserver = {
     }
   },
   onDragExit: function(event, session) {
-    var This = this;
     var target = event.target;
     if(target.nodeName == "menu" || target.nodeName == "menuitem") {
       target.removeAttribute("_moz-menuactive");
     }
   },
   onDrop: function(event, dropData, session) {
+    this.onDragExit(event, session);
     organizeSE.popup.hidePopup();
+    if(dropData instanceof Ci.nsIFile)
+      dropData = { data: dropData.leafName };
     if(!dropData.data)
       return;
     if(this.overButton(event.target)) {
@@ -61,7 +102,8 @@ const seOrganizer_dragObserver = {
         if(engine) {
           submission = engine.getSubmission(dropData.data, null);
           if(submission) {
-            if((!i && event.altKey) || content.location.href == "about:blank")
+            // load the first search in the current tab if the alt key was pressed
+            if(!i && (event.altKey) || content.location.href == "about:blank")
               loadURI(submission.uri.spec, null, submission.postData, false);
             else
               getBrowser().loadOneTab(submission.uri.spec, null, null,

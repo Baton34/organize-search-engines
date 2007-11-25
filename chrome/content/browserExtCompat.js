@@ -1,3 +1,39 @@
+/* ***** BEGIN LICENSE BLOCK *****
+Version: MPL 1.1/GPL 2.0/LGPL 2.1
+
+The contents of this file are subject to the Mozilla Public License Version
+1.1 (the "License"); you may not use this file except in compliance with
+the License. You may obtain a copy of the License at
+http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+for the specific language governing rights and limitations under the
+License.
+
+The Original Code is Organize Search Engines.
+
+The Initial Developer of the Original Code is
+Malte Kraus.
+Portions created by the Initial Developer are Copyright (C) 2006-2007
+the Initial Developer. All Rights Reserved.
+
+Contributor(s):
+  Malte Kraus <mails@maltekraus.de> (Original author)
+
+ Alternatively, the contents of this file may be used under the terms of
+ either the GNU General Public License Version 2 or later (the "GPL"), or
+ the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ in which case the provisions of the GPL or the LGPL are applicable instead
+ of those above. If you wish to allow use of your version of this file only
+ under the terms of either the GPL or the LGPL, and not to allow others to
+ use your version of this file under the terms of the MPL, indicate your
+ decision by deleting the provisions above and replace them with the notice
+ and other provisions required by the GPL or the LGPL. If you do not delete
+ the provisions above, a recipient may use your version of this file under
+ the terms of any one of the MPL, the GPL or the LGPL.
+***** END LICENSE BLOCK ***** */
+
 function organizeSE__Extensions() {
   this.init();
 };
@@ -67,11 +103,8 @@ organizeSE__Extensions.prototype = {
     sortDirectionHandler: function sortDirectionHandler(newVal) {
       contextsearch.contextitem.setAttribute("sortDirection", newVal);
     },
-    rebuildmenu: function() {
-      this.contextitem.builder.rebuild();
-    },
     init: function() {
-      contextsearch.rebuildmenu = this.rebuildmenu;
+      contextsearch.rebuildmenu = function() { };
       const menu = document.getElementById("context-searchmenu");
       menu.addEventListener("popupshowing", this.onPopupShowing, true);
       contextsearch.search = this.getSearch();
@@ -81,13 +114,13 @@ organizeSE__Extensions.prototype = {
       return function (aEvent) {
         const target = aEvent.target;
         target.engine = organizeSE.SEOrganizer.getEngineByName(target.label);
-        origSearch.call(this, aEvent);
+        origSearch.apply(this, arguments);
       };
     },
     onPopupShowing: function(event) {
-      const menu = contextsearch.contextitem;
-      if(event.target.parentNode.id === "context-searchmenu") {
+      if(event.target == event.currentTarget) {
         event.target.id = "context-searchpopup";
+        contextsearch.contextitem.builder.rebuild();
       } else {
         event.stopPropagation();
       }
@@ -210,7 +243,7 @@ organizeSE__Extensions.prototype = {
                   direction = "previousSibling";
                 else
                   direction = "nextSibling";
-                while((item = item[direction])) {
+                while((item = item[direction]) && item.nodeName) {
                   if(item.nodeName == "menu" || item.nodeName == "menuitem")
                     return item;
                 }
@@ -254,6 +287,9 @@ organizeSE__Extensions.prototype = {
               e.target.firstChild.setAttribute("_moz-menuactive", "true");
           } else {
             e.target.shown = false;
+            organizeSE.evalXPath("//xul:menupopup", e.target).forEach(function(cur) {
+              cur.hidePopup();
+            });
           }
         }
         e.stopPropagation();
@@ -285,9 +321,8 @@ organizeSE__Extensions.prototype = {
 
       count = popup.childNodes.length - 1;
       if (this.keywords.length) {
-        const XULNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
         if (count)
-          popup.appendChild(document.createElementNS(XULNS, 'menuseparator'));
+          popup.appendChild(document.createElementNS(OSE_XUL_NS, 'menuseparator'));
 
         for (var i = 0, maxi = this.keywords.length; i < maxi; i++)
         {
@@ -295,7 +330,7 @@ organizeSE__Extensions.prototype = {
               parent.getElementsByAttribute('engineName', this.keywords[i].name+'\n'+this.keywords[i].keyword).length)
           continue;
 
-          popup.appendChild(document.createElementNS(XULNS, 'menuitem'));
+          popup.appendChild(document.createElementNS(OSE_XUL_NS, 'menuitem'));
           popup.lastChild.setAttribute('label',      this.keywords[i].name);
           popup.lastChild.setAttribute('class',      'menuitem-iconic');
           popup.lastChild.setAttribute('src',        this.keywords[i].icon);
@@ -364,14 +399,16 @@ organizeSE__Extensions.prototype = {
         var SEOrganizer = organizeSE.SEOrganizer;
         var name = searchbar.currentEngine.name;
         var item = SEOrganizer.getItemByName(name);
-        do {
+        while(item) {
           var elem = document.getElementById(item.ValueUTF8);
           if(elem)
             elem.setAttribute("selected", "true");
           try {
             item = SEOrganizer.getParent(item);
-          } catch(e) { break; }
-        } while(item);
+          } catch(e) {
+            item = null;
+          }
+        }
       }
     }
   }

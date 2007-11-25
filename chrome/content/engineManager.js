@@ -1,4 +1,38 @@
-try {
+/* ***** BEGIN LICENSE BLOCK *****
+Version: MPL 1.1/GPL 2.0/LGPL 2.1
+
+The contents of this file are subject to the Mozilla Public License Version
+1.1 (the "License"); you may not use this file except in compliance with
+the License. You may obtain a copy of the License at
+http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+for the specific language governing rights and limitations under the
+License.
+
+The Original Code is Organize Search Engines.
+
+The Initial Developer of the Original Code is
+Malte Kraus.
+Portions created by the Initial Developer are Copyright (C) 2006-2007
+the Initial Developer. All Rights Reserved.
+
+Contributor(s):
+  Malte Kraus <mails@maltekraus.de> (Original author)
+
+ Alternatively, the contents of this file may be used under the terms of
+ either the GNU General Public License Version 2 or later (the "GPL"), or
+ the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ in which case the provisions of the GPL or the LGPL are applicable instead
+ of those above. If you wish to allow use of your version of this file only
+ under the terms of either the GPL or the LGPL, and not to allow others to
+ use your version of this file under the terms of the MPL, indicate your
+ decision by deleting the provisions above and replace them with the notice
+ and other provisions required by the GPL or the LGPL. If you do not delete
+ the provisions above, a recipient may use your version of this file under
+ the terms of any one of the MPL, the GPL or the LGPL.
+***** END LICENSE BLOCK ***** */
 
 const Ci = Components.interfaces, Cc = Components.classes;
 
@@ -19,7 +53,7 @@ var gRemovedEngines = [], gAddedEngines = [], gSortDir = "natural";
 
 const CONTRACT_ID =
          "@mozilla.org/rdf/datasource;1?name=organized-internet-search-engines";
-var gSEOrganizer = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer).wrappedJSObject;
+var gSEOrganizer;
 
 function gResort(orig) {
   function sortCallback(item1, item2) {
@@ -75,6 +109,7 @@ function EngineManagerDialog() {
 EngineManagerDialog.prototype = {
   init: function EngineManager__init() {
     gStrings = document.getElementById("strings");
+    gSEOrganizer = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer).wrappedJSObject;
 
     var prefService = Cc["@mozilla.org/preferences-service;1"]
                         .getService(Ci.nsIPrefService).getBranch("");
@@ -110,6 +145,8 @@ EngineManagerDialog.prototype = {
     document.getElementById("engineList").focus();
   },
   onOK: function EngineManager__onOK() {
+    this.onClose();
+
     // Set the preference
     var newSuggestEnabled = document.getElementById("enableSuggest")
                                     .getAttribute("checked");
@@ -124,49 +161,52 @@ EngineManagerDialog.prototype = {
 
     // Commit the changes
     gEngineView.commit();
-
-    this.onClose();
   },
   onCancel: function EngineManager__onCancel() {
-    gSEOrganizer.reload();
-    gSEOrganizer.beginUpdateBatch();
-    var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
-                       .getService(Ci.nsIRDFService);
-    var rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
-                              .getService(Ci.nsIRDFContainerUtils);
-    var container, parent;
-    for(var i = 0; i < gAddedEngines.length; ++i) {
-      parent = gSEOrganizer.getParent(gAddedEngines[i]);
-      container = rdfContainerUtils.MakeSeq(gSEOrganizer, parent);
-      container.RemoveElement(gAddedEngines[i], true);
-    }
-    gSEOrganizer.saveChanges();
-    gSEOrganizer.endUpdateBatch();
     this.onClose();
+
+    gSEOrganizer.reload();
+    if(gAddedEngines.length) {
+      gSEOrganizer.beginUpdateBatch();
+      for(var i = 0; i < gAddedEngines.length; ++i) {
+        gSEOrganizer._internalRemove(gAddedEngines[i]);
+      }
+      gSEOrganizer.saveChanges();
+      gSEOrganizer.endUpdateBatch();
+    }
   },
   onClose: function EngineManager__onClose() {
-    // Remove the observers
-    var os = Cc["@mozilla.org/observer-service;1"].
-             getService(Ci.nsIObserverService);
-    os.removeObserver(this, "browser-search-engine-modified");
+    var This = this;
+    var body = function() {
+      // Remove the observers
+      var os = Cc["@mozilla.org/observer-service;1"].
+               getService(Ci.nsIObserverService);
+      os.removeObserver(This, "browser-search-engine-modified");
 
-    var branch = Cc["@mozilla.org/preferences-service;1"]
-                   .getService(Ci.nsIPrefService).getBranch("");
-    branch.QueryInterface(Ci.nsIPrefBranch2);
-    branch.removeObserver("", this);
+      var branch = Cc["@mozilla.org/preferences-service;1"]
+                     .getService(Ci.nsIPrefService).getBranch("");
+      branch.QueryInterface(Ci.nsIPrefBranch2);
+      branch.removeObserver("", This);
 
-    // notify observers
-    os.notifyObservers(null, "browser-search-engine-modified",
-                       "-engines-organized");
+      // notify observers
+      os.notifyObservers(null, "browser-search-engine-modified",
+                         "-engines-organized");
+    };
+    if(window && !window.closed)
+      window.setTimeout(body, 0);
+    else
+      body();
   },
 
   observe: function EngineManager__observe(aSubject, aTopic, aVerb) {
+    if(!window || window.closed)
+      this.onClose();
     window.setTimeout(function() {
-      if(aTopic === "browser-search-engine-modified") {
-        var aEngine = aSubject.QueryInterface(Ci.nsISearchEngine)
+      if(aTopic === "browser-search-engine-modified" &&
+         aSubject instanceof Ci.nsISearchEngine) {
         switch (aVerb) {
           case "engine-added":
-            gEngineView.addEngine(aEngine);
+            gEngineView.addEngine(aSubject);
             gEngineView.rowCountChanged(gEngineView.lastIndex, 1);
             break;
           case "engine-changed":
@@ -204,8 +244,7 @@ EngineManagerDialog.prototype = {
   },
 
   remove: function EngineManager__remove() {
-    // we want the indexes in reversed order as we're changing indexes...
-    var indexes = gEngineView.selectedIndexes.sort(compareNumbers).reverse();
+    var indexes = gEngineView.selectedIndexes;
     var index, item, parent, localIndex;
     gEngineView.selection.clearSelection();
 
@@ -222,9 +261,13 @@ EngineManagerDialog.prototype = {
         for(var i = 0; i < items.length; ++i) {
           for(var j = 0; j < items[i].length; ++j) {
             gRemovedEngines.push(items[i][j].node);
-            ++removedCount;
-            if(items[i][j].isSeq)
+            if(items[i].open)
+              ++removedCount;
+            if(items[i][j].isSeq) {
               items.push(items[i][j].children);
+              if(!items[i].open)
+                items[i][j].open = false;
+            }
           }
         }
       }
@@ -244,11 +287,11 @@ EngineManagerDialog.prototype = {
     this.showRestoreDefaults();
   },
   bump: function EngineManager__bump(direction) {
-    var indexes = gEngineView.selectedIndexes.sort(compareNumbers);
+    var indexes = gEngineView.selectedIndexes;
+    if(direction > 0)
+      indexes = indexes.reverse();
     var index, item, localIndex, newLocalIndex, children, newChildren, newIndex;
     gEngineView.selection.clearSelection();
-    if(direction == -1)
-      indexes.reverse();
 
     for(var i = 0; i < indexes.length; i++) {
       index = indexes[i];
@@ -263,7 +306,8 @@ EngineManagerDialog.prototype = {
       newChildren = newChildren.concat(children.slice(Math.max(newLocalIndex,
                                                                localIndex) + 1));
       item.parent.children = newChildren;
-      item.parent.modified = true;
+      if(!item.parent.modified)
+        item.parent.modified = 1;
 
       gEngineView.updateCache();
       // as there are folders, the new index could be virtually anywhere:
@@ -313,6 +357,8 @@ EngineManagerDialog.prototype = {
     document.getElementById("engineList").focus();
     var index = gEngineView.selectedIndex;
     var item = gEngineView.selectedItem;
+    if(!item.modified)
+       item.modified = 1;
 
     var alias = { value: item.alias };
     var name =  { value: item.name  };
@@ -324,7 +370,7 @@ EngineManagerDialog.prototype = {
     if(!abort)
       return;
 
-    item.alias = alias.value.toLowerCase();
+    item.alias = alias.value.toLowerCase().replace(/ /g, "");
 
     gEngineView.rowCountChanged(index, -1);
     gEngineView.rowCountChanged(index, 1);
@@ -413,29 +459,28 @@ EngineManagerDialog.prototype = {
           defaultNames[i] = defaults[i].name;
         }
         var selection = {};
-        var cancel = prompts.select(window, gStrings.getString("restore.title"),
-                                    gStrings.getString("restore.content"),
-                                    defaultNames.length, defaultNames, selection);
-        if(!cancel)
+        var cancel = !prompts.select(window, gStrings.getString("restore.title"),
+                                     gStrings.getString("restore.content"),
+                                     defaultNames.length, defaultNames, selection);
+        if(cancel)
           return;
         var engine = defaults[selection.value];
-        if(engine.hidden)
-          engine.hidden = false;
+        /*if(engine.hidden)
+          engine.hidden = false;*/
         node = gSEOrganizer.getItemByName(engine.name);
         var idx = gRemovedEngines.indexOf(node);
-        if(node && idx !== -1) {
+        if(node && idx != -1) {
           gRemovedEngines = gRemovedEngines.slice(0, idx)
                                         .concat(gRemovedEngines.slice(idx + 1));
         }
-        node = gSEOrganizer.getItemByName(engine.name);
         if(!node) {
           node = gSEOrganizer._getAnonymousResource();
         }
-        item = new Structure__Item(gEngineView._structure, node, engine);
-        this.showRestoreDefaults(defaults.length !== 1);
+        item = new Structure__Item(parent, node, engine);
+        this.showRestoreDefaults(defaults.length != 1);
         break;
     }
-    item.modified = true;
+    item.modified = 2;
     parent.insertAt(insertLoc, item);
     gAddedEngines.push(node);
 
@@ -537,18 +582,19 @@ EngineManagerDialog.prototype = {
 };
 gEngineManagerDialog = new EngineManagerDialog();
 
-
+var _dragData = {};
 function DragObserver() {
 }
 DragObserver.prototype = {
   onDragStart: function (aEvent, aXferData, aDragAction) {
-    var selectedIndexes = window.gEngineView.selectedIndexes;
-    if (!selectedIndexes.length)
+    var selected = gEngineView.selectedItems;
+    if (!selected.length)
       return;
 
-    var data = selectedIndexes.join(FLAVOR_SEPARATOR);
+    var random = Math.random().toString();
+    _dragData[random] = selected;
     aXferData.data = new TransferData();
-    aXferData.data.addDataForFlavour(ENGINE_FLAVOR, data);
+    aXferData.data.addDataForFlavour(ENGINE_FLAVOR, random);
 
     aDragAction.action = Ci.nsIDragService.DRAGDROP_ACTION_MOVE;
   },
@@ -566,8 +612,8 @@ gDragObserver = new DragObserver();
 function Structure() {
   var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                      .getService(Ci.nsIRDFService);
-  Structure__Container.apply(this, [null, rdfService.GetResource(ROOT)]);
-  this.modified = false;
+  Structure__Container.call(this, null, rdfService.GetResource(ROOT));
+  this.modified = 0;
 }
 Structure.prototype = {
   node: null,
@@ -578,7 +624,7 @@ Structure.prototype = {
   isSeq: true,
   children: null,
   alias: "",
-  modified: false,
+  modified: 0,
   destroy: function Structure__destroy() {
     this.node = null;
     this.parent = null;
@@ -638,20 +684,20 @@ function Structure__Container(parent, node, children, open) {
       }
     }
   }
-  this.modified = false;
+  this.modified = 0;
 }
 Structure__Container.prototype = {
   node: null,
   parent: null,
   _name: "",
   get name() { return this._name; },
-  set name(name) { this.modified = true; return this._name = name },
+  set name(name) { if(!this.modified) this.modified = 1; return this._name = name },
   children: null,
   open: false,
   isSep: false,
   isSeq: true,
   alias: "",
-  modified: false,
+  modified: 0,
   set iconURI() {
     Structure.prototype.reloadIcons.call(this);
   },
@@ -660,8 +706,8 @@ Structure__Container.prototype = {
 function Structure__Item(parent, node, engine) {
   this.parent = parent;
   this.node = node;
-  this.modified = false;
-  if(!(engine instanceof Ci.nsISearchEngine))
+  this.modified = 0;
+  if(!engine || !(engine instanceof Ci.nsISearchEngine))
     engine = null;
 
   var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
@@ -680,14 +726,14 @@ function Structure__Item(parent, node, engine) {
   this.isSep = gSEOrganizer.HasAssertion(node, type, separator, true);
 
   if(engine)
-    this.modified = true;
+    this.modified = 1;
   else
     engine = gSEOrganizer.getEngineByName(this.name);
 
   this.originalEngine = engine;
   if(engine) {
     this.alias = engine.alias;
-    this.iconURI = engine.iconURI.spec;
+    this.iconURI = (engine.iconURI || {spec: ""}).spec;
   }
 }
 Structure__Item.prototype = {
@@ -695,7 +741,7 @@ Structure__Item.prototype = {
   parent: null,
   _name: "",
   get name() { return this._name; },
-  set name(name) { this.modified = true; return this._name = name },
+  set name(name) { if(!this.modified) this.modified = 1; return this._name = name },
   iconURI: "",
   isSep: false,
   isSeq: false,
@@ -704,10 +750,38 @@ Structure__Item.prototype = {
   alias: "",
   commit: function Structure__Item__commit() {
     var engine = this.originalEngine;
+    if(this.modified == 2) {
+      var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
+                         .getService(Ci.nsIRDFService);
+      if(this.isSep) {
+        var type = rdfService.GetResource(NS_RDF + "type");
+        var separator = rdfService.GetResource(NS + "separator");
+        gSEOrganizer.Assert(this.node, type, separator, true);
+      } else {
+        var namePred = rdfService.GetResource(NS + "Name");
+        gSEOrganizer.Assert(this.node, namePred, rdfService.GetLiteral(this.name), true);
+        engine.hidden = false;
+      }
+    }
     if(this.modified && engine) {
-      if(engine.name !== this.name) {
+      if(this.alias != engine.alias) {
+        engine.alias = this.alias;
+      }
+      if(engine.name != this.name) {
         var oldName = engine.name;
+
         engine = engine.wrappedJSObject;
+        var realSearchService = gSEOrganizer._searchService.wrappedJSObject;
+        delete realSearchService._engines[oldName];
+        realSearchService._engines[this.name] = engine;
+        engine._name = this.name;
+        engine._serializeToFile();
+        var os = Cc["@mozilla.org/observer-service;1"]
+                   .getService(Ci.nsIObserverService);
+        os.removeObserver(gSEOrganizer, SEARCH_ENGINE_TOPIC);
+        os.notifyObservers(this.originalEngine, SEARCH_ENGINE_TOPIC, "engine-changed");
+        os.addObserver(gSEOrganizer, SEARCH_ENGINE_TOPIC, false);
+
         var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                            .getService(Ci.nsIRDFService);
         var namePred = rdfService.GetResource(NS + "Name");
@@ -717,30 +791,8 @@ Structure__Item.prototype = {
         try {
           gSEOrganizer.Unassert(this.node, namePred, oldName);
         } catch(e) {}
-        // we pretend the engine would have been updated - otherwise it'd need
-        // a restart for Firefox to completely realize the engine changed
-        var clone = {};
-        for(var p in engine) {
-          if(!(engine.__lookupGetter__(p) || engine.__lookupSetter__(p)))
-            clone[p] = engine[p];
-        }
-        engine._name = this.name;
-        engine._serializeToFile();
-        engine._useNow = false;
-        engine._engineToUpdate = clone;
-        // we temporarily remove our service's observer so we don't end with
-        // this engine being twice in the rdf
-        var os = Cc["@mozilla.org/observer-service;1"]
-                   .getService(Ci.nsIObserverService);
-        //os.removeObserver(gSEOrganizer, SEARCH_ENGINE_TOPIC);
-        os.notifyObservers(engine, SEARCH_ENGINE_TOPIC, "engine-loaded");
-        //os.addObserver(gSEOrganizer, SEARCH_ENGINE_TOPIC, false);
-
-        // update the orig search service's cache
-        var realSearchService = gSEOrganizer._searchService;
-        realSearchService.wrappedJSObject._engines[engine.name] = engine;
       }
-      if(gSEOrganizer.getNameByItem(this.node) !== this.name) {
+      if(gSEOrganizer.getNameByItem(this.node) != this.name) {
         var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                            .getService(Ci.nsIRDFService);
         var namePred = rdfService.GetResource(NS + "Name");
@@ -751,9 +803,6 @@ Structure__Item.prototype = {
         } catch(e) {}
         gSEOrganizer.Assert(this.node, namePred,
                             rdfService.GetLiteral(this.name), true);
-      }
-      if(this.alias != engine.alias) {
-        engine.alias = this.alias;
       }
     }
   }
@@ -768,19 +817,22 @@ Structure__Item.prototype.destroy = Structure__Container.prototype.destroy =
   var idx = this.parent.children.indexOf(this);
   this.parent.children = this.parent.children.slice(0, idx)
                              .concat(this.parent.children.slice(idx + 1));
-  this.parent.modified = true;
+  if(!this.parent.modified)
+    this.parent.modified = 1;
   this.node = this.parent = this.children = this.modified = null;
 };
 Structure__Container.prototype.push = Structure.prototype.push =
            function Structure__General__push(what) {
-  this.modified = true;
+  if(!this.modified)
+    this.modified = 1;
   this.children.push.apply(this.children, arguments);
 };
 Structure__Container.prototype.insertAt = Structure.prototype.insertAt =
            function Structure__General__insertAt(idx, item) {
-  this.modified = true;
+  if(!this.modified)
+    this.modified = 1;
   item.parent = this;
-  if(idx === -1 || idx > this.children.length) {
+  if(idx === -1 || idx >= this.children.length) {
     this.children.push(item);
   } else if(idx === 0) {
     this.children = [item].concat(this.children);
@@ -794,17 +846,16 @@ Structure__Container.prototype.insertAt = Structure.prototype.insertAt =
 Structure__Container.prototype.commit = Structure.prototype.commit =
            function Structure__General__commit() {
   if(this.modified) {
-    if(this instanceof Structure__Container) {
-      if(gSEOrganizer.getNameByItem(this.node) !== this.name) {
-        var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
-                           .getService(Ci.nsIRDFService);
-        var namePred = rdfService.GetResource(NS + "Name");
-        var oldName = gSEOrganizer.GetTarget(this.node, namePred, true);
-        gSEOrganizer.Assert(this.node, namePred, rdfService.GetLiteral(this.name),
-                            true);
-        if(oldName instanceof Ci.nsIRDFLiteral)
-          gSEOrganizer.Unassert(this.node, namePred, oldName);
-      }
+    if(this instanceof Structure__Container &&
+       (gSEOrganizer.getNameByItem(this.node) != this.name || this.modified == 2)) {
+      var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
+                         .getService(Ci.nsIRDFService);
+      var namePred = rdfService.GetResource(NS + "Name");
+      var oldName = gSEOrganizer.GetTarget(this.node, namePred, true);
+      gSEOrganizer.Assert(this.node, namePred, rdfService.GetLiteral(this.name),
+                          true);
+      if(oldName instanceof Ci.nsIRDFLiteral)
+        gSEOrganizer.Unassert(this.node, namePred, oldName);
     }
     var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                        .getService(Ci.nsIRDFService);
@@ -910,16 +961,7 @@ EngineView.prototype = {
       if(seln.isSelected(i))
         indexes.push(i);
     }
-    /*var rangeCount = seln.getRangeCount();
-    var indexes = [], min = { }, max = { };
-    for(var i = 0; i <= rangeCount; i++) {
-      seln.getRangeAt(i, min, max);
-      for(var j = min.value; j <= max.value; j++) {
-        if(j != -1)
-          indexes.push(j);
-      }
-    }*/
-    return indexes;
+    return indexes.reverse();
   },
   get selectedItem() {
     return this._indexCache[this.selectedIndex];
@@ -965,39 +1007,23 @@ EngineView.prototype = {
   },
   commit: function commit() {
     gSEOrganizer.beginUpdateBatch();
+    this._structure.commit();
+    /*gSEOrganizer.endUpdateBatch();
+    gSEOrganizer.beginUpdateBatch();*/
     for(var i = 0; i < gRemovedEngines.length; ++i) {
       if(gRemovedEngines[i] && gRemovedEngines[i] instanceof Ci.nsIRDFResource) {
-        // remove the underlying search engine file using nsIBrowserSearchService
+        // remove the search engine, the rest is done by our observers
         var name = gSEOrganizer.getNameByItem(gRemovedEngines[i]);
         var engine = gSEOrganizer.getEngineByName(name);
         if(engine && engine instanceof Ci.nsISearchEngine) {
           if(engine == gSEOrganizer.currentEngine)
             gSEOrganizer.currentEngine = gSEOrganizer.defaultEngine;
           gSEOrganizer.removeEngine(engine);
-        }
-
-        /* remove everything from the rdf tree */
-        // remove everything this item references to
-        var predicates = gSEOrganizer.ArcLabelsIn(gRemovedEngines[i]), parent, pred;
-        while(predicates.hasMoreElements()) {
-          pred = predicates.getNext();
-          parent = gSEOrganizer.GetSources(pred, gRemovedEngines[i], true);
-          while(parent.hasMoreElements()) {
-            gSEOrganizer.Unassert(parent.getNext(), pred, gRemovedEngines[i], true);
-          }
-        }
-        // remove all references to this item
-        var predicates = gSEOrganizer.ArcLabelsOut(gRemovedEngines[i]), object;
-        while(predicates.hasMoreElements()) {
-          pred = predicates.getNext();
-          object = gSEOrganizer.GetTargets(gRemovedEngines[i], pred, true);
-           while(object.hasMoreElements()) {
-            gSEOrganizer.Unassert(gRemovedEngines[i], pred, object.getNext(), true);
-          }
+        } else {
+          gSEOrganizer.removeItem(gRemovedEngines[i], false);
         }
       }
     }
-    this._structure.commit();
     gSEOrganizer.endUpdateBatch();
     gSEOrganizer.saveChanges();
   },
@@ -1022,32 +1048,36 @@ EngineView.prototype = {
   getLocalIndex: function getLocalIndex(idx) {
     return this._indexCache[idx].parent.children.indexOf(this._indexCache[idx]);
   },
-  getSourceIndexesFromDrag: function getSourceIndexesFromDrag() {
-    var dragService = Cc["@mozilla.org/widget/dragservice;1"].
-                      getService().QueryInterface(Ci.nsIDragService);
+  _lastSourceItems: null,
+  getSourceItemsFromDrag: function getSourceItemsFromDrag() {
+    var dragService = Cc["@mozilla.org/widget/dragservice;1"]
+                        .getService().QueryInterface(Ci.nsIDragService);
     var dragSession = dragService.getCurrentSession();
-    var transfer = Cc["@mozilla.org/widget/transferable;1"].
-                   createInstance(Ci.nsITransferable);
+    var transfer = Cc["@mozilla.org/widget/transferable;1"]
+                     .createInstance(Ci.nsITransferable);
 
     transfer.addDataFlavor(ENGINE_FLAVOR);
     dragSession.getData(transfer, 0);
 
     var dataObj = {};
     var len = {};
-    var sourceIndexes = [];
+    var sourceItems = [];
     try {
       transfer.getAnyTransferData({}, dataObj, len);
     } catch (ex) {}
 
     if (dataObj.value) {
-      sourceIndexes = dataObj.value.QueryInterface(Ci.nsISupportsString).data;
-      sourceIndexes = sourceIndexes.substring(0, len.value).split(FLAVOR_SEPARATOR);
-      for(var i = 0; i < sourceIndexes.length; i++) {
-        sourceIndexes[i] = parseInt(sourceIndexes[i]);
-      }
+      sourceItems = dataObj.value.QueryInterface(Ci.nsISupportsString).data;
+      sourceItems = sourceItems.substring(0, len.value);
+      this._lastSourceItems = sourceItems;
+      sourceItems = window._dragData[sourceItems];
     }
 
-    return sourceIndexes;
+    return sourceItems;
+  },
+  clearSourceIndexes: function() {
+    if(_dragData[this._lastSourceItems])
+      delete _dragData[this._lastSourceItems];
   },
 
   /* attempts to be compatible to the original code */
@@ -1061,12 +1091,12 @@ EngineView.prototype = {
   },
   selection: null,
   canDrop: function EngineView__canDrop(index, orientation) {
-    var sourceIndexes = this.getSourceIndexesFromDrag();
-    if(!sourceIndexes.length)
+    var sourceItems = this.getSourceItemsFromDrag();
+    if(!sourceItems.length)
       return false;
-    for(var i = 0; i < sourceIndexes.length; i++) {
-      var sourceIndex = sourceIndexes[i];
-      var sourceItem = this._indexCache[sourceIndex];
+    for(var i = 0; i < sourceItems.length; i++) {
+      var sourceItem = sourceItems[i];
+      var sourceIndex = this._indexCache.indexOf(sourceItem);
       var dropItem = this._indexCache[index];
 
       var dropOnNext = (sourceIndex !== index + orientation ||
@@ -1092,23 +1122,27 @@ EngineView.prototype = {
       return;
     col = col.element || document.getElementById(col.id);
     var cycle = {
-      natural: 'ascending',
-      ascending: 'descending',
-      descending: 'natural'
+      "natural":    "ascending",
+      "ascending":  "descending",
+      "descending": "natural"
     };
 
     gEngineManagerDialog.sortBy(cycle[col.getAttribute("sortDirection")]);
   },
   drop: function EngineView__drop(treeDropIndex, orientation) {
-    // find out indexes
-    var treeSourceIndexes = this.getSourceIndexesFromDrag();
+    // find out the indexes
+    var treeSourceItems = this.getSourceItemsFromDrag(), treeSourceIndexes = [];
+    for(var i = 0; i < treeSourceItems.length; i++) {
+      treeSourceIndexes.push(this._indexCache.indexOf(treeSourceItems[i]));
+    }
+    this.clearSourceIndexes();
     var treeParentIndex = this.getParentIndex(treeDropIndex);
     var dropIndex;
 
     switch(orientation) {
       case Ci.nsITreeView.DROP_ON:
         treeParentIndex = treeDropIndex;
-        dropIndex = -1;
+        dropIndex = this._indexCache[treeParentIndex].children.length;
         break;
       case Ci.nsITreeView.DROP_BEFORE:
         var dropParent = this._indexCache[treeDropIndex].parent;
@@ -1130,18 +1164,21 @@ EngineView.prototype = {
 
     // now that we have the indexes, do the moving
     var parent = this._indexCache[treeParentIndex];
-    var items = [], tempDropIndex;
+    if(!parent || !parent.children)
+      return;
+    var items = [], tempDropIndex, relative = 0;
     for(var i = 0; i < treeSourceIndexes.length; i++) {
-      var item = this._indexCache[treeSourceIndexes[i]];
-      tempDropIndex = dropIndex;
-      if(tempDropIndex != 0) {
+      var item = treeSourceItems[i];
+      tempDropIndex = dropIndex + relative;
+      if(treeDropIndex > treeSourceIndexes[i] && dropParent == item.parent)
+        relative -= 1;
+      if(tempDropIndex) {
         if(orientation == Ci.nsITreeView.DROP_BEFORE &&
-           (treeDropIndex > treeSourceIndexes[i] || dropParent == item.parent)) {
-          tempDropIndex = tempDropIndex - 1;
+           (treeDropIndex > treeSourceIndexes[i] && dropParent == item.parent)) {
+          tempDropIndex -= 1;
         } else if(orientation == Ci.nsITreeView.DROP_AFTER &&
-                  (treeDropIndex < treeSourceIndexes[i] ||
-                   dropParent != item.parent)) {
-          tempDropIndex = tempDropIndex + 1;
+                  (treeDropIndex < treeSourceIndexes[i] || dropParent != item.parent)) {
+            tempDropIndex += 1;
         }
       }
       items[i] = this.internalMove(item, parent, tempDropIndex);
@@ -1151,12 +1188,10 @@ EngineView.prototype = {
     // update the tree and correct the selection
     this.updateCache();
     this.invalidate();
-    var treeDropIndexes = [];
+    this.select(true); // clear selection
     for(var i = 0; i < items.length; i++) {
-      treeDropIndexes[i] = this._indexCache.indexOf(items[i]);
+      this.select(this._indexCache.indexOf(items[i]), false);
     }
-    treeDropIndexes.push(true);
-    this.select.apply(this, treeDropIndexes);
     document.getElementById("engineList").focus();
   },
   internalMove: function(item, parent, index) {
@@ -1168,14 +1203,18 @@ EngineView.prototype = {
     if(treeParentIndex != -1 && !this.isContainerOpen(treeParentIndex))
       this.toggleOpenState(treeParentIndex);
     var node = item.node;
+    var old = item;
     if(item.isSeq) {
       var children = item.children;
       item.destroy();
-      item = item.replacedWith = new Structure__Container(parent, node, children, item.open);
+      item = new Structure__Container(parent, node, children, item.open);
     } else {
       item.destroy();
-      item = new Structure__Item(parent, node);
+      item = new Structure__Item(parent, node, item.originalEngine);
+      item.alias = old.alias;
     }
+    item.modified = old.modified;
+    item.name = old.name;
     parent.insertAt(index, item);
     return item;
   },
@@ -1281,9 +1320,6 @@ EngineView.prototype = {
     return open;
   }
 };
-} catch(e) {
-  Components.reportError(e);
-}
 function LOG(msg) {
   msg = "Organize Search Engines:   " + msg;
   var consoleService = Cc["@mozilla.org/consoleservice;1"]

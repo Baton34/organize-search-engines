@@ -1,3 +1,39 @@
+/* ***** BEGIN LICENSE BLOCK *****
+Version: MPL 1.1/GPL 2.0/LGPL 2.1
+
+The contents of this file are subject to the Mozilla Public License Version
+1.1 (the "License"); you may not use this file except in compliance with
+the License. You may obtain a copy of the License at
+http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+for the specific language governing rights and limitations under the
+License.
+
+The Original Code is Organize Search Engines.
+
+The Initial Developer of the Original Code is
+Malte Kraus.
+Portions created by the Initial Developer are Copyright (C) 2006-2007
+the Initial Developer. All Rights Reserved.
+
+Contributor(s):
+  Malte Kraus <mails@maltekraus.de> (Original author)
+
+ Alternatively, the contents of this file may be used under the terms of
+ either the GNU General Public License Version 2 or later (the "GPL"), or
+ the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ in which case the provisions of the GPL or the LGPL are applicable instead
+ of those above. If you wish to allow use of your version of this file only
+ under the terms of either the GPL or the LGPL, and not to allow others to
+ use your version of this file under the terms of the MPL, indicate your
+ decision by deleting the provisions above and replace them with the notice
+ and other provisions required by the GPL or the LGPL. If you do not delete
+ the provisions above, a recipient may use your version of this file under
+ the terms of any one of the MPL, the GPL or the LGPL.
+***** END LICENSE BLOCK ***** */
+
 #include "nsISupports.idl"
 
 interface nsIRDFContainer;
@@ -19,7 +55,7 @@ interface nsISEOrganizer : nsISupports {
    *
    * @return The new Folder.
    */
-  nsIRDFResource newFolder(in AUTF8String name, in nsISupports parent);
+  nsIRDFResource newFolder(in AString name, in nsISupports parent);
 
   /* Check whether a node is a separator. */
   boolean isSeparator(in nsIRDFResource separator);
@@ -35,24 +71,26 @@ interface nsISEOrganizer : nsISupports {
   /**
    * Removes an engine/separator/folder and all references to it.
    *
-   * @param item The item to remove.
+   * @param item     The item to remove.
+   * @param recourse Also remove children? If false, the caller has to make sure
+   *                 no unwanted engines are duplicated or removed
    */
-  void removeItem(in nsIRDFResource item);
+  void removeItem(in nsIRDFResource item, in boolean recourse);
 
 
   /**** Item/Name/Index handling ****/
   /* Returns whether an item with a specific name exists. */
-  boolean itemWithNameExists(in AUTF8String name);
+  boolean itemWithNameExists(in AString name);
   /* Returns the (string) name of a given item. */
-  AUTF8String getNameByItem(in nsIRDFResource item);
+  AString getNameByItem(in nsIRDFResource item);
   /* Returns the item with a given name.            *
    * @return The item or null if it does not exist. */
-  nsIRDFResource getItemByName(in AUTF8String name);
+  nsIRDFResource getItemByName(in AString name);
 
   /* Get an item from a given index. */
   nsIRDFResource getItemByIndex(in long index);
   /* Returns the icon URI of the engine with a given index. */
-  AUTF8String getIconByIndex(in long index);
+  AString getIconByIndex(in long index);
   /**
    * Determine the index of an item.
    *
@@ -62,11 +100,12 @@ interface nsISEOrganizer : nsISupports {
    */
   long indexOf(in nsIRDFResource item, in boolean global);
 
-  /* Determine how many children a given container has.                        *
-   * Including grand-children. (The number of direct children can be retrieved *
-   * using nsIRDFContainer.)                                                   */
+  /* Determine how many children a given container has.                       *
+   * Including grand-children. (For the number of direct children, use        *
+   * nsIRDFContainer.)                                                        */
   long getChildCount(in nsIRDFResource item);
 
+  /* returns item's parent folder */
   nsIRDFResource getParent(in nsIRDFResource item);
 
   /* Provides the API to use search aliases in Firefox. Has to be in the xpcom *
