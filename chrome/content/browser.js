@@ -464,13 +464,18 @@ SEOrganizer.prototype = {
 
     if(aVerb == "engine-removed") {
       this.offerNewEngine(aEngine);
-    } else if(aVerb == "engine-added") {
+    } else if(aVerb == "engine-added" || aVerb == "engine-changed") {
       this.hideNewEngine(aEngine);
-    } else if(aVerb == "engine-current" || aVerb == "engine-changed") {
+    } if(aVerb == "engine-current" || aVerb == "engine-changed") {
       this.updateDisplay();
     }
-    this._popup.hidePopup();
-    this.rebuildPopup();
+    // wait for other observers:
+    if(aVerb != "engine-changed") { // engine-changed means moved most times
+      this._popup.hidePopup();
+      window.setTimeout(function(This) {
+        This.rebuildPopup();
+      }, 0, this);
+    }
   }
 };
 organizeSE = new SEOrganizer();
