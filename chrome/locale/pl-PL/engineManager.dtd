@@ -1,0 +1,30 @@
+<!ENTITY namecol.label "Nazwa">
+<!ENTITY aliascol.label "Słowo kluczowe">
+<!ENTITY restoreDefault.label "Przywróć domyślną wyszukiwarkę">
+<!ENTITY restoreDefault.accesskey "e">
+<!ENTITY new-folder.label "Nowy folder...">
+<!ENTITY new-folder.accesskey "F">
+<!ENTITY new-separator.label "Nowy separator">
+<!ENTITY new-separator.accesskey "S">
+<!ENTITY move-engine.label "Przenieś...">
+<!ENTITY move-engine.accesskey "P">
+<!ENTITY rename.label "Zmień nazwę...">
+<!ENTITY rename.accesskey "n">
+<!ENTITY editalias.label "Edytuj słowo kluczowe...">
+<!ENTITY editalias.accesskey "K">
+<!ENTITY fileMenu.label "Plik">
+<!ENTITY fileMenu.accesskey "P">
+<!ENTITY closeCmd.label "Zamknij">
+<!ENTITY closeCmd.accesskey "k">
+<!ENTITY viewMenu.label "Widok">
+<!ENTITY viewMenu.accesskey "W">
+<!ENTITY menuitem.view.command.toolbar.label "Pasek narzędzi">
+<!ENTITY menuitem.view.command.toolbar.accesskey "n">
+<!ENTITY menuitem.view.show_columns.label "Pokaż kolumny">
+<!ENTITY menuitem.view.show_columns.accesskey "l">
+<!ENTITY menuitem.view.unsorted.label "Nieposortowane">
+<!ENTITY menuitem.view.unsorted.accesskey "s">
+<!ENTITY sortAscending.label "Rosnąco">
+<!ENTITY sortAscending.accesskey "a">
+<!ENTITY sortDescending.label "Malejąco">
+<!ENTITY sortDescending.accesskey "M">

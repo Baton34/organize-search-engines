@@ -1,0 +1,30 @@
+<!ENTITY namecol.label "Naam">
+<!ENTITY aliascol.label "Sleutelwoord">
+<!ENTITY restoreDefault.label "Standaard zoekmachine herstellen">
+<!ENTITY restoreDefault.accesskey "h">
+<!ENTITY new-folder.label "Nieuwe map...">
+<!ENTITY new-folder.accesskey "m">
+<!ENTITY new-separator.label "Nieuwe scheidingslijn">
+<!ENTITY new-separator.accesskey "s">
+<!ENTITY move-engine.label "Verplaatsen...">
+<!ENTITY move-engine.accesskey "p">
+<!ENTITY rename.label "Hernoemen...">
+<!ENTITY rename.accesskey "n">
+<!ENTITY editalias.label "Sleutelwoord wijzigen...">
+<!ENTITY editalias.accesskey "t">
+<!ENTITY fileMenu.label "Bestand">
+<!ENTITY fileMenu.accesskey "B">
+<!ENTITY closeCmd.label "Sluiten">
+<!ENTITY closeCmd.accesskey "S">
+<!ENTITY viewMenu.label "Beeld">
+<!ENTITY viewMenu.accesskey "l">
+<!ENTITY menuitem.view.command.toolbar.label "Werkbalk">
+<!ENTITY menuitem.view.command.toolbar.accesskey "W">
+<!ENTITY menuitem.view.show_columns.label "Kolommen weergeven">
+<!ENTITY menuitem.view.show_columns.accesskey "K">
+<!ENTITY menuitem.view.unsorted.label "Ongesorteerd">
+<!ENTITY menuitem.view.unsorted.accesskey "g">
+<!ENTITY sortAscending.label "Oplopend">
+<!ENTITY sortAscending.accesskey "O">
+<!ENTITY sortDescending.label "Aflopend">
+<!ENTITY sortDescending.accesskey "A">

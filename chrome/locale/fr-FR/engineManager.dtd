@@ -1,0 +1,30 @@
+<!ENTITY namecol.label "Nom">
+<!ENTITY aliascol.label "Mot-clé">
+<!ENTITY restoreDefault.label "Restaurer le moteur de recherche par défaut">
+<!ENTITY restoreDefault.accesskey "e">
+<!ENTITY new-folder.label "Nouveau dossier…">
+<!ENTITY new-folder.accesskey "N">
+<!ENTITY new-separator.label "Nouveau séparateur">
+<!ENTITY new-separator.accesskey "S">
+<!ENTITY move-engine.label "Déplacer…">
+<!ENTITY move-engine.accesskey "D">
+<!ENTITY rename.label "Renommer…">
+<!ENTITY rename.accesskey "n">
+<!ENTITY editalias.label "Éditer le mot-clé…">
+<!ENTITY editalias.accesskey "M">
+<!ENTITY fileMenu.label "Fichier">
+<!ENTITY fileMenu.accesskey "F">
+<!ENTITY closeCmd.label "Fermer">
+<!ENTITY closeCmd.accesskey "r">
+<!ENTITY viewMenu.label "Voir">
+<!ENTITY viewMenu.accesskey "V">
+<!ENTITY menuitem.view.command.toolbar.label "Barre d&apos;outils">
+<!ENTITY menuitem.view.command.toolbar.accesskey "o">
+<!ENTITY menuitem.view.show_columns.label "Afficher les colonnes">
+<!ENTITY menuitem.view.show_columns.accesskey "c">
+<!ENTITY menuitem.view.unsorted.label "Non triés">
+<!ENTITY menuitem.view.unsorted.accesskey "i">
+<!ENTITY sortAscending.label "Ascendant">
+<!ENTITY sortAscending.accesskey "A">
+<!ENTITY sortDescending.label "Descendant">
+<!ENTITY sortDescending.accesskey "D">
