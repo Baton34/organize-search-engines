@@ -152,56 +152,26 @@ SEOrganizer.prototype = {
       } catch(e) {
         var addObserver = false;
       }
-      var engines = [];
-      for(var i = 0; i < this._indexCache.length; ++i) {
+      var hiddenInTemplate = false;
+      for(var i = 0, j = 0; i < this._indexCache.length; ++i) {
         if(!this.isFolder(this._indexCache[i]) &&
            !this.isSeparator(this._indexCache[i])) {
           var name = this.getNameByItem(this._indexCache[i]);
           var engine = this.getEngineByName(name);
           if(engine instanceof Ci.nsISearchEngine && !engine.hidden) {
-            engines.push(name);
+            this.moveEngine(engines[i], j++);
           } else {
-            this._removeNonExisting();
+            hiddenInTemplate = true;
           }
         }
       }
-      i = 0;
-      var ss = Cc["@mozilla.org/browser/search-service;1"]
-                 .getService(Ci.nsIBrowserSearchService);
-      /*var obj = {
-        notify:*/var notify = function notify() {
-          if(i >= engines.length) {
-            //timer.cancel();
-            clearTimeout(timer);
-            if(addObserver)
-              os.addObserver(instance, "browser-search-engine-modified", false);
-            os.removeObserver(quit, "quit-application");
-            timer = null;
-          } else {
-            var engineName = engines[i];
-            try {
-              instance.moveEngine(engine, i);
-            } catch(e) {
-              Components.reportError(e);
-            }
-            i = i + 1;
-          }
-        };
-      /*};
-      var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-      timer.initWithCallback(obj, 3, Ci.nsITimer.TYPE_REPEATING_PRECISE);*/
-      var timer = setInterval(notify, 3);
-
-      // it might happen that Firefox is exiting while we are still trying to tell
-      // the search service of the right order. If so, let's freeze Firefox!
-      var quit = {
-        observe: function observe() {
-          while(timer) {
-            obj.notify();
-          }
-        }
-      };
-      os.addObserver(quit, "quit-application", false);
+      if(hiddenInTemplate) {
+        this._removeNonExisting();
+        this.notifyObservers();
+      }
+      if(addObserver) {
+        os.addObserver(instance, "browser-search-engine-modified", false);
+      }
     }
   },
 
@@ -1006,8 +976,7 @@ FoldersOnly.prototype = {
                          .getService(Ci.nsIRDFService);
     var rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
                               .getService(Ci.nsIRDFContainerUtils);
-    var seOrganizer = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer)
-                        .wrappedJSObject;
+    var seOrganizer = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer).wrappedJSObject;
 
     var root = rdfService.GetResource(FOLDERS_ROOT);
     var rootContainer = rdfContainerUtils.MakeSeq(datasource, root);
@@ -1022,12 +991,12 @@ FoldersOnly.prototype = {
       while(item) {
         if(seOrganizer.isFolder(item)) {
           rootContainer.AppendElement(item);
-          
         }
-        if(++i < seOrganizer._indexCache.length)
+        if(++i < seOrganizer._indexCache.length) {
           item = seOrganizer.getItemByIndex(i);
-        else
+        } else {
           break;
+        }
       }
     } catch(e) {}
     this.endUpdateBatch();

@@ -458,6 +458,7 @@ SEOrganizer.prototype = {
     }
   },
 
+  _rebuildTimer: null,
   searchObserve: function observe(aEngine, aTopic, aVerb) {
     if(aTopic != "browser-search-engine-modified")
       return;
@@ -469,13 +470,17 @@ SEOrganizer.prototype = {
     } if(aVerb == "engine-current" || aVerb == "engine-changed") {
       this.updateDisplay();
     }
-    // wait for other observers:
-    if(aVerb != "engine-changed") { // engine-changed means moved most times
-      this._popup.hidePopup();
-      window.setTimeout(function(This) {
-        This.rebuildPopup();
-      }, 0, this);
+
+    // when the manager window is closed, there'll be dozens of notifications
+    // rebuilding the template it for all of these is too slow
+    if(this._rebuildTimer) {
+      window.clearTimeout(this._rebuildTimer);
     }
+    this._rebuildTimer = window.setTimeout(function(This) {
+      This.rebuildPopup();
+      This._popup.hidePopup();
+      This._rebuildTimer = null;
+    }, 50, this);
   }
 };
 organizeSE = new SEOrganizer();
