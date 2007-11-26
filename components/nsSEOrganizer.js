@@ -159,7 +159,7 @@ SEOrganizer.prototype = {
           var name = this.getNameByItem(this._indexCache[i]);
           var engine = this.getEngineByName(name);
           if(engine instanceof Ci.nsISearchEngine && !engine.hidden) {
-            this.moveEngine(engines[i], j++);
+            this.moveEngine(engine, j++);
           } else {
             hiddenInTemplate = true;
           }
