@@ -352,8 +352,16 @@ SEOrganizer.prototype = {
           if(this._removeNonExisting(true)) {
             this.notifyObservers();
           }
-          if(aEngine == this.currentEngine)
-            aEngine = this.defaultEngine;
+          if(aEngine == this.currentEngine) {
+            if(aEngine != this.defaultEngine) {
+              this.currentEngine = this.defaultEngine;
+            } else {
+              var engines = this.getVisibleEngines({});
+              if(engines.length) {
+                this.currentEngine = engines[0];
+              }
+            }
+          }
           break;
         case "engine-added":
           if(this._addMissingEnginesToRDF(true)) {
@@ -361,17 +369,15 @@ SEOrganizer.prototype = {
           }
           break;
         case "engine-changed":
-          // An engine was hidden or unhidden or moved or updated, or an icon
-          // was changed.  We have to remove or add it from/to the RDF for the
-          // case it was hidden/unhidden (this doesn't call removed/added).
-          if(aEngine.wrappedJSObject._engineToUpdate || !this.itemWithNameExists(aEngine.name))
-            return;
-          if(aEngine.hidden)
-            var changed = this._removeNonExisting(true);
-          else
-            var changed = this._addMissingEnginesToRDF(true);
-          if(changed)
-            this.notifyObservers();
+          // An engine was hidden, unhidden, moved, renamed, updated or an icon
+          // changed.  We have to remove or add it from/to the RDF for the case
+          // it was hidden/unhidden (this doesn't call removed/added).
+          if(!aEngine.wrappedJSObject._engineToUpdate) {
+            if(aEngine.hidden)
+              this.observe(aEngine, aTopic, "engine-removed");
+            else
+              this.observe(aEngine, aTopic, "engine-added");
+          }
         case "engine-current": // The current engine was changed.
         case "engine-loaded": // An engine's/icon's download was completed.
           break;
