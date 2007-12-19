@@ -1,0 +1,4 @@
+<!ENTITY window.title "Mover Item(ns)">
+<!ENTITY move-to.label "Mover para:">
+<!ENTITY move-to.accesskey "M">
+<!ENTITY search-engines.toplevel "Mecanismos de pesquisa">

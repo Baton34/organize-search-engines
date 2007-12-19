@@ -1,5 +1,6 @@
 <!ENTITY namecol.label "שם">
 <!ENTITY aliascol.label "מילת מפתח">
+<!ENTITY addEngine.accesskey "G">
 <!ENTITY restoreDefault.label "שחזר מנועי ברירת מחדל">
 <!ENTITY restoreDefault.accesskey "ז">
 <!ENTITY new-folder.label "תיקיה חדשה...">
@@ -12,6 +13,10 @@
 <!ENTITY rename.accesskey "ש">
 <!ENTITY editalias.label "ערוך מילת מפתח...">
 <!ENTITY editalias.accesskey "מ">
+<!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">
+<!ENTITY noconflict.remove.accesskey "&remove.accesskey;">
+<!ENTITY noconflict.up.accesskey "&up.accesskey;">
+<!ENTITY noconflict.dn.accesskey "&dn.accesskey;">
 <!ENTITY fileMenu.label "קובץ">
 <!ENTITY fileMenu.accesskey "ק">
 <!ENTITY closeCmd.label "סגור">

@@ -1,5 +1,6 @@
 <!ENTITY namecol.label "Név">
 <!ENTITY aliascol.label "Kulcsszó">
+<!ENTITY addEngine.accesskey "G">
 <!ENTITY restoreDefault.label "Alapértelmezett kereső visszaállítása">
 <!ENTITY restoreDefault.accesskey "A">
 <!ENTITY new-folder.label "Új mappa...">
@@ -12,6 +13,10 @@
 <!ENTITY rename.accesskey "t">
 <!ENTITY editalias.label "Módosítás...">
 <!ENTITY editalias.accesskey "M">
+<!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">
+<!ENTITY noconflict.remove.accesskey "o">
+<!ENTITY noconflict.up.accesskey "e">
+<!ENTITY noconflict.dn.accesskey "L">
 <!ENTITY fileMenu.label "Fájl">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY closeCmd.label "Bezárás">
