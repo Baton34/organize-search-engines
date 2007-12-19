@@ -470,6 +470,11 @@ SEOrganizer.prototype = {
     } if(aVerb == "engine-current" || aVerb == "engine-changed") {
       this.updateDisplay();
     }
+    if(aVerb == "-engines-organized" && "oDenDZones_Observer" in window) {
+      window.setTimeout(function() {
+        oDenDZones_Observer.observe();
+      }, 0);
+    }
 
     // when the manager window is closed, there'll be dozens of notifications
     // rebuilding the template it for all of these is too slow

@@ -640,6 +640,7 @@ Structure.prototype = {
   isSep: false,
   iconURI: "",
   isSeq: true,
+  isEngine: false,
   children: null,
   alias: "",
   modified: 0,
@@ -714,6 +715,7 @@ Structure__Container.prototype = {
   open: false,
   isSep: false,
   isSeq: true,
+  isEngine: false,
   alias: "",
   modified: 0,
   set iconURI() {
@@ -763,6 +765,9 @@ Structure__Item.prototype = {
   iconURI: "",
   isSep: false,
   isSeq: false,
+  get isEngine() {
+    return !this.isSep;
+  },
   recursiveChildCount: 0,
   originalEngine: null,
   alias: "",
@@ -1032,8 +1037,6 @@ EngineView.prototype = {
         var name = gSEOrganizer.getNameByItem(gRemovedEngines[i]);
         var engine = gSEOrganizer.getEngineByName(name);
         if(engine && engine instanceof Ci.nsISearchEngine) {
-          if(engine == gSEOrganizer.currentEngine)
-            gSEOrganizer.currentEngine = gSEOrganizer.defaultEngine;
           gSEOrganizer.removeEngine(engine);
         } else {
           gSEOrganizer.removeItem(gRemovedEngines[i], false);
@@ -1096,9 +1099,8 @@ EngineView.prototype = {
       delete _dragData[this._lastSourceItems];
   },
 
-  /* attempts to be compatible to the original code */
   get _engineStore() {
-    return this._structure;
+    return new EngineStore();
   },
 
   /* nsITreeView */
@@ -1393,3 +1395,29 @@ function onViewMenuColumnItemSelected(aEvent) {
 
   aEvent.stopPropagation();
 }
+
+
+/* attempt to be somewhat compatible to the original code */
+function EngineStore() {
+  this.engines = [];
+  for(var i = 0; i < gEngineView._indexCache.length; i++) {
+    this.engines.push(gEngineView._indexCache[i].originalEngine);
+  }
+  this.engines.length = gEngineView._indexCache.length;
+  // copy the _dragData stuff over to here so that exts retrieving the "index"
+  for(var i in window._dragData) { // from the drag can use it here
+    if(window._dragData[i].length)
+      this.engines[i] = window._dragData[i][0].originalEngine;
+    else
+      this.engines[i] = null;
+  }
+}
+EngineStore.prototype = {
+  engines: null, // array
+  _getEngineByName: function(name) {
+    var engine = gSEOrganizer.getEngineByName(name);
+    if(engine && gEngineView.engineVisible(engine))
+      return engine;
+    return null;
+  }
+};
