@@ -1129,7 +1129,6 @@ var FolderFactory = {
 module definition (xpcom registration)
 ***********************************************************/
 var SEOrganizerModule = {
-  _firstTime: true,
   registerSelf: function(aCompMgr, aFileSpec, aLocation, aType) {
     aCompMgr = aCompMgr.QueryInterface(Ci.nsIComponentRegistrar);
     aCompMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME, CONTRACT_ID,
