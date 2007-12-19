@@ -84,6 +84,11 @@ Contributor(s):
   </window>
 
   <!-- - - - - - - - - - extensions - - - - - - - - - -->
+  <!-- Auto Context -->
+  <menu id="autocontext-searchmenu" ref="urn:organize-search-engines:root"
+        datasources="rdf:organized-internet-search-engines"
+        template="searchbar-template" sortDirection="natural"
+        sortResource="urn:organize-search-engines#Name" />
   <!-- Context Search -->
   <menu id="context-searchmenu" ref="urn:organize-search-engines:root"
         datasources="rdf:organized-internet-search-engines"
