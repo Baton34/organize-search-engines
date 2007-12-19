@@ -152,56 +152,26 @@ SEOrganizer.prototype = {
       } catch(e) {
         var addObserver = false;
       }
-      var engines = [];
-      for(var i = 0; i < this._indexCache.length; ++i) {
+      var hiddenInTemplate = false;
+      for(var i = 0, j = 0; i < this._indexCache.length; ++i) {
         if(!this.isFolder(this._indexCache[i]) &&
            !this.isSeparator(this._indexCache[i])) {
           var name = this.getNameByItem(this._indexCache[i]);
           var engine = this.getEngineByName(name);
           if(engine instanceof Ci.nsISearchEngine && !engine.hidden) {
-            engines.push(name);
+            this.moveEngine(engine, j++);
           } else {
-            this._removeNonExisting();
+            hiddenInTemplate = true;
           }
         }
       }
-      i = 0;
-      var ss = Cc["@mozilla.org/browser/search-service;1"]
-                 .getService(Ci.nsIBrowserSearchService);
-      /*var obj = {
-        notify:*/var notify = function notify() {
-          if(i >= engines.length) {
-            //timer.cancel();
-            clearTimeout(timer);
-            if(addObserver)
-              os.addObserver(instance, "browser-search-engine-modified", false);
-            os.removeObserver(quit, "quit-application");
-            timer = null;
-          } else {
-            var engineName = engines[i];
-            try {
-              instance.moveEngine(engine, i);
-            } catch(e) {
-              Components.reportError(e);
-            }
-            i = i + 1;
-          }
-        };
-      /*};
-      var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-      timer.initWithCallback(obj, 3, Ci.nsITimer.TYPE_REPEATING_PRECISE);*/
-      var timer = setInterval(notify, 3);
-
-      // it might happen that Firefox is exiting while we are still trying to tell
-      // the search service of the right order. If so, let's freeze Firefox!
-      var quit = {
-        observe: function observe() {
-          while(timer) {
-            obj.notify();
-          }
-        }
-      };
-      os.addObserver(quit, "quit-application", false);
+      if(hiddenInTemplate) {
+        this._removeNonExisting();
+        this.notifyObservers();
+      }
+      if(addObserver) {
+        os.addObserver(instance, "browser-search-engine-modified", false);
+      }
     }
   },
 
@@ -375,15 +345,23 @@ SEOrganizer.prototype = {
   },
 
   observe: function observe(aEngine, aTopic, aVerb) {
-    if(aTopic === "browser-search-engine-modified") {
+    if(aTopic == "browser-search-engine-modified") {
       this.beginUpdateBatch();
       switch(aVerb) {
         case "engine-removed":
           if(this._removeNonExisting(true)) {
             this.notifyObservers();
           }
-          if(aEngine == this.currentEngine)
-            aEngine = this.defaultEngine;
+          if(aEngine == this.currentEngine) {
+            if(aEngine != this.defaultEngine) {
+              this.currentEngine = this.defaultEngine;
+            } else {
+              var engines = this.getVisibleEngines({});
+              if(engines.length) {
+                this.currentEngine = engines[0];
+              }
+            }
+          }
           break;
         case "engine-added":
           if(this._addMissingEnginesToRDF(true)) {
@@ -391,17 +369,15 @@ SEOrganizer.prototype = {
           }
           break;
         case "engine-changed":
-          // An engine was hidden or unhidden or moved or updated, or an icon
-          // was changed.  We have to remove or add it from/to the RDF for the
-          // case it was hidden/unhidden (this doesn't call removed/added).
-          if(aEngine.wrappedJSObject._engineToUpdate || !this.itemWithNameExists(aEngine.name))
-            return;
-          if(aEngine.hidden)
-            var changed = this._removeNonExisting(true);
-          else
-            var changed = this._addMissingEnginesToRDF(true);
-          if(changed)
-            this.notifyObservers();
+          // An engine was hidden, unhidden, moved, renamed, updated or an icon
+          // changed.  We have to remove or add it from/to the RDF for the case
+          // it was hidden/unhidden (this doesn't call removed/added).
+          if(!aEngine.wrappedJSObject._engineToUpdate) {
+            if(aEngine.hidden)
+              this.observe(aEngine, aTopic, "engine-removed");
+            else
+              this.observe(aEngine, aTopic, "engine-added");
+          }
         case "engine-current": // The current engine was changed.
         case "engine-loaded": // An engine's/icon's download was completed.
           break;
@@ -755,13 +731,16 @@ SEOrganizer.prototype = {
     var ss = this._searchService;
     var offset = aName.indexOf(" ");
     var alias = aName.substr(0, offset == -1 ? aName.length : offset).toLowerCase();
-    var engine = ss.getEngineByAlias(alias);
-    if(engine != null && engine.alias == alias && alias && !engine.hidden) {
-      var searchTerm = (offset != -1) ? aName.substr(offset + 1) : "";
-      var submission = engine.getSubmission(searchTerm, null); // we want HTML
-      if(submission.uri) {
-        aPostData.value = submission.postData;
-        return submission.uri.spec;
+    if(alias) {
+      var engine = ss.getEngineByAlias(alias);
+      if(engine != null && engine instanceof Ci.nsISearchEnige &&
+         engine.alias.toLowerCase() == alias && !engine.hidden) {
+        var searchTerm = (offset != -1) ? aName.substr(offset + 1) : "";
+        var submission = engine.getSubmission(searchTerm, null); // we want HTML
+        if(submission.uri) {
+          aPostData.value = submission.postData;
+          return submission.uri.spec;
+        }
       }
     }
     return null;
@@ -1003,8 +982,7 @@ FoldersOnly.prototype = {
                          .getService(Ci.nsIRDFService);
     var rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
                               .getService(Ci.nsIRDFContainerUtils);
-    var seOrganizer = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer)
-                        .wrappedJSObject;
+    var seOrganizer = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer).wrappedJSObject;
 
     var root = rdfService.GetResource(FOLDERS_ROOT);
     var rootContainer = rdfContainerUtils.MakeSeq(datasource, root);
@@ -1019,12 +997,12 @@ FoldersOnly.prototype = {
       while(item) {
         if(seOrganizer.isFolder(item)) {
           rootContainer.AppendElement(item);
-          
         }
-        if(++i < seOrganizer._indexCache.length)
+        if(++i < seOrganizer._indexCache.length) {
           item = seOrganizer.getItemByIndex(i);
-        else
+        } else {
           break;
+        }
       }
     } catch(e) {}
     this.endUpdateBatch();
@@ -1151,7 +1129,6 @@ var FolderFactory = {
 module definition (xpcom registration)
 ***********************************************************/
 var SEOrganizerModule = {
-  _firstTime: true,
   registerSelf: function(aCompMgr, aFileSpec, aLocation, aType) {
     aCompMgr = aCompMgr.QueryInterface(Ci.nsIComponentRegistrar);
     aCompMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME, CONTRACT_ID,

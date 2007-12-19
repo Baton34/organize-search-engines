@@ -370,7 +370,25 @@ EngineManagerDialog.prototype = {
     if(!abort)
       return;
 
-    item.alias = alias.value.toLowerCase().replace(/ /g, "");
+    alias = alias.value.toLowerCase().replace(/ /g, "");
+    item.alias = alias;
+
+    for(var i = 0; i < gEngineView._indexCache.length; i++) {
+      if(gEngineView._indexCache[i].alias == alias) {
+        gEngineView._indexCache[i].alias = "";
+        gEngineView.rowCountChanged(i, -1);
+        gEngineView.rowCountChanged(i, 1);
+      }
+    }
+
+    // the engine is hidden, so its alias is ignored anyways
+    var hiddenDefaults = gSEOrganizer.getDefaultEngines({}).filter(function(e) {
+      return !gEngineView.engineVisible(e);
+    });
+    hiddenDefaults.forEach(function(engine) {
+      if(engine.alias == alias)
+        engine.alias = "";
+    });
 
     gEngineView.rowCountChanged(index, -1);
     gEngineView.rowCountChanged(index, 1);
@@ -622,6 +640,7 @@ Structure.prototype = {
   isSep: false,
   iconURI: "",
   isSeq: true,
+  isEngine: false,
   children: null,
   alias: "",
   modified: 0,
@@ -696,6 +715,7 @@ Structure__Container.prototype = {
   open: false,
   isSep: false,
   isSeq: true,
+  isEngine: false,
   alias: "",
   modified: 0,
   set iconURI() {
@@ -745,6 +765,9 @@ Structure__Item.prototype = {
   iconURI: "",
   isSep: false,
   isSeq: false,
+  get isEngine() {
+    return !this.isSep;
+  },
   recursiveChildCount: 0,
   originalEngine: null,
   alias: "",
@@ -1008,16 +1031,12 @@ EngineView.prototype = {
   commit: function commit() {
     gSEOrganizer.beginUpdateBatch();
     this._structure.commit();
-    /*gSEOrganizer.endUpdateBatch();
-    gSEOrganizer.beginUpdateBatch();*/
     for(var i = 0; i < gRemovedEngines.length; ++i) {
       if(gRemovedEngines[i] && gRemovedEngines[i] instanceof Ci.nsIRDFResource) {
         // remove the search engine, the rest is done by our observers
         var name = gSEOrganizer.getNameByItem(gRemovedEngines[i]);
         var engine = gSEOrganizer.getEngineByName(name);
         if(engine && engine instanceof Ci.nsISearchEngine) {
-          if(engine == gSEOrganizer.currentEngine)
-            gSEOrganizer.currentEngine = gSEOrganizer.defaultEngine;
           gSEOrganizer.removeEngine(engine);
         } else {
           gSEOrganizer.removeItem(gRemovedEngines[i], false);
@@ -1080,9 +1099,8 @@ EngineView.prototype = {
       delete _dragData[this._lastSourceItems];
   },
 
-  /* attempts to be compatible to the original code */
   get _engineStore() {
-    return this._structure;
+    return new EngineStore();
   },
 
   /* nsITreeView */
@@ -1377,3 +1395,29 @@ function onViewMenuColumnItemSelected(aEvent) {
 
   aEvent.stopPropagation();
 }
+
+
+/* attempt to be somewhat compatible to the original code */
+function EngineStore() {
+  this.engines = [];
+  for(var i = 0; i < gEngineView._indexCache.length; i++) {
+    this.engines.push(gEngineView._indexCache[i].originalEngine);
+  }
+  this.engines.length = gEngineView._indexCache.length;
+  // copy the _dragData stuff over to here so that exts retrieving the "index"
+  for(var i in window._dragData) { // from the drag can use it here
+    if(window._dragData[i].length)
+      this.engines[i] = window._dragData[i][0].originalEngine;
+    else
+      this.engines[i] = null;
+  }
+}
+EngineStore.prototype = {
+  engines: null, // array
+  _getEngineByName: function(name) {
+    var engine = gSEOrganizer.getEngineByName(name);
+    if(engine && gEngineView.engineVisible(engine))
+      return engine;
+    return null;
+  }
+};

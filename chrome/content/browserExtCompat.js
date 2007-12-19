@@ -95,6 +95,38 @@ organizeSE__Extensions.prototype = {
    **     want to call this method from init.                                 **
    ****************************************************************************/
 
+  /*** Auto Context ***/
+  autocontext: {
+    get check() {
+      return ("gOverlayAutoContext" in window);
+    },
+    sortDirectionHandler: function sortDirectionHandler(newVal) {
+      const menu = document.getElementById("autocontext-searchmenu");        
+      menu.setAttribute("sortDirection", newVal);
+    },
+    init: function() {
+      const menu = document.getElementById("autocontext-searchmenu");
+      menu.addEventListener("popupshowing", this.onPopupShowing, true);
+      gOverlayAutoContext.loadSearch = this.getSearch();
+    },
+    getSearch: function() {
+      var origSearch = gOverlayAutoContext.loadSearch;
+      return function (aEvent) {
+        const target = aEvent.target;
+        target.engine = organizeSE.SEOrganizer.getEngineByName(target.label);
+        origSearch.apply(this, arguments);
+      };
+    },
+    onPopupShowing: function(event) {
+      if(event.target == event.currentTarget) {
+        event.target.id = "autocontext-searchmenupopup";
+        const menu = document.getElementById("autocontext-searchmenu");        
+        menu.builder.rebuild();
+      } else {
+        event.stopPropagation();
+      }
+    }
+  },
   /*** Context Search ***/
   contextSearch: {
     get check() {

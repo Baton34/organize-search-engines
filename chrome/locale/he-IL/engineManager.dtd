@@ -1,0 +1,35 @@
+<!ENTITY namecol.label "שם">
+<!ENTITY aliascol.label "מילת מפתח">
+<!ENTITY addEngine.accesskey "G">
+<!ENTITY restoreDefault.label "שחזר מנועי ברירת מחדל">
+<!ENTITY restoreDefault.accesskey "ז">
+<!ENTITY new-folder.label "תיקיה חדשה...">
+<!ENTITY new-folder.accesskey "ח">
+<!ENTITY new-separator.label "קו מפריד חדש">
+<!ENTITY new-separator.accesskey "ק">
+<!ENTITY move-engine.label "העבר">
+<!ENTITY move-engine.accesskey "ע">
+<!ENTITY rename.label "שנה שם...">
+<!ENTITY rename.accesskey "ש">
+<!ENTITY editalias.label "ערוך מילת מפתח...">
+<!ENTITY editalias.accesskey "מ">
+<!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">
+<!ENTITY noconflict.remove.accesskey "&remove.accesskey;">
+<!ENTITY noconflict.up.accesskey "&up.accesskey;">
+<!ENTITY noconflict.dn.accesskey "&dn.accesskey;">
+<!ENTITY fileMenu.label "קובץ">
+<!ENTITY fileMenu.accesskey "ק">
+<!ENTITY closeCmd.label "סגור">
+<!ENTITY closeCmd.accesskey "ס">
+<!ENTITY viewMenu.label "תצוגה">
+<!ENTITY viewMenu.accesskey "ת">
+<!ENTITY menuitem.view.command.toolbar.label "סרגל כלים">
+<!ENTITY menuitem.view.command.toolbar.accesskey "ס">
+<!ENTITY menuitem.view.show_columns.label "הצג עמודות">
+<!ENTITY menuitem.view.show_columns.accesskey "צ">
+<!ENTITY menuitem.view.unsorted.label "לא ממוין">
+<!ENTITY menuitem.view.unsorted.accesskey "ל">
+<!ENTITY sortAscending.label "בסדר עולה">
+<!ENTITY sortAscending.accesskey "ע">
+<!ENTITY sortDescending.label "בסדר יורד">
+<!ENTITY sortDescending.accesskey "ר">

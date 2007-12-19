@@ -458,19 +458,34 @@ SEOrganizer.prototype = {
     }
   },
 
+  _rebuildTimer: null,
   searchObserve: function observe(aEngine, aTopic, aVerb) {
     if(aTopic != "browser-search-engine-modified")
       return;
 
     if(aVerb == "engine-removed") {
       this.offerNewEngine(aEngine);
-    } else if(aVerb == "engine-added") {
+    } else if(aVerb == "engine-added" || aVerb == "engine-changed") {
       this.hideNewEngine(aEngine);
-    } else if(aVerb == "engine-current" || aVerb == "engine-changed") {
+    } if(aVerb == "engine-current" || aVerb == "engine-changed") {
       this.updateDisplay();
     }
-    this._popup.hidePopup();
-    this.rebuildPopup();
+    if(aVerb == "-engines-organized" && "oDenDZones_Observer" in window) {
+      window.setTimeout(function() {
+        oDenDZones_Observer.observe();
+      }, 0);
+    }
+
+    // when the manager window is closed, there'll be dozens of notifications
+    // rebuilding the template it for all of these is too slow
+    if(this._rebuildTimer) {
+      window.clearTimeout(this._rebuildTimer);
+    }
+    this._rebuildTimer = window.setTimeout(function(This) {
+      This.rebuildPopup();
+      This._popup.hidePopup();
+      This._rebuildTimer = null;
+    }, 50, this);
   }
 };
 organizeSE = new SEOrganizer();

@@ -204,19 +204,21 @@ Contributor(s):
   <separator class="thin" />
   <description>&engineManager.intro;</description>
 
-  <tree id="engineList" flex="1" rows="10"
-        enableColumnDrag="true" flags="dont-build-content"
-        onselect="gEngineManagerDialog.onSelect();"
-        ondraggesture="gEngineManagerDialog.startDrag(event);">
-    <treecols>
-      <treecol id="engineName" primary="true" flex="1" label="&namecol.label;"
-               persist="width ordinal hidden" />
-      <splitter class="tree-splitter"/>
-      <treecol id="engineAlias" width="35" label="&aliascol.label;"
-               persist="width ordinal hidden" />
-    </treecols>
-    <treechildren />
-  </tree>
+  <hbox>
+    <tree id="engineList" flex="1" rows="10"
+          enableColumnDrag="true" flags="dont-build-content"
+          onselect="gEngineManagerDialog.onSelect();"
+          ondraggesture="gEngineManagerDialog.startDrag(event);">
+      <treecols>
+        <treecol id="engineName" primary="true" flex="1" label="&namecol.label;"
+                 persist="width ordinal hidden" />
+        <splitter class="tree-splitter"/>
+        <treecol id="engineAlias" width="35" label="&aliascol.label;"
+                 persist="width ordinal hidden" />
+      </treecols>
+      <treechildren />
+    </tree>
+  </hbox>
 
   <hbox pack="end">
     <button command="cmd_ok" id="btn_ok" />
