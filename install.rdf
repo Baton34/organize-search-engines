@@ -16,14 +16,20 @@
     <em:creator>Malte Kraus</em:creator>
     <em:contributor>ReVox: help sorting out the crash on cancel</em:contributor>
     <em:contributor>Wawuschel: help sorting out the crash with context search and menu editor</em:contributor>
-    <em:translator>Cashman</em:translator>
+
     <em:translator>Andrea</em:translator>
+    <em:translator>Cashman</em:translator>
+    <em:translator>SilentBob</em:translator>
+    <em:translator>Alf</em:translator>
+    <em:translator>catcat</em:translator>
+    <em:translator>vatzec</em:translator>
+    <em:translator>raryelcsouza</em:translator>
 
     <em:targetApplication>
       <RDF:Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>2.0</em:minVersion>
-        <em:maxVersion>3.0b2</em:maxVersion>
+        <em:maxVersion>3.0b3</em:maxVersion>
       </RDF:Description>
     </em:targetApplication>
 
