@@ -176,6 +176,8 @@ EngineManagerDialog.prototype = {
     }
   },
   onClose: function EngineManager__onClose() {
+    var Components = window.Components || EngineManager__onClose.caller.caller.caller.__parent__.Components;
+    var Cc = Components.classes, Ci = Components.interfaces;
     var This = this;
     var body = function() {
       // Remove the observers
@@ -199,8 +201,10 @@ EngineManagerDialog.prototype = {
   },
 
   observe: function EngineManager__observe(aSubject, aTopic, aVerb) {
-    if(!window || window.closed)
+    if(!window || window.closed) {
       this.onClose();
+      return;
+    }
     window.setTimeout(function() {
       if(aTopic === "browser-search-engine-modified" &&
          aSubject instanceof Ci.nsISearchEngine) {
@@ -361,20 +365,20 @@ EngineManagerDialog.prototype = {
        item.modified = 1;
 
     var alias = { value: item.alias };
-    var name =  { value: item.name  };
     var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
                     .getService(Ci.nsIPromptService);
-    var title = gStrings.getFormattedString("editalias.title", [name.value]);
-    var content = gStrings.getFormattedString("editalias.name", [name.value]);
+    var title = gStrings.getFormattedString("editalias.title", [item.name]);
+    var content = gStrings.getFormattedString("editalias.name", [item.name]);
     var abort = prompts.prompt(window, title, content, alias, null, {});
     if(!abort)
       return;
 
-    alias = alias.value.toLowerCase().replace(/ /g, "");
+    alias = alias.value.replace(/ /g, "").toLowerCase();
     item.alias = alias;
 
     for(var i = 0; i < gEngineView._indexCache.length; i++) {
-      if(gEngineView._indexCache[i].alias == alias) {
+      if(item != gEngineView._indexCache[i] &&
+         gEngineView._indexCache[i].alias == alias) {
         gEngineView._indexCache[i].alias = "";
         gEngineView.rowCountChanged(i, -1);
         gEngineView.rowCountChanged(i, 1);
@@ -801,9 +805,9 @@ Structure__Item.prototype = {
         engine._serializeToFile();
         var os = Cc["@mozilla.org/observer-service;1"]
                    .getService(Ci.nsIObserverService);
-        os.removeObserver(gSEOrganizer, SEARCH_ENGINE_TOPIC);
-        os.notifyObservers(this.originalEngine, SEARCH_ENGINE_TOPIC, "engine-changed");
-        os.addObserver(gSEOrganizer, SEARCH_ENGINE_TOPIC, false);
+        engine.__action = "name";
+        os.notifyObservers(engine, SEARCH_ENGINE_TOPIC, "engine-changed");
+        delete engine.__action;
 
         var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                            .getService(Ci.nsIRDFService);
@@ -1030,6 +1034,9 @@ EngineView.prototype = {
   },
   commit: function commit() {
     gSEOrganizer.beginUpdateBatch();
+    for(var i = 0; i < gSEOrganizer._observers.length; ++i) {
+      gSEOrganizer._datasource.RemoveObserver(gSEOrganizer._observers[i]);
+    }
     this._structure.commit();
     for(var i = 0; i < gRemovedEngines.length; ++i) {
       if(gRemovedEngines[i] && gRemovedEngines[i] instanceof Ci.nsIRDFResource) {
@@ -1042,6 +1049,9 @@ EngineView.prototype = {
           gSEOrganizer.removeItem(gRemovedEngines[i], false);
         }
       }
+    }
+    for(var i = 0; i < gSEOrganizer._observers.length; ++i) {
+      gSEOrganizer._datasource.AddObserver(gSEOrganizer._observers[i]);
     }
     gSEOrganizer.endUpdateBatch();
     gSEOrganizer.saveChanges();
