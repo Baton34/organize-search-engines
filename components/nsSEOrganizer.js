@@ -110,7 +110,7 @@ function SEOrganizer() {
                           .getService(Ci.nsIBrowserSearchService);
   this._rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                        .getService(Ci.nsIRDFService);
-  this.wrappedJSObject = this; // xxx
+  this.wrappedJSObject = this;
   this._init();
 }
 
