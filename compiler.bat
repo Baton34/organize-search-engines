@@ -19,7 +19,7 @@ ren chrome.manifest.rel chrome.manifest
 rem delete the old file to start with a blank ext
 del %filename%
 rem make the xpi file (maximum compression)
-%ProgramFiles%\7-Zip\7z.exe -mx=9 u -tzip %filename% LICENSE.txt chrome.manifest install.rdf chrome\*.jar defaults\preferences\%extShortName%.js components\*.js components\*.xpt
+%ProgramFiles%\7-Zip\7z.exe -mx=9 u -tzip %filename% LICENSE.txt SOURCE.txt chrome.manifest install.rdf chrome\*.jar defaults\preferences\%extShortName%.js components\*.js components\*.xpt
 
 rem rename chrome.manifest files
 ren chrome.manifest chrome.manifest.rel
