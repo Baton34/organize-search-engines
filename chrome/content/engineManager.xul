@@ -204,7 +204,7 @@ Contributor(s):
   <separator class="thin" />
   <description>&engineManager.intro;</description>
 
-  <hbox>
+  <hbox flex="1">
     <tree id="engineList" flex="1" rows="10"
           enableColumnDrag="true" flags="dont-build-content"
           onselect="gEngineManagerDialog.onSelect();"

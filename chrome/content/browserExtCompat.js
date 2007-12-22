@@ -101,7 +101,7 @@ organizeSE__Extensions.prototype = {
       return ("gOverlayAutoContext" in window);
     },
     sortDirectionHandler: function sortDirectionHandler(newVal) {
-      const menu = document.getElementById("autocontext-searchmenu");
+      const menu = document.getElementById("autocontext-searchmenu");        
       menu.setAttribute("sortDirection", newVal);
     },
     init: function() {
@@ -120,7 +120,7 @@ organizeSE__Extensions.prototype = {
     onPopupShowing: function(event) {
       if(event.target == event.currentTarget) {
         event.target.id = "autocontext-searchmenupopup";
-        const menu = document.getElementById("autocontext-searchmenu");
+        const menu = document.getElementById("autocontext-searchmenu");        
         menu.builder.rebuild();
       } else {
         event.stopPropagation();

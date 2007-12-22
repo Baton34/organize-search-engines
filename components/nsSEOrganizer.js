@@ -110,7 +110,7 @@ function SEOrganizer() {
                           .getService(Ci.nsIBrowserSearchService);
   this._rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                        .getService(Ci.nsIRDFService);
-  this.wrappedJSObject = this; // xxx
+  this.wrappedJSObject = this;
   this._init();
 }
 
@@ -130,9 +130,7 @@ SEOrganizer.prototype = {
     if(this._addMissingEnginesToRDF() | this._removeNonExisting())
       this.saveChanges();
 
-    this._setUpWrappedJSObject();
-    this._replaceAddEngineConfirmation();
-    this._replaceUpdateHandling();
+    this._modifySearchService();
   },
 
   saveChanges: function SEOrganizer__saveChanges(dontResort) {
@@ -153,26 +151,36 @@ SEOrganizer.prototype = {
         var addObserver = false;
       }
       var hiddenInTemplate = false;
-      for(var i = 0, j = 0; i < this._indexCache.length; ++i) {
+      var engines = [];
+      for(var i = 0; i < this._indexCache.length; ++i) {
         if(!this.isFolder(this._indexCache[i]) &&
            !this.isSeparator(this._indexCache[i])) {
           var name = this.getNameByItem(this._indexCache[i]);
           var engine = this.getEngineByName(name);
           if(engine instanceof Ci.nsISearchEngine && !engine.hidden) {
-            this.moveEngine(engine, j++);
+            engines.push(engine);
           } else {
             hiddenInTemplate = true;
           }
         }
       }
+      setTimeout(this.__delayedMoveEngines, 0, 0, engines, this);
       if(hiddenInTemplate) {
         this._removeNonExisting();
         this.notifyObservers();
+        this.saveChanges();
       }
       if(addObserver) {
         os.addObserver(instance, "browser-search-engine-modified", false);
       }
     }
+  },
+  __delayedMoveEngines: function delayedMoveEngines(i, engines, This) {
+    if(engines.length <= i)
+      return;
+    for(var j = i; j < engines.length && j < i + 10; j++)
+      This.moveEngine(engines[j], j);
+    setTimeout(delayedMoveEngines, 30, j, engines, This);
   },
 
   reload: function SEOrganizer__reload() {
@@ -229,8 +237,7 @@ SEOrganizer.prototype = {
           var current = this._getAnonymousResource();
           (container || rootContainer).AppendElement(current);
           var currentName = rdfService.GetLiteral(engines[i].name);
-          var observers = this._observers.concat([]);
-            this.Assert(current, name, currentName, true);
+          this.Assert(current, name, currentName, true);
           modified = true;
         } catch(e) {}
       }
@@ -263,92 +270,19 @@ SEOrganizer.prototype = {
     return modified;
   },
 
-  _replaceAddEngineConfirmation: function() {
-    var seOrganizer = this;
 
-    var comparator = Cc["@mozilla.org/xpcom/version-comparator;1"]
-                       .getService(Ci.nsIVersionComparator);
-    var app  = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo)
-                 .QueryInterface(Ci.nsIXULRuntime);
-    var version = comparator.compare(app.version, "3.0a0pre");
-
-    var topLevel = this._topLevel;
-    const BUNDLE = topLevel.SIDEBAR_BUNDLE || topLevel.SEARCH_BUNDLE;
-    var EnginePrototype = topLevel.Engine.prototype;
-    EnginePrototype._confirmAddEngine = function confirmAddEngine() {
-      var windowWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"]
-                            .getService(Ci.nsIWindowWatcher);
-      var parent = windowWatcher.activeWindow;
-      if(!parent)
-        return;
-
-      var sbs = Cc["@mozilla.org/intl/stringbundle;1"].
-                getService(Ci.nsIStringBundleService);
-      var stringBundle = sbs.createBundle(BUNDLE);
-
-      var titleMessage = stringBundle.GetStringFromName("addEngineConfirmTitle");
-
-      // Display only the hostname portion of the URL.
-      var dialogMessage = (version < 1) ? "addEngineConfirmText" : "addEngineConfirmation";
-      dialogMessage = stringBundle.formatStringFromName(dialogMessage,
-                                               [this._name, this._uri.host], 2);
-      var checkboxMessage = stringBundle.GetStringFromName("addEngineUseNowText");
-      var addButtonLabel = stringBundle.GetStringFromName("addEngineAddButtonLabel");
-
-      var args =  Cc["@mozilla.org/embedcomp/dialogparam;1"]
-                    .createInstance(Ci.nsIDialogParamBlock);
-      args.SetString(12, titleMessage);
-      args.SetString(0, dialogMessage);
-      args.SetString(1, checkboxMessage);
-      args.SetInt(1, 0); // checkbox not checked by default
-      args.SetString(3, ""); // header
-      args.SetInt(2, 2); // number of buttons
-      args.SetInt(5, 0); // default button
-      args.SetString(8, addButtonLabel); // accept button label
-      args.SetString(9, ""); // cancel button label
-      args.SetInt(3, 0); // number of textboxes
-      args.SetInt(6, 0); // no delay
-      parent.openDialog("chrome://seorganizer/content/confirmAddEngine.xul",
-                        "_blank", "centerscreen,chrome,modal,titlebar", args);
-      var folder = args.GetString(13);
-      seOrganizer._engineFolders[this.name] = folder;
-      return {confirmed: !args.GetInt(0), useNow: args.GetInt(1)};
-    };
-  },
-  // we want to persist the user-chosen name and alias through an update
-  _replaceUpdateHandling: function() {
-    var ss = this._searchService.wrappedJSObject;
-    var orig = ss._addEngineToStore;
-    ss._addEngineToStore = function(aEngine) {
-      var oldEngine = aEngine._engineToUpdate;
-      if(oldEngine &&
-         (aEngine.name != oldEngine.name || aEngine.alias != oldEngine.alias)) {
-        aEngine._name = oldEngine.name;
-        aEngine._alias = oldEngine.alias;
-        aEngine._serializeToFile();
-      }
-      orig.apply(this, arguments);
-    };
-  },
-
-  _setUpWrappedJSObject: function() {
+  _modifySearchService: function() {
     var topLevel = this.defaultEngine.wrappedJSObject.__parent__;
-    this._topLevel = topLevel;
-    var ss = topLevel.SearchService.prototype;
-    var orig = ss.getEngines;
-    ss.getEngines = function(a) {
-      this.wrappedJSObject = this; // NOW we have a .wrappedJSObject
-      this.getEngines = orig; // restore the original function
-      return orig.call(this, arguments); // call the original function, just to be sure
-    };
-    this._searchService.getEngines({});
+    var uri = "chrome://seorganizer/content/searchServiceModifications.js";
+    Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader)
+                                               .loadSubScript(uri, topLevel);
   },
 
   observe: function observe(aEngine, aTopic, aVerb) {
     if(aTopic == "browser-search-engine-modified") {
-      this.beginUpdateBatch();
       switch(aVerb) {
         case "engine-removed":
+          this.beginUpdateBatch();
           if(this._removeNonExisting(true)) {
             this.notifyObservers();
           }
@@ -362,17 +296,20 @@ SEOrganizer.prototype = {
               }
             }
           }
+          this.endUpdateBatch();
           break;
         case "engine-added":
+          this.beginUpdateBatch();
           if(this._addMissingEnginesToRDF(true)) {
             this.notifyObservers();
           }
+          this.endUpdateBatch();
           break;
         case "engine-changed":
           // An engine was hidden, unhidden, moved, renamed, updated or an icon
-          // changed.  We have to remove or add it from/to the RDF for the case
-          // it was hidden/unhidden (this doesn't call removed/added).
-          if(!aEngine.wrappedJSObject._engineToUpdate) {
+          // changed.  We have to remove or add it from/to the RDF when it was
+          // hidden/unhidden (this doesn't call removed/added).
+          if(aEngine.wrappedJSObject.__action == "hidden") {
             if(aEngine.hidden)
               this.observe(aEngine, aTopic, "engine-removed");
             else
@@ -382,8 +319,7 @@ SEOrganizer.prototype = {
         case "engine-loaded": // An engine's/icon's download was completed.
           break;
       }
-      this.endUpdateBatch();
-      // we should notify rdf observers
+      // xxx we should notify rdf observers
     }
   },
 
@@ -724,7 +660,6 @@ SEOrganizer.prototype = {
   _rdfService: null,
   _datasource: null,
   _searchService: null,
-  _topLevel: null,
 
   /* make Firefox support search aliases */
   resolveKeyword: function(aName, aPostData) {
@@ -781,8 +716,11 @@ SEOrganizer.prototype = {
   removeEngine: function nsIBrowserSearchService__removeEngine(engine) {
     return this._searchService.removeEngine(engine);
   },
+  _defaultEngine: null,
   get defaultEngine() {
-    return this._searchService.defaultEngine;
+    if(!this._defaultEngine)
+      this._defaultEngine = this._searchService.defaultEngine;
+    return this._defaultEngine;
   },
   get currentEngine() {
     return this._searchService.currentEngine;

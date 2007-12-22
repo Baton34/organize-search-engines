@@ -462,12 +462,23 @@ SEOrganizer.prototype = {
   searchObserve: function observe(aEngine, aTopic, aVerb) {
     if(aTopic != "browser-search-engine-modified")
       return;
+    if(aEngine)
+      aEngine = aEngine.wrappedJSObject;
+
+    if(aVerb == "engine-changed") {
+      if(aEngine.__action == "hidden") {
+        aVerb = (aEngine.hidden) ? "engine-removed" : "engine-added";
+      } else if(aEngine.__action == "alias" || aEngine.__action == "update") {
+        return; // ignore
+      } /*else if(aEngine.__action == "icon" || aEngine.__action == "move") {
+      }*/
+    }
 
     if(aVerb == "engine-removed") {
       this.offerNewEngine(aEngine);
-    } else if(aVerb == "engine-added" || aVerb == "engine-changed") {
+    } else if(aVerb == "engine-added") {
       this.hideNewEngine(aEngine);
-    } if(aVerb == "engine-current" || aVerb == "engine-changed") {
+    } if(aVerb == "engine-current") {
       this.updateDisplay();
     }
     if(aVerb == "-engines-organized" && "oDenDZones_Observer" in window) {
@@ -477,7 +488,7 @@ SEOrganizer.prototype = {
     }
 
     // when the manager window is closed, there'll be dozens of notifications
-    // rebuilding the template it for all of these is too slow
+    // rebuilding the template for all of these is too slow
     if(this._rebuildTimer) {
       window.clearTimeout(this._rebuildTimer);
     }
@@ -485,7 +496,7 @@ SEOrganizer.prototype = {
       This.rebuildPopup();
       This._popup.hidePopup();
       This._rebuildTimer = null;
-    }, 50, this);
+    }, 100, this);
   }
 };
 organizeSE = new SEOrganizer();
