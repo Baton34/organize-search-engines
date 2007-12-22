@@ -10,3 +10,6 @@ menu.searchbar-engine-menu[selected="true"],
 menuitem.searchbar-engine-menuitem[selected="true"] {
   font-weight: bolder;
 }
+menuseparator.searchbar-engine-menuseparator {
+  min-width: 5em;
+}
