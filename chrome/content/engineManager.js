@@ -122,8 +122,8 @@ EngineManagerDialog.prototype = {
     document.getElementById(gSortDir).setAttribute("checked", "true");
 
     var engineList = document.getElementById("engineList");
-    gEngineView = new EngineView(new Structure());
-    engineList.view = gEngineView;
+    engineList.view = gEngineView = new EngineView(new Structure());
+    gEngineView.selection.currentIndex = gEngineView.rowCount - 1;
 
     // add observers:
     var os = Cc["@mozilla.org/observer-service;1"].
@@ -142,7 +142,9 @@ EngineManagerDialog.prototype = {
     cancel.setAttribute("label", dlgStrings.getString("button-cancel"));
     cancel.setAttribute("accesskey", dlgStrings.getString("accesskey-cancel"));
 
-    document.getElementById("engineList").focus();
+    window.setTimeout(function() {
+      engineList.focus();
+    }, 0);
   },
   onOK: function EngineManager__onOK() {
     this.onClose();
@@ -249,9 +251,9 @@ EngineManagerDialog.prototype = {
 
   remove: function EngineManager__remove() {
     var indexes = gEngineView.selectedIndexes;
-    var index, item, parent, localIndex;
     gEngineView.selection.clearSelection();
 
+    var index, item, parent, localIndex;
     for(var k = 0; k < indexes.length; k++) {
       index = indexes[k];
       item = gEngineView._indexCache[index];
@@ -260,17 +262,17 @@ EngineManagerDialog.prototype = {
 
       gRemovedEngines.push(item.node);
       var removedCount = 1;
-      if(item.isSeq) {
-        var items = [item.children];
+      if(item.isSeq) { // count removed children and add them to gRemovedEngines
+        var items = [item];
         for(var i = 0; i < items.length; ++i) {
-          for(var j = 0; j < items[i].length; ++j) {
-            gRemovedEngines.push(items[i][j].node);
+          for(var j = 0; j < items[i].children.length; ++j) {
+            gRemovedEngines.push(items[i].children[j].node);
             if(items[i].open)
-              ++removedCount;
-            if(items[i][j].isSeq) {
-              items.push(items[i][j].children);
-              if(!items[i].open)
-                items[i][j].open = false;
+              removedCount++;
+            if(items[i].children[j].isSeq) {
+              items.push(items[i].children[j].children);
+              if(!items[i].open) // don't count items in open folders in closed folders
+                items[i].children[j].open = false;
             }
           }
         }
@@ -278,12 +280,12 @@ EngineManagerDialog.prototype = {
 
       parent.children = parent.children.slice(0, localIndex)
                               .concat(parent.children.slice(localIndex + 1));
+      parent.modified = parent.modified || 1;
 
       gEngineView.updateCache();
       gEngineView.rowCountChanged(index, -removedCount);
       gEngineView.invalidate();
-      var idx = Math.min(index, gEngineView.lastIndex);
-      gEngineView.ensureRowIsVisible(idx);
+      gEngineView.ensureRowIsVisible(Math.min(index, gEngineView.lastIndex));
     }
 
     document.getElementById("engineList").focus();
@@ -850,9 +852,9 @@ Structure__Container.prototype.insertAt = Structure.prototype.insertAt =
            function Structure__General__insertAt(idx, item) {
   this.modified = this.modified || 1;
   item.parent = this;
-  if(idx === -1 || idx >= this.children.length) {
+  if(idx == -1 || idx >= this.children.length) {
     this.children.push(item);
-  } else if(idx === 0) {
+  } else if(idx == 0) {
     this.children = [item].concat(this.children);
   } else {
     var children = this.children.slice(0, idx);
@@ -863,20 +865,22 @@ Structure__Container.prototype.insertAt = Structure.prototype.insertAt =
 };
 Structure__Container.prototype.commit = Structure.prototype.commit =
            function Structure__General__commit() {
+  for(var i = 0; i < this.children.length; ++i) {
+    this.children[i].commit();
+  }
   if(this.modified) {
-    if(this instanceof Structure__Container &&
-       (gSEOrganizer.getNameByItem(this.node) != this.name || this.modified == 2)) {
-      var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
-                         .getService(Ci.nsIRDFService);
-      var namePred = rdfService.GetResource(NS + "Name");
-      var oldName = gSEOrganizer.GetTarget(this.node, namePred, true);
-      gSEOrganizer.Assert(this.node, namePred, rdfService.GetLiteral(this.name),
-                          true);
-      if(oldName instanceof Ci.nsIRDFLiteral)
-        gSEOrganizer.Unassert(this.node, namePred, oldName);
-    }
     var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                        .getService(Ci.nsIRDFService);
+    if(this instanceof Structure__Container && (this.modified == 2 ||
+       this.name != gSEOrganizer.getNameByItem(this.node))) {
+      var namePred = rdfService.GetResource(NS + "Name");
+      var oldName = gSEOrganizer.GetTarget(this.node, namePred, true);
+      var name = rdfService.GetLiteral(this.name);
+      if(oldName instanceof Ci.nsIRDFLiteral)
+        gSEOrganizer.Unassert(this.node, namePred, oldName);
+      gSEOrganizer.Assert(this.node, namePred, name, true);
+    }
+
     var rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
                               .getService(Ci.nsIRDFContainerUtils);
     var container = rdfContainerUtils.MakeSeq(gSEOrganizer, this.node);
@@ -888,13 +892,10 @@ Structure__Container.prototype.commit = Structure.prototype.commit =
       var pred = rdfService.GetResource(NS_RDF + "_" + i);
       if(gSEOrganizer.hasArcOut(container.Resource, pred)) {
         try {
-          container.RemoveElementAt(i, true);
+          container.RemoveElementAt(i, !(i - 1));
         } catch(e) { }
       }
     }
-  }
-  for(var i = 0; i < this.children.length; ++i) {
-    this.children[i].commit();
   }
 };
 Structure__Container.prototype.find = Structure.prototype.find =
