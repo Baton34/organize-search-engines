@@ -90,9 +90,7 @@ organizeSE__Extensions.prototype = {
    **            you should remove the menuitem from the DOM.                 **
    **   @optional method customizeToolbarHandler: this is called when some    **
    **     element in the toolbar is rebuilt, probably because the toolbars    **
-   **     were customized. You have to check yourself whether it was the      **
-   **     searchbar or some other element of your interest. You'll may also   **
-   **     want to call this method from init.                                 **
+   **     were customized. You may also want to call this method from init.   **
    ****************************************************************************/
 
   /*** Auto Context ***/
@@ -354,7 +352,7 @@ organizeSE__Extensions.prototype = {
       count = popup.childNodes.length - 1;
       if (this.keywords.length) {
         if (count)
-          popup.appendChild(document.createElementNS(OSE_XUL_NS, 'menuseparator'));
+          popup.appendChild(document.createElementNS(gXUL_NS, 'menuseparator'));
 
         for (var i = 0, maxi = this.keywords.length; i < maxi; i++)
         {
@@ -362,7 +360,7 @@ organizeSE__Extensions.prototype = {
               parent.getElementsByAttribute('engineName', this.keywords[i].name+'\n'+this.keywords[i].keyword).length)
           continue;
 
-          popup.appendChild(document.createElementNS(OSE_XUL_NS, 'menuitem'));
+          popup.appendChild(document.createElementNS(gXUL_NS, 'menuitem'));
           popup.lastChild.setAttribute('label',      this.keywords[i].name);
           popup.lastChild.setAttribute('class',      'menuitem-iconic');
           popup.lastChild.setAttribute('src',        this.keywords[i].icon);
@@ -392,17 +390,16 @@ organizeSE__Extensions.prototype = {
     _xpath: "//xul:toolbar/xul:toolbaritem[@class='thinger-item' and @thingtype='search']",
     init: function() {
       this._default = organizeSE.SEOrganizer.currentEngine.name;
-      var searchbars = organizeSE.evalXPath(this._xpath);
-      for(var i = 0; i < searchbars.length; i++) {
-        this.customizeToolbarHandler.call(organizeSE, searchbars[i]);
-      }
+      this.customizeToolbarHandler.call(organizeSE);
       var popupset = document.getElementById("search-popupset");
       popupset.addEventListener("popupshowing", this, false);
     },
     wait: 0,
-    customizeToolbarHandler: function(elem) {
+    customizeToolbarHandler: function() {
       var This = organizeSE.extensions.thinger;
-      if(This._isThingerSearchbar(elem)) {
+      var searchbars = organizeSE.evalXPath(this._xpath);
+      for(var i = 0; i < searchbars.length; i++) {
+        var elem = searchbars[i];
         var anon = document.getAnonymousNodes(elem);
         if(anon && anon[0])
           organizeSE._replaceSearchbarProperties(anon[0]);
@@ -410,10 +407,6 @@ organizeSE__Extensions.prototype = {
     },
     get check() {
       return "thinger" in window;
-    },
-    _isThingerSearchbar: function(elem) {
-      return (elem.className.split(" ").indexOf("thinger-item") != -1 &&
-              elem.getAttribute("thingtype") == "search");
     },
     handleEvent: function(event) {
       if(event.type == "popupshowing") {
