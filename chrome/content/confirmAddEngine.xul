@@ -104,9 +104,9 @@ Contributor(s):
         <label id="engineListLabel" value="&createin.label;" accesskey="&createin.accesskey;" control="engineList" />
         <menulist id="engineList" class="folder-icon" oncommand="organizeSE.onEngineListChange(this);">
           <menupopup ref="urn:organize-search-engines:folders-root"
-                  datasources="rdf:organized-internet-search-engines rdf:organized-internet-search-folders"
-                  sortResource="urn:organize-search-engines#Name"
-                  sortDirection="natural">
+                     datasources="rdf:organized-internet-search-engines rdf:organized-internet-search-folders"
+                     sortResource="urn:organize-search-engines#Name"
+                     sortDirection="natural" id="enginePopup">
             <menuitem class="menuitem-iconic folder-icon"
                       label="&searchEngines;" selected="true"
                       id="rdf:urn:organize-search-engines:folders-root"/>
