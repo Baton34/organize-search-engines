@@ -351,10 +351,9 @@ EngineManagerDialog.prototype = {
     gEngineView.invalidate();
     gEngineView.selection.clearSelection();
     var indexes = [];
-    for each(var item in selected) {
-      if(item)
-        indexes.push(gEngineView._indexCache.indexOf(item));
-    }
+    selected.forEach(function(item) {
+      indexes.push(gEngineView._indexCache.indexOf(item));
+    });
     gEngineView.select.apply(gEngineView, indexes.concat([true]));
     document.getElementById("engineList").focus();
   },
@@ -1009,6 +1008,7 @@ EngineView.prototype = {
       seln.clearSelection();
 
     for(var i = 0; i < arguments.length - 1; ++i) {
+      if(arguments[i] < 0 || arguments[i] > this.rowCount) continue;
       if(!seln.isSelected(arguments[i]))
         seln.toggleSelect(arguments[i]);
       this.ensureRowIsVisible(arguments[i]);
