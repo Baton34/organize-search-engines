@@ -15,7 +15,7 @@ The Original Code is Organize Search Engines.
 
 The Initial Developer of the Original Code is
 Malte Kraus.
-Portions created by the Initial Developer are Copyright (C) 2006-2007
+Portions created by the Initial Developer are Copyright (C) 2006-2008
 the Initial Developer. All Rights Reserved.
 
 Contributor(s):
@@ -65,7 +65,7 @@ SEOrganizer.prototype = {
           return "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
         case "xul":
         default:
-          return gXUL_NS;
+          return kXULNS;
       }
     };
     var scope = aScope || document;
@@ -88,8 +88,8 @@ SEOrganizer.prototype = {
           organizeSE.customizeToolbarListener();
       };
     }, 0);
+    this.customizeToolbarListener();
 
-    this.onCustomizeToolbarFinished();
     var popupset = this.popupset;
 
     const SORT_DIRECTION_PREF = "extensions.seorganizer.sortDirection";
@@ -132,9 +132,7 @@ SEOrganizer.prototype = {
     searchbar.openManager = this.openManager;
     searchbar.observe = this.searchObserve;
     searchbar._textbox.openSearch = this.openSearch;
-    searchbar.__defineGetter__("_popup", function() {
-      return document.getElementById("search-popupset").lastChild;
-    }, false);
+    searchbar.__defineGetter__("_popup", this.__lookupGetter__("popup"), false);
     if(!("_engineButton" in searchbar)) { // minefield compat.
       searchbar.__defineGetter__("_engineButton", function() {
         return document.getAnonymousElementByAttribute(searchbar, "anonid",
@@ -155,7 +153,7 @@ SEOrganizer.prototype = {
     seOrganizer_dragObserver.init();
 
     // now lets copy the manage engines items to where we need it
-    var container =  document.createElementNS(gXUL_NS, "box");
+    var container =  document.createElementNS(kXULNS, "box");
     container.id = "searchpopup-bottom-container";
     if(!document.getElementById("manage-engines-item")) {
       container.insertBefore(popup.lastChild.cloneNode(true), container.firstChild);
@@ -195,9 +193,7 @@ SEOrganizer.prototype = {
   rebuildPopup: function rebuildPopup() {
     organizeSE.popupset.builder.rebuild();
   },
-  rebuildPopupDynamic: function rebuildPopupDynamic() {
-    this.rebuildPopup();
-  },
+  rebuildPopupDynamic: function () { this.rebuildPopup(); },
   // opens the manager in a _resizable_ window
   openManager: function openManager() {
     const wm = Cc["@mozilla.org/appshell/window-mediator;1"]
@@ -311,7 +307,7 @@ SEOrganizer.prototype = {
     if(!addengines || !addengines.length)
       return;
 
-    const separator = document.createElementNS(gXUL_NS, "menuseparator");
+    const separator = document.createElementNS(kXULNS, "menuseparator");
     separator.className = "addengine-separator";
     popup.appendChild(separator);
 
@@ -322,7 +318,7 @@ SEOrganizer.prototype = {
       var labelStr =
            this.searchbar._stringBundle.getFormattedString("cmd_addFoundEngine",
                                                            [engineInfo.title]);
-      menuitem = document.createElementNS(gXUL_NS, "menuitem");
+      menuitem = document.createElementNS(kXULNS, "menuitem");
       menuitem.className = "menuitem-iconic addengine-item";
       menuitem.setAttribute("label", labelStr);
       menuitem.setAttribute("uri", engineInfo.uri);
@@ -392,7 +388,7 @@ SEOrganizer.prototype = {
           EmptyMsg = BookmarksUtils.getLocaleString("emptyFolder");
         else
           EmptyMsg = PlacesUtils.getString("bookmarksMenuEmptyFolder");
-        var emptyElement = document.createElementNS(gXUL_NS, "menuitem");
+        var emptyElement = document.createElementNS(kXULNS, "menuitem");
         emptyElement.setAttribute("id", "empty-menuitem");
         emptyElement.setAttribute("label", EmptyMsg);
         emptyElement.setAttribute("disabled", "true");
