@@ -325,6 +325,7 @@ EngineManagerDialog.prototype = {
     document.getElementById("engineList").focus();
   },
   move: function EngineManager__move() {
+    document.getElementById("engineList").focus();
     var canceled = {value: true}, returnVal = {};
     window.openDialog("chrome://seorganizer/content/moveTo.xul", "_blank",
                       "resizable,chrome,modal,dialog", canceled, returnVal);
@@ -355,7 +356,6 @@ EngineManagerDialog.prototype = {
       indexes.push(gEngineView._indexCache.indexOf(item));
     });
     gEngineView.select.apply(gEngineView, indexes.concat([true]));
-    document.getElementById("engineList").focus();
   },
   editAlias: function EngineManager__editAlias() {
     document.getElementById("engineList").focus();
@@ -379,6 +379,7 @@ EngineManagerDialog.prototype = {
       if(item != gEngineView._indexCache[i] &&
          gEngineView._indexCache[i].alias == alias) {
         gEngineView._indexCache[i].alias = "";
+        gEngineView._indexCache[i].modified = gEngineView._indexCache[i].modified || 1;
         gEngineView.rowCountChanged(i, -1);
         gEngineView.rowCountChanged(i, 1);
       }
@@ -420,18 +421,11 @@ EngineManagerDialog.prototype = {
     gEngineView.selection.clearSelection();
     gEngineView.selection.select(index);
     gEngineView.ensureRowIsVisible(index);
-    document.getElementById("engineList").focus();
   },
 
-  get NEW_ITEM_TYPE_SEPARATOR() {
-    return "separator";
-  },
-  get NEW_ITEM_TYPE_FOLDER() {
-    return "folder";
-  },
-  get NEW_ITEM_RESTORED_DEFAULT_ENGINE() {
-    return "default-engine";
-  },
+  get NEW_ITEM_TYPE_SEPARATOR()          {  return "separator";       },
+  get NEW_ITEM_TYPE_FOLDER()             {  return "folder";          },
+  get NEW_ITEM_RESTORED_DEFAULT_ENGINE() {  return "default-engine";  },
   newItem: function EngineManager__newItem(type) {
     var treeInsertLoc = gEngineView.selectedIndex;
     var insertLoc, parent;
