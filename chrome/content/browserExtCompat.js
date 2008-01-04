@@ -15,7 +15,7 @@ The Original Code is Organize Search Engines.
 
 The Initial Developer of the Original Code is
 Malte Kraus.
-Portions created by the Initial Developer are Copyright (C) 2006-2007
+Portions created by the Initial Developer are Copyright (C) 2006-2008
 the Initial Developer. All Rights Reserved.
 
 Contributor(s):
@@ -231,11 +231,11 @@ organizeSE__Extensions.prototype = {
     getDoSearchBy: function() {
       var origDoSearchBy = SecondSearch.doSearchBy;
       return function(aItem, aEvent) {
-               aItem = aEvent.target;
-               if(!aItem.hasAttribute("engineName"))
-                 aItem.setAttribute("engineName", aItem.label);
-               return origDoSearchBy.call(this, aItem, aEvent);
-             };
+        aItem = aEvent.target;
+        if(!aItem.hasAttribute("engineName"))
+          aItem.setAttribute("engineName", aItem.label);
+        return origDoSearchBy.call(this, aItem, aEvent);
+      };
     },
     getOperateSecondSearch: function() {
       var orig = SecondSearch.operateSecondSearch;
@@ -352,7 +352,7 @@ organizeSE__Extensions.prototype = {
       count = popup.childNodes.length - 1;
       if (this.keywords.length) {
         if (count)
-          popup.appendChild(document.createElementNS(gXUL_NS, 'menuseparator'));
+          popup.appendChild(document.createElementNS(kXULNS, 'menuseparator'));
 
         for (var i = 0, maxi = this.keywords.length; i < maxi; i++)
         {
@@ -360,7 +360,7 @@ organizeSE__Extensions.prototype = {
               parent.getElementsByAttribute('engineName', this.keywords[i].name+'\n'+this.keywords[i].keyword).length)
           continue;
 
-          popup.appendChild(document.createElementNS(gXUL_NS, 'menuitem'));
+          popup.appendChild(document.createElementNS(kXULNS, 'menuitem'));
           popup.lastChild.setAttribute('label',      this.keywords[i].name);
           popup.lastChild.setAttribute('class',      'menuitem-iconic');
           popup.lastChild.setAttribute('src',        this.keywords[i].icon);
