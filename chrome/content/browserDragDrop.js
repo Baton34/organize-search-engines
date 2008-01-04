@@ -52,22 +52,32 @@ const seOrganizer_dragObserver = {
     if(this.overButton(event.target)) {
       organizeSE.searchbar._textbox.openSearch();
     }
+    if(this._closeTimer) {
+      window.removeEventListener("dragover", this._closeTimer, false);
+      this._closeTimer = null;
+    }
   },
 
+  _closeTimer: null,
+
   onDragOver: function(event, flavour, session) {
+    if(this._closeTimer) {
+      window.removeEventListener("dragover", this._closeTimer, false);
+      this._closeTimer = null;
+    }
     var target = event.target;
     this.closePopups(target);
     var className = " " + target.className + " ";
     session.canDrop = (className.indexOf(" searchbar-engine-menuitem ") != -1 ||
                        className.indexOf(" searchbar-engine-menu ") != -1 ||
                        this.overButton(target));
-    switch(event.target.nodeName) {
+    switch(target.nodeName) {
       case "menu":
-        if(event.target.getAttribute("open") != "true")
-          event.target.firstChild.showPopup();
+        if(target.getAttribute("open") != "true")
+          target.firstChild.showPopup();
         // no break!
       case "menuitem":
-        event.target.setAttribute("_moz-menuactive", "true");
+        target.setAttribute("_moz-menuactive", "true");
         break;
     }
   },
@@ -75,6 +85,18 @@ const seOrganizer_dragObserver = {
     var target = event.target;
     if(target.nodeName == "menu" || target.nodeName == "menuitem") {
       target.removeAttribute("_moz-menuactive");
+    }
+    if((!event.relatedTarget || !this.isOurElement(event.relatedTarget)) &&
+       !this._closeTimer) {
+      var closeTime = new Date().getTime() + this.springLoadedMenuDelay;
+      var This = this;
+      this._closeTimer = function(event) {
+        if(closeTime < new Date().getTime() && !This.isOurElement(event.target)) {
+          window.removeEventListener("dragover", This._closeTimer, false);
+          organizeSE.popup.hidePopup();
+        }
+      }
+      window.addEventListener("dragover", this._closeTimer, false);
     }
   },
   onDrop: function(event, dropData, session) {
@@ -121,6 +143,17 @@ const seOrganizer_dragObserver = {
     return flavours;
   },
 
+  isOurElement: function(target) {
+    return this.overPopup(target) || this.overButton(target);
+  },
+  overPopup: function(target) {
+    do {
+      if(target.id == "search-popup")
+        return true;
+    } while((target = target.parentNode) &&
+            (target.nodeType == target.ELEMENT_NODE));
+    return false;
+  },
   overButton: function(target) {
     do {
       if(target.getAttribute("anonid") == "searchbar-engine-button")
