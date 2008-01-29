@@ -39,6 +39,7 @@ Contributor(s):
 interface nsIRDFContainer;
 interface nsIRDFResource;
 interface nsIInputStream;
+interface nsISearchEngine;
 
 [scriptable, uuid(e4e6e165-81e7-44fb-a027-8b606c865b00)]
 interface nsISEOrganizer : nsISupports {
@@ -111,6 +112,11 @@ interface nsISEOrganizer : nsISupports {
   /* Provides the API to use search aliases in Firefox. Has to be in the xpcom *
    * service because the out-parameter can't be imitated with pure javascript. */
   string resolveKeyword(in wstring name, out nsIInputStream postData);
+
+   /* returns a multi-engine wrapping multiple nsISearchEngines. these can be  *
+    * used by QI'ing the submission to nsISimpleEnumerator and using the       *
+    * enumerated nsISearchSubmissions (e.g. open these in tabs)                */
+  nsISearchEngine folderToEngine(in nsIRDFResource item);
 
   /* Save the changes. */
   void saveChanges();
