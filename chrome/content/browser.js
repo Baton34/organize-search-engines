@@ -132,6 +132,9 @@ SEOrganizer.prototype = {
     searchbar.openManager = this.openManager;
     searchbar.observe = this.searchObserve;
     searchbar._textbox.openSearch = this.openSearch;
+    searchbar.doSearch = this.doSearch;
+    if(!("_getParentSearchbar" in searchbar._textbox))
+      searchbar._textbox._getParentSearchbar = this._getParentSearchBarTrunk;
     searchbar.__defineGetter__("_popup", this.__lookupGetter__("popup"), false);
     if(!("_engineButton" in searchbar)) { // minefield compat.
       searchbar.__defineGetter__("_engineButton", function() {
@@ -209,6 +212,9 @@ SEOrganizer.prototype = {
       }, 0);
     }
   },
+  _getParentSearchBarTrunk: function() {
+    return document.getBindingParent(this);
+  },
   openSearch: function openSearch() {
     // Don't open search popup if history popup is open
     if(!this.popupOpen) {
@@ -217,74 +223,56 @@ SEOrganizer.prototype = {
     }
     return true;
   },
+  doSearch: function doSearch(aData, aWhere) {
+    // null parameter below specifies HTML response for search
+    var submission = this.currentEngine.getSubmission(aData, null);
+    openUILinkIn(submission.uri.spec, aWhere, null, submission.postData);
+    if(submission instanceof Ci.nsISimpleEnumerator) {
+      var list = submission;
+      while(list.hasMoreElements()) {
+        submission = list.getNext().QueryInterface(Ci.nsISearchSubmission);
+        gBrowser.loadOneTab(submission.uri.spec, null, null, submission.postData,
+                            true, false);
+      }
+    }
+  },
 
   _insertItemsHandlers: [ {
     mod: null,
     insertMethod: "insertAddEngineItems",
     removeMethod: "removeAddEngineItems",
     pos: "before"
+  }, {
+    mod: null,
+    insertMethod: "insertOpenInTabsItems",
+    removeMethod: "removeOpenInTabsItems",
+    pos: "after",
+    subFolders: true
   } ],
-  insertDynamicItems: function insertDynamicItems() {
-    const popup = organizeSE.popup;
-    const manageContainer = popup.previousSibling;
+  _callDynamicHandlers: function(pos, popup, toplevel, methodName) {
     var handlers = this._insertItemsHandlers;
     for(var i = 0; i < handlers.length; ++i) {
-      if(handlers[i].pos == "before") {
-        try {
-          if(!handlers[i].mod) {
-            this[handlers[i].insertMethod](popup);
-          } else {
-            handlers[i].insertMethod.call(handlers[i].mod, popup);
-          }
-        } catch(e) { Components.reportError(e); }
-      }
-    }
-    this.insertManageEngineItems();
-    for(var i = 0; i < handlers.length; ++i) {
-      if(handlers[i].pos != "before") {
-        try {
-          if(!handlers[i].mod) {
-            this[handlers[i].insertMethod](popup);
-          } else {
-            handlers[i].insertMethod.call(handlers[i].mod, popup);
-          }
-        } catch(e) { Components.reportError(e); }
-      }
+      if(handlers[i].pos != pos || !!handlers[i].subFolders == toplevel)
+        continue;
+      try {
+        if(!handlers[i].mod)
+          this[handlers[i][methodName]](popup);
+        else
+          handlers[i][methodName].call(handlers[i].mod, popup);
+      } catch(e) { Components.reportError(e); }
     }
   },
-  removeDynamicItems: function removeDynamicItems() {
-    const popup = organizeSE.popup;
-
-    // call extension handlers for extensions that are inserted /before/ manage
-    const container = organizeSE.popupset.firstChild;
-    var handlers = this._insertItemsHandlers;
-    for(var i = 0; i < handlers.length; ++i) {
-      if(handlers[i].pos == "before") {
-        try {
-          if(!handlers[i].mod)
-            this[handlers[i].removeMethod](popup);
-          else {
-            handlers[i].removeMethod.call(handlers[i].mod, popup);
-          }
-        } catch(e) { Components.reportError(e); }
-      }
-    }
-    this.removeManageEngineItems();
-    // call extension handlers for extensions that are inserted /after/ manage
-    for(var i = 0; i < handlers.length; ++i) {
-      if(handlers[i].pos != "before") {
-        try {
-          if(!handlers[i].mod)
-            this[handlers[i].removeMethod](popup);
-          else {
-            handlers[i].removeMethod.call(handlers[i].mod, popup);
-          }
-        } catch(e) { Components.reportError(e); }
-      }
-    }
+  insertDynamicItems: function insertDynamicItems(toplevel, popup) {
+    this._callDynamicHandlers("before", popup, toplevel, "insertMethod");
+    if(toplevel) this.insertManageEngineItems(popup);
+    this._callDynamicHandlers("after", popup, toplevel, "insertMethod");
   },
-  insertManageEngineItems: function insertManageEnginesItems() {
-    const popup = this.popup;
+  removeDynamicItems: function removeDynamicItems(toplevel, popup) {
+    this._callDynamicHandlers("before", popup, toplevel, "removeMethod");
+    if(toplevel) this.removeManageEngineItems(popup);
+    this._callDynamicHandlers("after", popup, toplevel, "removeMethod");
+  },
+  insertManageEngineItems: function insertManageEnginesItems(popup) {
     var sep = document.getElementById("manage-engines-menuseparator").cloneNode(true);
     sep.id += "-live";
     popup.appendChild(sep);
@@ -292,16 +280,14 @@ SEOrganizer.prototype = {
     item.id += "-live";
     popup.appendChild(item);
   },
-  removeManageEngineItems: function removeManageEngineItems() {
-    const popup = this.popup;
+  removeManageEngineItems: function removeManageEngineItems(popup) {
     var item;
     while((item = document.getElementById("manage-engines-menuseparator-live")))
       item.parentNode.removeChild(item);
     while((item = document.getElementById("manage-engines-item-live")))
       item.parentNode.removeChild(item);
   },
-  insertAddEngineItems: function insertAddEngineItems() {
-    const popup = this.popup;
+  insertAddEngineItems: function insertAddEngineItems(popup) {
     var addengines = getBrowser().mCurrentBrowser.engines;
 
     if(!addengines || !addengines.length)
@@ -328,11 +314,29 @@ SEOrganizer.prototype = {
       popup.appendChild(menuitem);
     }
   },
-  removeAddEngineItems: function removeAddEngineItems() {
-    const popup = organizeSE.popup;
+  removeAddEngineItems: function removeAddEngineItems(popup) {
     for(var i = 0; i < popup.childNodes.length; ++i) {
       if(popup.childNodes[i].className.indexOf("addengine-item") != -1 ||
          popup.childNodes[i].className.indexOf("addengine-separator") != -1) {
+        popup.removeChild(popup.childNodes[i]);
+        --i;
+      }
+    }
+  },
+  insertOpenInTabsItems: function insertOpenInTabsItems(popup) {
+    var separator = document.createElementNS(kXULNS, "menuseparator");
+    separator.className = "openintabs-separator";
+    popup.appendChild(separator);
+
+    var menuitem = document.createElementNS(kXULNS, "menuitem");
+    menuitem.className = "menuitem-iconic openintabs-item";
+    menuitem.setAttribute("label", "Open In Tabs...");
+    popup.appendChild(menuitem);
+  },
+  removeOpenInTabsItems: function removeOpenInTabsItems(popup) {
+    for(var i = 0; i < popup.childNodes.length; ++i) {
+      if(popup.childNodes[i].className.indexOf("openintabs-item") != -1 ||
+         popup.childNodes[i].className.indexOf("openintabs-separator") != -1) {
         popup.removeChild(popup.childNodes[i]);
         --i;
       }
@@ -364,8 +368,10 @@ SEOrganizer.prototype = {
   buildObserver: { /* nsIXULBuilderListener */
     popupHidden: function observe__popuphidden(event) {
       if(event.target == event.currentTarget) {
-        organizeSE.removeDynamicItems();
+        organizeSE.removeDynamicItems(true, event.target);
         organizeSE.searchbar._engineButton.removeAttribute("open");
+      } else {
+        organizeSE.removeDynamicItems(false, event.target);
       }
       var item = document.getElementById("empty-menuitem");
       if(item)
@@ -373,11 +379,13 @@ SEOrganizer.prototype = {
     },
     popupShowing: function observe__popupshowing(event) {
       if(event.target == event.currentTarget) {
-        // when the popup is hidden and shown back-to-back, the popuphidden
-        organizeSE.removeDynamicItems(); // event isn't fired sometimes
-
-        organizeSE.insertDynamicItems();
+        // when the popup is hidden and shown back-to-back, popuphidden isn't
+        organizeSE.removeDynamicItems(true, event.target); // fired sometimes
+        organizeSE.insertDynamicItems(true, event.target);
         organizeSE.searchbar._engineButton.setAttribute("open", "true");
+      } else {
+        organizeSE.removeDynamicItems(false, event.target);
+        organizeSE.insertDynamicItems(false, event.target);
       }
 
       // code taken from Firefox' bookmarksMenu.js::showEmptyItem
@@ -403,12 +411,22 @@ SEOrganizer.prototype = {
         searchbar = searchbar.parentNode;
       if(!searchbar)
          return;
+      function hasClass(elem, className) {
+        return (" "+elem.className+" ").indexOf(" "+className+" ") != -1;
+      }
       if(target.getAttribute("anonid") == "open-engine-manager") {
         searchbar.openManager(event);
-      } else if(target.className.indexOf("addengine-item") != -1 ||
-                target.className.indexOf("searchbar-engine-menuitem") != -1) {
-        if(!target.engine)
+      } else if(hasClass(target, "addengine-item") ||
+                hasClass(target, "searchbar-engine-menuitem") ||
+                hasClass(target, "openintabs-item")) {
+        if(hasClass(target, "openintabs-item")) {
+          var folder = target.parentNode.parentNode.id;
+          folder = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService)
+                     .GetResource(folder);
+          target.engine = organizeSE.SEOrganizer.folderToEngine(folder);
+        } else if(!target.engine) {
           target.engine = organizeSE.SEOrganizer.getEngineByName(target.label);
+        }
 
         if("onEnginePopupCommand" in searchbar) { // Firefox 2.0
           searchbar.onEnginePopupCommand(target);
@@ -421,6 +439,10 @@ SEOrganizer.prototype = {
         }
       }
     },
+    mouseMove: function observe__mouseMove(event) { // hover effect for the button
+      var domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
+      domUtils.setContentState(organizeSE.searchbar._engineButton, 4);
+    },
     didRebuild: function observe__didRebuild() {
       const popup = organizeSE.popup;
       popup.id = "search-popup";
@@ -428,6 +450,7 @@ SEOrganizer.prototype = {
       popup.addEventListener("command", this.onCommand, false);
       popup.addEventListener("popuphidden", this.popupHidden, false);
       popup.addEventListener("popupshowing", this.popupShowing, false);
+      popup.addEventListener("mousemove", this.mouseMove, false);
       if(organizeSE.searchbar)
         organizeSE.searchbar._engines = organizeSE.SEOrganizer.getVisibleEngines({});
     },
