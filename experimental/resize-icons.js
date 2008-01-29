@@ -61,9 +61,12 @@ Resizer.prototype = {
     canvas.setAttribute("height", this.height);
     this._canvas = canvas.getContext("2d");
   },*/
+  _document: this.document || Cc["@mozilla.org/appshell/window-mediator;1"]
+                           .getService(Ci.nsIWindowMediator)
+                           .getMostRecentWindow("navigator:browser").document,
   _createCanvas: function() {
-    var canvas = document.createElementNS("http://www.w3.org/1999/xhtml",
-                                          "canvas");
+    var canvas = this._document.createElementNS("http://www.w3.org/1999/xhtml",
+                                                "canvas");
     canvas.setAttribute("width", this.width);
     canvas.setAttribute("height", this.height);
     //document.appendChild(canvas);
@@ -88,8 +91,8 @@ Resizer.prototype = {
     if(icons.length < 2)
       return;
 
-    var biggest = 0; // pick one
-    for(var i = 1; i < icons.length; ++i) {
+    var biggest = icons.length - 1; // pick one
+    for(var i = 0; i < icons.length - 1; i++) {
       if(icons[i].height > icons[biggest].height ||
          (icons[i].height == icons[biggest].height && icons[i].width > icons[biggest].width)) {
         biggest = i;
@@ -116,7 +119,7 @@ Resizer.prototype = {
     }, false);
   },
   addIconByURL: function(url) {
-    var img = new Image();
+    var img = new this._document.defaultView.Image();
     this._addLoadingIcon(img);
     img.src = url;
   },
@@ -160,8 +163,8 @@ Resizer.prototype = {
   },*/
   paintIcons: function() {
     var canvas = this._canvas;
-    canvas.fillStyle = canvas.strokeStyle = "rgba(254, 254, 254, 1)";
-    canvas.fillRect(0, 0, this.width, this.height);
+    canvas.fillStyle = canvas.strokeStyle = "rgba(0,0,0,0)"; // transparent
+    canvas.clearRect(0, 0, this.width, this.height);
     var num = this.icons.length;
     if(!num)
       return;
