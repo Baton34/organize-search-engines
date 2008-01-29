@@ -91,6 +91,10 @@ function setInterval(callback, interval) {
   return _timer(callback, interval, Ci.nsITimer.TYPE_REPEATING_SLACK, args);
 }
 var clearInterval = clearTimeout;
+function makeURI(aURL, aOriginCharset, aBaseURI) {
+  var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
+  return ioService.newURI(aURL, aOriginCharset, aBaseURI);
+}
 
 /*try {*/
 
@@ -131,6 +135,8 @@ SEOrganizer.prototype = {
       this.saveChanges();
 
     this._modifySearchService();
+
+    this._createMultiEngine();
   },
 
   saveChanges: function SEOrganizer__saveChanges(dontResort) {
@@ -278,6 +284,21 @@ SEOrganizer.prototype = {
                                                .loadSubScript(uri, topLevel);
   },
 
+  _createMultiEngine: function() {
+    var prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
+    const CUR_ENGINE_PREF = "browser.search.selectedEngine";
+    if(prefs.getPrefType(CUR_ENGINE_PREF) == Ci.nsIPrefBranch.PREF_STRING) {
+      var curEngine = prefs.getComplexValue(CUR_ENGINE_PREF, Ci.nsISupportsString).data
+      if(this.currentEngine.name != curEngine &&
+         !this.getEngineByName(curEngine)) {
+        var item = this.getItemByName(curEngine);
+        if(item) {
+          this.currentEngine = this.folderToEngine(item);
+        }
+      }
+    }
+  },
+
   observe: function observe(aEngine, aTopic, aVerb) {
     if(aTopic == "browser-search-engine-modified") {
       switch(aVerb) {
@@ -316,6 +337,13 @@ SEOrganizer.prototype = {
               this.observe(aEngine, aTopic, "engine-added");
           }
         case "engine-current": // The current engine was changed.
+          var engines = this.getVisibleEngines({});
+          for(var i = 0; i < engines.length; i++) {
+            if("innerEngines" in engines[i].wrappedJSObject &&
+               engines[i].name != aEngine.name)
+              this.removeEngine(engines[i]);
+          }
+          break;
         case "engine-loaded": // An engine's/icon's download was completed.
           break;
       }
@@ -635,6 +663,65 @@ SEOrganizer.prototype = {
     return true;
   },
 
+  folderToEngine: function(folder) {
+    var engine = {
+      alias: "", searchForm: "",
+      hidden: false, _remove: function() {},
+      iconURI: null, iconURL: "",
+      name: this.getNameByItem(folder),
+      type: 4,
+      addParam: function() { throw Cr.NS_ERROR_FAILURE },
+      getSubmission: function(data, type) {
+        var i = -1;
+        var submission = {
+          getNext: function() {
+            i++;
+            var submission = engine.innerEngines[i].getSubmission(data, type);
+            this.postData = submission.postData;
+            this.uri = submission.uri;
+            return submission;
+          },
+          hasMoreElements: function() { return i + 1 < engine.innerEngines.length; },
+          QueryInterface: function(aIID) {
+            if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsISimpleEnumerator) ||
+               aIID.equals(Ci.nsISearchSubmission))
+              return this;
+            throw Cr.NS_ERROR_NO_INTERFACE;
+          }
+        };
+        submission.getNext();
+        return submission;
+      },
+      innerEngines: [],
+      QueryInterface: function(aIID) {
+        if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsISearchEngine))
+          return this;
+        throw Cr.NS_ERROR_NO_INTERFACE;
+      }
+    };
+    engine.wrappedJSObject = engine;
+    this._iterateAll(function(item) {
+      engine.innerEngines.push(this.getEngineByName(this.getNameByItem(item)));
+    }, null, folder);
+    if(typeof Resizer == "undefined") {
+       Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader)
+         .loadSubScript("chrome://seorganizer/content/resize-icons.js");
+    }
+    var ss = this._searchService.wrappedJSObject;
+    var resizer = new Resizer(16, 16);
+    resizer.onload = function iconLoadCallback() {
+      resizer.paintIcons();
+      engine.iconURI = makeURI(resizer.getDataURL());
+      engine.iconURL = engine.iconURI.spec;
+      ss.__parent__.notifyAction(engine, "engine-changed");
+    };
+    for(var i = 0; i < engine.innerEngines.length; i++) {
+      resizer.addIconByURL(engine.innerEngines[i].iconURI.spec);
+    }
+    ss._addEngineToStore(engine);
+    return engine;
+  },
+
   // I know of at least one case, where an id was used twice, so we're making
   // sure here, this won't happen again in future
   _getAnonymousResource: function() {
@@ -803,12 +890,12 @@ SEOrganizer.prototype = {
       var engine = this.getEngineByName(name);
       if(engine && engine.iconURI)
         return this._rdfService.GetLiteral(engine.iconURI.spec);
-    } else if(property.ValueUTF8 === NS + "Selected"
-        && !this.isSeparator(source) && truthValue) {
+    } else if(property.ValueUTF8 === NS + "Selected" &&
+              !this.isSeparator(source) && truthValue) {
       try {
         if(this.isFolder(source)) {
           var name = this.currentEngine.name;
-          var found = false;
+          var found = (name == this.getNameByItem(source));
           function find(item) {
             if(this.getNameByItem(item) == name) {
               found = true;
@@ -817,10 +904,8 @@ SEOrganizer.prototype = {
           }
           this._iterateAll(find, null, source);
           return this._rdfService.GetLiteral(found.toString());
-        } else if(this.getNameByItem(source) == this.currentEngine.name) {
-          return this._rdfService.GetLiteral("true");
         } else {
-          return this._rdfService.GetLiteral("false");
+          return (this.getNameByItem(source) == this.currentEngine.name).toString();
         }
       } catch(e) {
         return this._rdfService.GetLiteral("false");
@@ -841,7 +926,7 @@ SEOrganizer.prototype = {
           var prevItem = this._datasource.GetTarget(parent.Resource, arc, true);
           var prevName = this.GetTarget(prevItem, property, true);
           if(!(prevName instanceof Ci.nsIRDFLiteral)) // separator is at top
-            return this._rdfService.GetLiteral("AAAAAAAAAAAAAA"); // bah!
+            return this._rdfService.GetLiteral("\0\0\0\0\0\0\0\0\0\0\0\0\0\0"); // bah!
           return this._rdfService.GetLiteral(prevName.Value + "ZZZZZZZZZZZZZZ");
         }
       } catch(e) {
