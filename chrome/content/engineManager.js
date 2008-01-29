@@ -207,18 +207,46 @@ EngineManagerDialog.prototype = {
       this.onClose();
       return;
     }
-    window.setTimeout(function() {
+    window.setTimeout(function timed_EngineManager__observe() {
       if(aTopic === "browser-search-engine-modified" &&
          aSubject instanceof Ci.nsISearchEngine) {
         switch (aVerb) {
           case "engine-added":
-            gEngineView.addEngine(aSubject);
+            gEngineManagerDialog.newItem(gEngineManagerDialog.NEW_ITEM_RESTORED_DEFAULT_ENGINE,
+                                         aSubject);
             gEngineView.rowCountChanged(gEngineView.lastIndex, 1);
             break;
           case "engine-changed":
-            break;
+            var change = aSubject.wrappedJSObject.__action;
+            if(change == "update" || change == "move") {
+            } else if(change == "icon") {
+              var item = gEngineView._getItemByProperty("originalEngine", aSubject);
+              if(item) {
+                item.iconURI = (aSubject.iconURI || {spec: ""}).spec;
+                gEngineView.invalidateCell(gEngineView._indexCache.indexOf(item), "engineName");
+              }
+            } else if(change == "hidden") {
+              aVerb = aSubject.hidden ? "engine-removed" : "engine-added";
+              timed_EngineManager__observe();
+            } else if(change == "alias") {
+              var item = gEngineView._getItemByProperty("originalEngine", aSubject);
+              if(item) {
+                item.alias = aSubject.alias;
+                gEngineView.invalidateCell(gEngineView._indexCache.indexOf(item), "engineAlias");
+              }
+            } else if(change == "name") { /* that's us! */ }
+            return; // abort
           case "engine-removed":
-            gEngineView.rowCountChanged(null, -1);
+            var item = gEngineView._getItemByProperty("originalEngine", aSubject);
+            if(item) {
+              var selection = gEngineView.selectedItems;
+              gEngineView.select(gEngineView._indexCache.indexOf(item), true);
+              gEngineManagerDialog.remove();
+              for(var i = 0; i < selection.length; i++) {
+                selection[i] = gEngineView._indexCache.indexOf(selection[i]);
+              }
+              gEngineView.select.apply(gEngineView, selection.concat([true]));
+            }
             break;
           case "engine-current":
             return; // Not relevant
@@ -284,7 +312,6 @@ EngineManagerDialog.prototype = {
 
       gEngineView.updateCache();
       gEngineView.rowCountChanged(index, -removedCount);
-      gEngineView.invalidate();
       gEngineView.ensureRowIsVisible(Math.min(index, gEngineView.lastIndex));
     }
 
@@ -317,8 +344,8 @@ EngineManagerDialog.prototype = {
       gEngineView.updateCache();
       // as there are folders, the new index could be virtually anywhere:
       newIndex = gEngineView._indexCache.indexOf(item);
-      gEngineView.rowCountChanged(index, -1);
-      gEngineView.rowCountChanged(newIndex, 1);
+      gEngineView.invalidateRow(index);
+      gEngineView.invalidateRow(newIndex);
       gEngineView.ensureRowIsVisible(newIndex);
       gEngineView.selection.rangedSelect(newIndex, newIndex, true);
     }
@@ -344,16 +371,19 @@ EngineManagerDialog.prototype = {
     var n = 0;
     for(var i = 0; i < selected.length; i++) {
       if(selected[i].parent != target) {
+        gEngineView.rowCountChanged(gEngineView._indexCache.indexOf(selected[i]), -1);
         selected[i] = gEngineView.internalMove(selected[i], target, -1);
       }
     }
 
     gEngineView.updateCache();
-    gEngineView.invalidate();
     gEngineView.selection.clearSelection();
     var indexes = [];
     selected.forEach(function(item) {
       indexes.push(gEngineView._indexCache.indexOf(item));
+    });
+    indexes.forEach(function(index) {
+      gEngineView.rowCountChanged(index, 1);
     });
     gEngineView.select.apply(gEngineView, indexes.concat([true]));
   },
@@ -361,7 +391,6 @@ EngineManagerDialog.prototype = {
     document.getElementById("engineList").focus();
     var index = gEngineView.selectedIndex;
     var item = gEngineView.selectedItem;
-    item.modified = item.modified || 1;
 
     var alias = { value: item.alias };
     var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
@@ -371,18 +400,13 @@ EngineManagerDialog.prototype = {
     var abort = prompts.prompt(window, title, content, alias, null, {});
     if(!abort)
       return;
-
     alias = alias.value.replace(/ /g, "").toLowerCase();
-    item.alias = alias;
 
-    for(var i = 0; i < gEngineView._indexCache.length; i++) {
-      if(item != gEngineView._indexCache[i] &&
-         gEngineView._indexCache[i].alias == alias) {
-        gEngineView._indexCache[i].alias = "";
-        gEngineView._indexCache[i].modified = gEngineView._indexCache[i].modified || 1;
-        gEngineView.rowCountChanged(i, -1);
-        gEngineView.rowCountChanged(i, 1);
-      }
+    var other;
+    while(other = gEngineView._getItemByProperty("alias", alias, item)) {
+      other.alias = "";
+      other.modified = other.modified || 1;
+      gEngineView.invalidateCell(gEngineView._indexCache.indexOf(other), "engineAlias");
     }
 
     // the engine is hidden, so its alias is ignored anyways
@@ -394,8 +418,10 @@ EngineManagerDialog.prototype = {
         engine.alias = "";
     });
 
-    gEngineView.rowCountChanged(index, -1);
-    gEngineView.rowCountChanged(index, 1);
+    item.alias = alias;
+    item.modified = item.modified || 1;
+
+    gEngineView.invalidateCell(index, "engineAlias");
     gEngineView.selection.clearSelection();
     gEngineView.selection.select(index);
     gEngineView.ensureRowIsVisible(index);
@@ -411,13 +437,17 @@ EngineManagerDialog.prototype = {
     var title = gStrings.getFormattedString("rename.title", [name.value]);
     var content = gStrings.getFormattedString("rename.name", [name.value]);
     var abort = prompts.prompt(window, title, content, name, null, {});
+    name = name.value;
     if(!abort)
       return;
 
-    item.name = name.value;
+    while(gEngineView._getItemByProperty("name", name, item)) {
+      name = name + " ";
+    }
 
-    gEngineView.rowCountChanged(index, -1);
-    gEngineView.rowCountChanged(index, 1);
+    item.name = name;
+
+    gEngineView.invalidateCell(index, "engineName");
     gEngineView.selection.clearSelection();
     gEngineView.selection.select(index);
     gEngineView.ensureRowIsVisible(index);
@@ -426,7 +456,7 @@ EngineManagerDialog.prototype = {
   get NEW_ITEM_TYPE_SEPARATOR()          {  return "separator";       },
   get NEW_ITEM_TYPE_FOLDER()             {  return "folder";          },
   get NEW_ITEM_RESTORED_DEFAULT_ENGINE() {  return "default-engine";  },
-  newItem: function EngineManager__newItem(type) {
+  newItem: function EngineManager__newItem(type, fromOriginal) {
     var treeInsertLoc = gEngineView.selectedIndex;
     var insertLoc, parent;
     if(treeInsertLoc === -1) {
@@ -455,31 +485,38 @@ EngineManagerDialog.prototype = {
                                    gStrings.getString("new-folder.title"),
                                    gStrings.getString("new-folder.name"), name,
                                    null, {});
-        if(!abort)
-          return;
+        if(!abort) return;
+        name = name.value;
 
-        var node = gSEOrganizer.newFolder(name.value, parent.node);
+        while(gEngineView._getItemByProperty("name", name, item)) {
+          name = name + " ";
+        }
+
+        var node = gSEOrganizer.newFolder(name, parent.node);
         item = new Structure__Container(parent, node);
         break;
       case this.NEW_ITEM_RESTORED_DEFAULT_ENGINE:
-        var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
-                        .getService(Ci.nsIPromptService);
-        var defaults = gSEOrganizer.getDefaultEngines({}).filter(function(e) {
-          return !gEngineView.engineVisible(e);
-        });
-        if(!defaults.length)
-          return;
-        var defaultNames = [];
-        for(var i = 0; i < defaults.length; ++i) {
-          defaultNames[i] = defaults[i].name;
+        if(fromOriginal) {
+          var engine = fromOriginal;
+        } else {
+          var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+                          .getService(Ci.nsIPromptService);
+          var defaults = gSEOrganizer.getDefaultEngines({}).filter(function(e) {
+            return !gEngineView.engineVisible(e);
+          });
+          if(!defaults.length)
+            return;
+          var defaultNames = [];
+          for(var i = 0; i < defaults.length; ++i) {
+            defaultNames[i] = defaults[i].name;
+          }
+          var selection = {};
+          var cancel = !prompts.select(window, gStrings.getString("restore.title"),
+                                       gStrings.getString("restore.content"),
+                                       defaultNames.length, defaultNames, selection);
+          if(cancel) return;
+          var engine = defaults[selection.value];
         }
-        var selection = {};
-        var cancel = !prompts.select(window, gStrings.getString("restore.title"),
-                                     gStrings.getString("restore.content"),
-                                     defaultNames.length, defaultNames, selection);
-        if(cancel)
-          return;
-        var engine = defaults[selection.value];
         node = gSEOrganizer.getItemByName(engine.name);
         var idx = gRemovedEngines.indexOf(node);
         if(node && idx != -1) {
@@ -532,7 +569,6 @@ EngineManagerDialog.prototype = {
       document.getElementById("descending").setAttribute("checked", "false");
     }
 
-    gEngineView.updateCache();
     gEngineView.invalidate();
   },
 
@@ -645,11 +681,6 @@ Structure.prototype = {
     this.children = null;
   },
 
-  reloadIcons: function ES_reloadIcons() {
-    this.children.forEach(function (e) {
-      e.iconURI = e.originalEngine.uri;
-    });
-  },
   isAncestorOf: function Structure__Item__isAncestorOf(item) {
     return this === item;
   }
@@ -713,9 +744,6 @@ Structure__Container.prototype = {
   isEngine: false,
   alias: "",
   modified: 0,
-  set iconURI() {
-    Structure.prototype.reloadIcons.call(this);
-  },
   originalEngine: null
 };
 function Structure__Item(parent, node, engine) {
@@ -995,9 +1023,9 @@ EngineView.prototype = {
     }
     return engines;
   },
-  select: function EngineView__select(index0, index1, /*..., */ override) {
+  select: function EngineView__select(/*index0, index1, ...,  override*/) {
     var seln = gEngineView.selection;
-    override = arguments[arguments.length - 1];
+    var override = arguments[arguments.length - 1];
     if(override)
       seln.clearSelection();
 
@@ -1011,6 +1039,12 @@ EngineView.prototype = {
   invalidate: function EngineView__invalidate() {
     this.updateCache();
     return this.tree.invalidate();
+  },
+  invalidateRow: function(row) {
+    return this.tree.invalidateRow(row);
+  },
+  invalidateCell: function(row, colId) {
+    return this.tree.invalidateCell(row, this.tree.columns.getNamedColumn(colId));
   },
   rowCountChanged: function EngineView__rowCountChanged(index, count) {
     return this.tree.rowCountChanged(index, count);
@@ -1044,21 +1078,25 @@ EngineView.prototype = {
   },
 
   engineVisible: function engineVisible(engine) {
+    return !!this._getItemByProperty("originalEngine", engine);
+  },
+  _getItemByProperty: function(property, value, besides) {
     var folds = [{s: this._structure, i: 0}], lastIndex;
     while(folds.length) {
       lastIndex = folds.length - 1;
       for(var i = folds[lastIndex].i; i < folds[lastIndex].s.children.length; ++i) {
-        if(folds[lastIndex].s.children[i].isSeq) {
+        if(!folds[lastIndex].s.children[i].isSep) {
+          if(folds[lastIndex].s.children[i][property] == value &&
+             (!besides || folds[lastIndex].s.children[i] != besides))
+            return folds[lastIndex].s.children[i];
+        } else if(folds[lastIndex].s.children[i].isSeq) {
           folds[lastIndex].i = i + 1;
           folds.push({s: folds[lastIndex++].s.children[i], i: i = -1});
-        } else if(!folds[lastIndex].s.children[i].isSep) {
-          if(folds[lastIndex].s.children[i].originalEngine === engine)
-            return true;
         }
       }
       folds = folds.slice(0, lastIndex);
     }
-    return false;
+    return null;
   },
   getLocalIndex: function getLocalIndex(idx) {
     return this._indexCache[idx].parent.children.indexOf(this._indexCache[idx]);
@@ -1196,13 +1234,16 @@ EngineView.prototype = {
         }
       }
       items[i] = this.internalMove(item, parent, tempDropIndex);
+      this.rowCountChanged(treeSourceIndexes[i], -1);
     }
     item = items[0];
 
     // update the tree and correct the selection
-    this.updateCache();
-    this.invalidate();
     this.select(true); // clear selection
+    this.updateCache();
+    for(var i = 0; i < items.length; i++) {
+      this.rowCountChanged(this._indexCache.indexOf(items[i]), 1);
+    }
     for(var i = 0; i < items.length; i++) {
       this.select(this._indexCache.indexOf(items[i]), false);
     }
@@ -1330,7 +1371,6 @@ EngineView.prototype = {
     var open = (item.open = !item.open);
     this.updateCache();
     this.rowCountChanged(index + 1, (open ? 1 : -1) * count);
-    this.invalidate();
     return open;
   }
 };
