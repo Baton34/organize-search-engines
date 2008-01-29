@@ -123,9 +123,7 @@ Contributor(s):
       if(notify.caller) {
         if(notify.caller.name) {
           caller = notify.caller.name;
-          if(caller == "SRCH_ENG_setIcon")
-            caller = "icon";
-          else if(caller == "SRCH_SVC_addEngineToStore")
+          if(caller == "SRCH_SVC_addEngineToStore")
             caller = "update";
           else if(caller == "SRCH_ENG_setIcon" || caller == "iconLoadCallback")
             caller = "icon";
@@ -136,7 +134,7 @@ Contributor(s):
             caller = "hidden";
           else if(notify.caller == aEngine.__lookupSetter__("alias"))
             caller = "alias";
-        }
+        } // in engineManager.js, there's also a caller "name"
         aEngine.__action = caller;
       }
     }
