@@ -330,7 +330,15 @@ SEOrganizer.prototype = {
 
     var menuitem = document.createElementNS(kXULNS, "menuitem");
     menuitem.className = "menuitem-iconic openintabs-item";
-    menuitem.setAttribute("label", "Open In Tabs...");
+    if("BookmarkUtils" in window) {
+      var label = BookmarksUtils.getLocaleString("cmd_bm_openfolder");
+      var accesskey = BookmarksUtils.getLocaleString("cmd_bm_openfolder_accesskey");
+    } else {
+      var label = gNavigatorBundle.getString("menuOpenAllInTabs.label");
+      var accesskey = gNavigatorBundle.getString("menuOpenAllInTabs.accesskey");
+    }
+    menuitem.setAttribute("label", label);
+    menuitem.setAttribute("accesskey", accesskey);
     popup.appendChild(menuitem);
   },
   removeOpenInTabsItems: function removeOpenInTabsItems(popup) {
