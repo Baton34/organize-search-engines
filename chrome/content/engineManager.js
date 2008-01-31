@@ -320,34 +320,25 @@ EngineManagerDialog.prototype = {
     this.showRestoreDefaults();
   },
   bump: function EngineManager__bump(direction) {
-    var indexes = gEngineView.selectedIndexes;
+    var indexes = gEngineView.selectedIndexes, items = gEngineView.selectedItems;
     if(direction > 0)
       indexes = indexes.reverse();
-    var index, item, localIndex, newLocalIndex, children, newChildren, newIndex;
-    gEngineView.selection.clearSelection();
+    gEngineView.select(true);
 
     for(var i = 0; i < indexes.length; i++) {
-      index = indexes[i];
-      item = gEngineView._indexCache[index];
-
-      localIndex = gEngineView.getLocalIndex(index);
-      newLocalIndex = localIndex - direction;
-      children = item.parent.children;
-      newChildren = children.slice(0, Math.min(newLocalIndex, localIndex));
-      newChildren.push(children[Math.max(newLocalIndex, localIndex)]);
-      newChildren.push(children[Math.min(newLocalIndex, localIndex)]);
-      newChildren = newChildren.concat(children.slice(Math.max(newLocalIndex,
-                                                               localIndex) + 1));
-      item.parent.children = newChildren;
-      item.parent.modified = item.parent.modified || 1;
-
-      gEngineView.updateCache();
-      // as there are folders, the new index could be virtually anywhere:
-      newIndex = gEngineView._indexCache.indexOf(item);
-      gEngineView.invalidateRow(index);
-      gEngineView.invalidateRow(newIndex);
-      gEngineView.ensureRowIsVisible(newIndex);
-      gEngineView.selection.rangedSelect(newIndex, newIndex, true);
+      var localIndex = gEngineView.getLocalIndex(indexes[i]) - direction;
+      items[i] = gEngineView.internalMove(items[i], items[i].parent, localIndex);
+    }
+    gEngineView.updateCache();
+    for(var i = 0; i < indexes.length; i++) {
+      gEngineView.invalidateRow(indexes[i]);
+      // for folders the new index could be nearly anywhere:
+      indexes[i] = gEngineView._indexCache.indexOf(items[i])
+      gEngineView.invalidateRow(indexes[i]);
+    }
+    for(var i = 0; i < indexes.length; i++) {
+      gEngineView.ensureRowIsVisible(indexes[i]);
+      gEngineView.select(indexes[i], false);
     }
     document.getElementById("engineList").focus();
   },
@@ -768,7 +759,7 @@ function Structure__Item(parent, node, engine) {
   var separator = rdfService.GetResource(NS + "separator");
   this.isSep = gSEOrganizer.HasAssertion(node, type, separator, true);
 
-  if(!engine)
+  if(!engine && !this.isSeq)
     engine = gSEOrganizer.getEngineByName(this.name);
 
   this.originalEngine = engine;
