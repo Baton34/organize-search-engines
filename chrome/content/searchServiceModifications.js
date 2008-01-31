@@ -134,7 +134,7 @@ Contributor(s):
             caller = "hidden";
           else if(notify.caller == aEngine.__lookupSetter__("alias"))
             caller = "alias";
-        } // in engineManager.js, there's also a caller "name"
+        } // in engineManager.js, there's also a caller "name" for renames
         aEngine.__action = caller;
       }
     }
