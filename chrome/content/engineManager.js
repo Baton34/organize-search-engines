@@ -322,7 +322,7 @@ EngineManagerDialog.prototype = {
   bump: function EngineManager__bump(direction) {
     var indexes = gEngineView.selectedIndexes, items = gEngineView.selectedItems;
     if(direction > 0)
-      indexes = indexes.reverse();
+      indexes = indexes.reverse(), items = items.reverse();
     gEngineView.select(true);
 
     for(var i = 0; i < indexes.length; i++) {
@@ -340,26 +340,20 @@ EngineManagerDialog.prototype = {
       gEngineView.ensureRowIsVisible(indexes[i]);
       gEngineView.select(indexes[i], false);
     }
-    document.getElementById("engineList").focus();
   },
   move: function EngineManager__move() {
     document.getElementById("engineList").focus();
     var canceled = {value: true}, returnVal = {};
     window.openDialog("chrome://seorganizer/content/moveTo.xul", "_blank",
                       "resizable,chrome,modal,dialog", canceled, returnVal);
-    if(canceled.value)
-      return;
-    var target;
+    if(canceled.value) return;
     if(returnVal.value == ROOT)
-      target = gEngineView._structure;
+      var target = gEngineView._structure;
     else
-      target = gEngineView._structure.find(returnVal.value);
-    if(!target)
-      return;
+      var target = gEngineView._structure.find(returnVal.value);
+    if(!target) return;
 
     var selected = gEngineView.selectedItems;
-    var item, itemIndex, node, children;
-    var n = 0;
     for(var i = 0; i < selected.length; i++) {
       if(selected[i].parent != target) {
         gEngineView.rowCountChanged(gEngineView._indexCache.indexOf(selected[i]), -1);
@@ -572,9 +566,7 @@ EngineManagerDialog.prototype = {
 
     var index, item, engine;
     for(var i = 0; i < indexes.length; i++) {
-      index = indexes[i];
-      item = gEngineView._indexCache[index];
-      engine = item.originalEngine;
+      index = indexes[i]; item = gEngineView._indexCache[index];
       if(item.parent.children.length - 1 == gEngineView.getLocalIndex(index))
         lastSelected = true;
       if(!gEngineView.getLocalIndex(index))
@@ -583,7 +575,7 @@ EngineManagerDialog.prototype = {
         onlyEngines = writeableSelected = !(specialSelected = true);
       else if(item.isSeq)
         onlyEngines = false;
-      else if(!engine || engine.wrappedJSObject._readOnly)
+      else if(!item.originalEngine || item.originalEngine.wrappedJSObject._readOnly)
         writeableSelected = false;
     }
 
@@ -735,7 +727,11 @@ Structure__Container.prototype = {
   isEngine: false,
   alias: "",
   modified: 0,
-  originalEngine: null
+  originalEngine: null,
+  inheritFrom: function(old) {
+    this.modified = old.modified || 1;
+    this.name = old.name;
+  }
 };
 function Structure__Item(parent, node, engine) {
   this.parent = parent;
@@ -840,6 +836,10 @@ Structure__Item.prototype = {
                             rdfService.GetLiteral(this.name), true);
       }
     }
+  },
+  inheritFrom: function(old) {
+    this.alias = old.alias;
+    Structure__Container.prototype.inheritFrom.apply(this, arguments);
   }
 };
 Structure__Item.prototype.isAncestorOf =
@@ -1240,27 +1240,22 @@ EngineView.prototype = {
     }
     document.getElementById("engineList").focus();
   },
-  internalMove: function(item, parent, index) {
-    var treeParentIndex = this._indexCache.indexOf(parent);
-    if(!item || !parent) {
+  internalMove: function(old, parent, index) {
+    if(!old || !parent) {
       Components.reportError(new Error('an unknown error occured'));
       return false;
     }
+    var treeParentIndex = this._indexCache.indexOf(parent);
     if(treeParentIndex != -1 && !this.isContainerOpen(treeParentIndex))
       this.toggleOpenState(treeParentIndex);
-    var node = item.node;
-    var old = item;
-    if(item.isSeq) {
-      var children = item.children;
-      item.destroy();
-      item = new Structure__Container(parent, node, children, item.open);
+    var node = old.node, children = old.children;
+    old.destroy();
+    if(old.isSeq) {
+      var item = new Structure__Container(parent, node, children, old.open);
     } else {
-      item.destroy();
-      item = new Structure__Item(parent, node, item.originalEngine);
-      item.alias = old.alias;
+      var item = new Structure__Item(parent, node, old.originalEngine);
     }
-    item.modified = old.modified || 1;
-    item.name = old.name;
+    item.inheritFrom(old);
     parent.insertAt(index, item);
     return item;
   },
