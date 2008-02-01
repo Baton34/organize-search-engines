@@ -80,7 +80,8 @@ SEOrganizer.prototype = {
   },
 
   init: function init() {
-    var toolbox = document.getElementById("navigator-toolbox");
+    var toolbox = document.getElementById("navigator-toolbox") ||
+                                     document.getElementById("browser-toolbox");
     setTimeout(function() {
       toolbox.customizeDone = function(toolboxChanged) {
         BrowserToolboxCustomizeDone(toolboxChanged);
