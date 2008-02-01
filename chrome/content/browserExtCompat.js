@@ -351,8 +351,9 @@ organizeSE__Extensions.prototype = {
 
       count = popup.childNodes.length - 1;
       if (this.keywords.length) {
+        const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
         if (count)
-          popup.appendChild(document.createElementNS(kXULNS, 'menuseparator'));
+          popup.appendChild(document.createElementNS(XUL_NS, 'menuseparator'));
 
         for (var i = 0, maxi = this.keywords.length; i < maxi; i++)
         {
@@ -360,7 +361,7 @@ organizeSE__Extensions.prototype = {
               parent.getElementsByAttribute('engineName', this.keywords[i].name+'\n'+this.keywords[i].keyword).length)
           continue;
 
-          popup.appendChild(document.createElementNS(kXULNS, 'menuitem'));
+          popup.appendChild(document.createElementNS(XUL_NS, 'menuitem'));
           popup.lastChild.setAttribute('label',      this.keywords[i].name);
           popup.lastChild.setAttribute('class',      'menuitem-iconic');
           popup.lastChild.setAttribute('src',        this.keywords[i].icon);

@@ -7,7 +7,8 @@
 }
 
 menu.searchbar-engine-menu[selected="true"],
-menuitem.searchbar-engine-menuitem[selected="true"] {
+menuitem.searchbar-engine-menuitem[selected="true"],
+menuitem.openintabs-item[selected="true"] {
   font-weight: bolder;
 }
 menuseparator.searchbar-engine-menuseparator {
