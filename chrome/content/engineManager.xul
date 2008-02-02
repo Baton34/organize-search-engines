@@ -205,16 +205,16 @@ Contributor(s):
   <description>&engineManager.intro;</description>
 
   <hbox flex="1">
-    <tree id="engineList" flex="1" rows="10"
+    <tree id="engineList" flex="1" rows="10" editable="true"
           enableColumnDrag="true" flags="dont-build-content"
           onselect="gEngineManagerDialog.onSelect();"
           ondraggesture="gEngineManagerDialog.startDrag(event);">
       <treecols>
-        <treecol id="engineName" primary="true" flex="1" label="&namecol.label;"
-                 persist="width ordinal hidden" />
+        <treecol id="engineName" label="&namecol.label;" primary="true"
+                 persist="width ordinal hidden" flex="1" />
         <splitter class="tree-splitter"/>
-        <treecol id="engineAlias" width="35" label="&aliascol.label;"
-                 persist="width ordinal hidden" />
+        <treecol id="engineAlias" label="&aliascol.label;"
+                 persist="width ordinal hidden" flex="1" />
       </treecols>
       <treechildren />
     </tree>
