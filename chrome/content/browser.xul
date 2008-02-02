@@ -48,8 +48,7 @@ Contributor(s):
   <window id="main-window">
     <popupset id="search-popupset" ref="urn:organize-search-engines:root"
               datasources="rdf:organized-internet-search-engines"
-              sortResource="urn:organize-search-engines#Name"
-              sortDirection="natural"
+              sortResource="urn:organize-search-engines#Name" sortDirection="natural"
               ondragover="nsDragAndDrop.dragOver(event, seOrganizer_dragObserver);"
               ondragexit="nsDragAndDrop.dragExit(event, seOrganizer_dragObserver);"
               ondragdrop="nsDragAndDrop.drop(event, seOrganizer_dragObserver);">
