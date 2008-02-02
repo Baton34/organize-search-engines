@@ -346,8 +346,8 @@ SEOrganizer.prototype = {
   },
   removeOpenInTabsItems: function removeOpenInTabsItems(popup) {
     for(var i = 0; i < popup.childNodes.length; ++i) {
-      if(organizeSE.hasClass(popup.childNodes[i], "openintabs-item") != -1 ||
-         organizeSE.hasClass(popup.childNodes[i], "openintabs-separator") != -1) {
+      if(organizeSE.hasClass(popup.childNodes[i], "openintabs-item") ||
+         organizeSE.hasClass(popup.childNodes[i], "openintabs-separator")) {
         popup.removeChild(popup.childNodes[i]);
         --i;
       }
@@ -389,31 +389,26 @@ SEOrganizer.prototype = {
         item.parentNode.removeChild(item);
     },
     popupShowing: function observe__popupshowing(event) {
-      if(event.target == event.currentTarget) {
-        // when the popup is hidden and shown back-to-back, popuphidden isn't
-        organizeSE.removeDynamicItems(true, event.target); // fired sometimes
-        organizeSE.insertDynamicItems(true, event.target);
-        organizeSE.searchbar._engineButton.setAttribute("open", "true");
-      } else {
-        organizeSE.removeDynamicItems(false, event.target);
-        organizeSE.insertDynamicItems(false, event.target);
-      }
-
+      var target = event.target;
       // code taken from Firefox' bookmarksMenu.js::showEmptyItem
       // not reusing that method to remain compatible to places
-      if(!event.target.hasChildNodes()) {
-        var EmptyMsg;
-        if(BookmarksUtils)
-          EmptyMsg = BookmarksUtils.getLocaleString("emptyFolder");
+      if(!target.childNodes.length) {
+        if("BookmarksUtils" in window)
+          var EmptyMsg = BookmarksUtils.getLocaleString("emptyFolder");
         else
-          EmptyMsg = PlacesUtils.getString("bookmarksMenuEmptyFolder");
+          var EmptyMsg = PlacesUtils.getString("bookmarksMenuEmptyFolder");
         const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
         var emptyElement = document.createElementNS(XUL_NS, "menuitem");
         emptyElement.setAttribute("id", "empty-menuitem");
         emptyElement.setAttribute("label", EmptyMsg);
         emptyElement.setAttribute("disabled", "true");
-
-        event.target.appendChild(emptyElement);
+        target.appendChild(emptyElement);
+      } else {
+        var topLevel = (target == event.currentTarget);
+        // when the popup is hidden and shown back-to-back, popuphidden isn't
+        organizeSE.removeDynamicItems(topLevel, target); // fired sometimes
+        organizeSE.insertDynamicItems(topLevel, target);
+        if(topLevel) organizeSE.searchbar._engineButton.setAttribute("open", "true");
       }
     },
     onCommand: function onCommand(event) {
@@ -424,8 +419,9 @@ SEOrganizer.prototype = {
       if(!searchbar) return;
       if(target.getAttribute("anonid") == "open-engine-manager") {
         searchbar.openManager(event);
-      } else if(organizeSE.hasClass(target, "addengine-item") ||
-                organizeSE.hasClass(target, "searchbar-engine-menuitem")) {
+      } else if(organizeSE.hasClass(target, "searchbar-engine-menuitem") ||
+                organizeSE.hasClass(target, "addengine-item") ||
+                organizeSE.hasClass(target, "openintabs-item")) {
         if(organizeSE.hasClass(target, "openintabs-item")) {
           var folder = target.parentNode.parentNode.id;
           folder = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService)
