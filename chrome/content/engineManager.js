@@ -103,10 +103,17 @@ function compareNumbers(a, b) {
   return a - b;
 }
 
+window.addEventListener("keypress", function(event) {
+  if(event.keyCode == KeyboardEvent.DOM_VK_ESCAPE) {
+    document.getElementById("cmd_cancel").doCommand();
+  }
+}, false); // a key element is fired even when the editable tree canceled the event
+
 
 function EngineManagerDialog() {
 }
 EngineManagerDialog.prototype = {
+  _c: Components,
   init: function EngineManager__init() {
     gStrings = document.getElementById("strings");
     gSEOrganizer = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer).wrappedJSObject;
@@ -177,11 +184,10 @@ EngineManagerDialog.prototype = {
       gSEOrganizer.endUpdateBatch();
     }
   },
-  onClose: function EngineManager__onClose() {
-    var Components = window.Components || EngineManager__onClose.caller.caller.caller.__parent__.Components;
+  onClose: function EngineManager__onClose(event) {
+    var Components = window.Components || this._c;
     var Cc = Components.classes, Ci = Components.interfaces;
-    var This = this;
-    var body = function() {
+    var body = function(This) {
       // Remove the observers
       var os = Cc["@mozilla.org/observer-service;1"].
                getService(Ci.nsIObserverService);
@@ -195,11 +201,18 @@ EngineManagerDialog.prototype = {
       // notify observers
       os.notifyObservers(null, "browser-search-engine-modified",
                          "-engines-organized");
+      This.onCancel = function() {};
     };
-    if(window && !window.closed)
-      window.setTimeout(body, 0);
+    if(window && !window.closed && !event)
+      window.setTimeout(body, 0, this);
     else
-      body();
+      body(this);
+  },
+  cancel: function(event) {
+    if(!gEngineView.tree.element._editingColumn) {
+      closeWindow(true);
+      gEngineManagerDialog.onCancel();
+    }
   },
 
   observe: function EngineManager__observe(aSubject, aTopic, aVerb) {
@@ -278,6 +291,8 @@ EngineManagerDialog.prototype = {
   },
 
   remove: function EngineManager__remove() {
+    document.getElementById("engineList").focus();
+    if(gEngineView.tree.element._editingColumn) return;
     var indexes = gEngineView.selectedIndexes;
     gEngineView.selection.clearSelection();
 
@@ -314,8 +329,6 @@ EngineManagerDialog.prototype = {
       gEngineView.rowCountChanged(index, -removedCount);
       gEngineView.ensureRowIsVisible(Math.min(index, gEngineView.lastIndex));
     }
-
-    document.getElementById("engineList").focus();
 
     this.showRestoreDefaults();
   },

@@ -53,6 +53,7 @@ Contributor(s):
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
         onload="gEngineManagerDialog.init();"
+        onunload="gEngineManagerDialog.onCancel(event);"
         title="&engineManager.title;"
         persist="screenX screenY width height"
         windowtype="Browser:SearchManager">
@@ -74,7 +75,7 @@ Contributor(s):
           src="chrome://global/content/globalOverlay.js"/>
 
   <commandset id="generalCommandSet">
-    <command id="cmd_cancel" oncommand="closeWindow(true); gEngineManagerDialog.onCancel();" />
+    <command id="cmd_cancel" oncommand="gEngineManagerDialog.cancel(event);" />
     <command id="cmd_ok" oncommand="closeWindow(true); gEngineManagerDialog.onOK();" />
 
     <command id="cmd_selectAll" oncommand="gEngineManagerDialog.selectAll();" />
@@ -102,8 +103,7 @@ Contributor(s):
   </commandset>
 
   <keyset id="engineManagerKeyset">
-    <key id="key_remove" keycode="VK_DELETE" command="cmd_remove"/>
-    <key id="key_cancel" keycode="VK_ESCAPE" command="cmd_cancel"/>
+    <key id="key_remove" keycode="VK_DELETE" command="cmd_remove" />
     <key id="key_ok" key="W" modifiers="accel" command="cmd_ok" />
     <key id="key_selectAll" key="A" modifiers="accel" command="cmd_selectAll" />
   </keyset>
