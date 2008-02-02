@@ -373,69 +373,29 @@ EngineManagerDialog.prototype = {
     gEngineView.select.apply(gEngineView, indexes.concat([true]));
   },
   editAlias: function EngineManager__editAlias() {
-    document.getElementById("engineList").focus();
-    var index = gEngineView.selectedIndex;
-    var item = gEngineView.selectedItem;
-
-    var alias = { value: item.alias };
-    var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
-                    .getService(Ci.nsIPromptService);
-    var title = gStrings.getFormattedString("editalias.title", [item.name]);
-    var content = gStrings.getFormattedString("editalias.name", [item.name]);
-    var abort = prompts.prompt(window, title, content, alias, null, {});
-    if(!abort)
-      return;
-    alias = alias.value.replace(/ /g, "").toLowerCase();
-
-    var other;
-    while(other = gEngineView._getItemByProperty("alias", alias, item)) {
-      other.alias = "";
-      other.modified = other.modified || 1;
-      gEngineView.invalidateCell(gEngineView._indexCache.indexOf(other), "engineAlias");
-    }
-
-    // the engine is hidden, so its alias is ignored anyways
-    var hiddenDefaults = gSEOrganizer.getDefaultEngines({}).filter(function(e) {
-      return !gEngineView.engineVisible(e);
-    });
-    hiddenDefaults.forEach(function(engine) {
-      if(engine.alias == alias)
-        engine.alias = "";
-    });
-
-    item.alias = alias;
-    item.modified = item.modified || 1;
-
-    gEngineView.invalidateCell(index, "engineAlias");
-    gEngineView.selection.clearSelection();
-    gEngineView.selection.select(index);
-    gEngineView.ensureRowIsVisible(index);
+    this._edit("alias", "editalias", "engineAlias");
   },
   editName: function EngineManager__editName() {
-    document.getElementById("engineList").focus();
+    this._edit("name", "rename", "engineName");
+  },
+  _edit: function(prop, str, colId) {
     var index = gEngineView.selectedIndex;
-    var item = gEngineView.selectedItem;
-
-    var name = { value: item.name };
-    var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
-                    .getService(Ci.nsIPromptService);
-    var title = gStrings.getFormattedString("rename.title", [name.value]);
-    var content = gStrings.getFormattedString("rename.name", [name.value]);
-    var abort = prompts.prompt(window, title, content, name, null, {});
-    name = name.value;
-    if(!abort)
-      return;
-
-    while(gEngineView._getItemByProperty("name", name, item)) {
-      name = name + " ";
+    var tree = gEngineView.tree.element, col = gEngineView.getNamedColumn(colId);
+    if(tree.editable) {
+      tree.startEditing(index, col);
+    } else {
+      tree.focus();
+      var item = gEngineView.selectedItem;
+      var value = { value: item[prop] };
+      var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+                      .getService(Ci.nsIPromptService);
+      var title = gStrings.getFormattedString(str + ".title", [item.name]);
+      var content = gStrings.getFormattedString(str + ".name", [item.name]);
+      var abort = !prompts.prompt(window, title, content, value, null, {});
+      if(abort) return;
+      gEngineView.setCellText(index, col, value.value);
+      gEngineView.ensureRowIsVisible(index);
     }
-
-    item.name = name;
-
-    gEngineView.invalidateCell(index, "engineName");
-    gEngineView.selection.clearSelection();
-    gEngineView.selection.select(index);
-    gEngineView.ensureRowIsVisible(index);
   },
 
   get NEW_ITEM_TYPE_SEPARATOR()          {  return "separator";       },
@@ -1035,13 +995,16 @@ EngineView.prototype = {
     return this.tree.invalidateRow(row);
   },
   invalidateCell: function(row, colId) {
-    return this.tree.invalidateCell(row, this.tree.columns.getNamedColumn(colId));
+    return this.tree.invalidateCell(row, this.getNamedColumn(colId));
   },
   rowCountChanged: function EngineView__rowCountChanged(index, count) {
     return this.tree.rowCountChanged(index, count);
   },
   ensureRowIsVisible: function (index) {
     this.tree.ensureRowIsVisible(index);
+  },
+  getNamedColumn: function EngineView__getNamedColumn(name) {
+    return this.tree.columns.getNamedColumn(name)
   },
   commit: function commit() {
     gSEOrganizer.beginUpdateBatch();
@@ -1263,17 +1226,15 @@ EngineView.prototype = {
     var aserv = Cc["@mozilla.org/atom-service;1"].getService(Ci.nsIAtomService);
     if(this.isSeparator(row))
       props.AppendElement(aserv.getAtom("separator"));
-    if(col.id === "engineName")
+    if(col.id == "engineName")
       props.AppendElement(aserv.getAtom("Name"));
   },
   getCellText: function EngineView__getCellText(row, col) {
     var rowItem = this._indexCache[row];
-    switch(col.id) {
-      case "engineName":
-        return rowItem.isSep ? "" : rowItem.name;
-      case "engineAlias":
-        return rowItem.isSep ? "" : rowItem.alias;
-    }
+    if(col.id == "engineName")
+      return rowItem.isSep ? "" : rowItem.name;
+    else if(col.id == "engineAlias")
+      return rowItem.isSep ? "" : rowItem.alias;
     return "";
   },
   getCellValue: function EngineView__getCellValue(row, col) { },
@@ -1284,14 +1245,13 @@ EngineView.prototype = {
       props.AppendElement(aserv.getAtom("Name"));
   },
   getImageSrc: function EngineView__getImageSrc(row, col) {
-    if(col.id === "engineName")
+    if(col.id == "engineName")
       return this._indexCache[row].iconURI;
     return "";
   },
   getLevel: function EngineView__getLevel(index) {
     var item = this._indexCache[index];
-    if(!item)
-      return -1;
+    if(!item) return -1;
 
     var level = -1;
     while((item = item.parent))
@@ -1335,7 +1295,12 @@ EngineView.prototype = {
   isContainerOpen: function EngineView__isContainerOpen(index) {
     return this._indexCache[index].open;
   },
-  isEditable: function() { return false; },
+  isEditable: function EngineView__isEditable(row, col) {
+    var item = this._indexCache[row];
+    var editableEngine = (item.originalEngine && !item.originalEngine.wrappedJSObject._readOnly);
+    return (col.id == "engineName" && (item.isSeq || editableEngine)) ||
+           (col.id == "engineAlias" && item.isEngine);
+  },
   isSeparator: function EngineView__isSeparator(index) {
     return this._indexCache[index].isSep;
   },
@@ -1346,7 +1311,35 @@ EngineView.prototype = {
   performActionOnCell: function() {},
   performActionOnRow: function() {},
   selectionChanged: function() {},
-  setCellText: function() {},
+  setCellText: function EngineView__setCellText(row, col, value) {
+    var item = this._indexCache[row];
+    if(!item) return;
+    if(col.id == "engineName") {
+      if(item.name == value) return;
+      while(gEngineView._getItemByProperty("name", value, item)) {
+        value = value + " ";
+      }
+      item.name = value;
+      gEngineView.invalidateCell(row, "engineName");
+    } else if(col.id == "engineAlias") {
+      value = value.replace(/ /g, "").toLowerCase();
+      if(item.alias == value) return;
+
+      var other;
+      while(value && (other = gEngineView._getItemByProperty("alias", value, item))) {
+        this.setCellText(gEngineView._indexCache.indexOf(other), col, "");
+      }
+      gSEOrganizer.getEngines({}).forEach(function(engine) {
+        if(!gEngineView.engineVisible(engine) && engine.alias == value)
+          engine.alias = "";
+      });
+
+      item.alias = value;
+      item.modified = item.modified || 1;
+
+      gEngineView.invalidateCell(row, "engineAlias");
+    }
+  },
   setCellValue: function() {},
   setTree: function(tree) {
     this.tree = tree;
@@ -1357,6 +1350,7 @@ EngineView.prototype = {
     var open = (item.open = !item.open);
     this.updateCache();
     this.rowCountChanged(index + 1, (open ? 1 : -1) * count);
+    this.invalidateCell(index, "engineName");
     return open;
   }
 };
