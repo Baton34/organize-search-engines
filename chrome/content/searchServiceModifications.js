@@ -118,25 +118,20 @@ Contributor(s):
   var orig = notifyAction;
   notifyAction = function notify(aEngine, aVerb) {
     var caller = "";
-    if(aVerb == "engine-changed") {
-      aEngine = aEngine.wrappedJSObject;
-      if(notify.caller) {
-        if(notify.caller.name) {
-          caller = notify.caller.name;
-          if(caller == "SRCH_SVC_addEngineToStore")
-            caller = "update";
-          else if(caller == "SRCH_ENG_setIcon" || caller == "iconLoadCallback")
-            caller = "icon";
-          else if(caller == "SRCH_SVC_moveEngine")
-            caller = "move";
-        } else {
-          if(notify.caller == aEngine.__lookupSetter__("hidden"))
-            caller = "hidden";
-          else if(notify.caller == aEngine.__lookupSetter__("alias"))
-            caller = "alias";
-        } // in engineManager.js, there's also a caller "name" for renames
-        aEngine.__action = caller;
-      }
+    if(aVerb == "engine-changed" && notify.caller && notify.caller.name) {
+      caller = notify.caller.name;
+      if(caller == "SRCH_SVC_addEngineToStore")
+        caller = "update";
+      else if(caller == "SRCH_ENG_setIcon" || caller == "iconLoadCallback")
+        caller = "icon";
+      else if(caller == "SRCH_SVC_moveEngine")
+        caller = "move";
+      else if(caller == "SRCH_SVC_setHidden")
+        caller = "hidden";
+      else if(caller == "SRCH_SVC_setAlias")
+        caller = "alias";
+      // in engineManager.js, there's also a caller "name" for renames
+      aEngine.wrappedJSObject.__action = caller;
     }
     if(aVerb == "engine-added" || aVerb == "engine-removed" || caller == "move") {
       _filteredSortedEngines = null;
@@ -145,6 +140,8 @@ Contributor(s):
     if(caller)
       delete aEngine.wrappedJSObject.__action;
   };
+  Engine.prototype.__lookupSetter__("hidden").name = "SRCH_SVC_setHidden";
+  Engine.prototype.__lookupSetter__("alias").name = "SRCH_SVC_setAlias";
 })();
 
 // cache the output of getSortedEngines
