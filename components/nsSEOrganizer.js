@@ -15,7 +15,7 @@ The Original Code is Organize Search Engines.
 
 The Initial Developer of the Original Code is
 Malte Kraus.
-Portions created by the Initial Developer are Copyright (C) 2006-2007
+Portions created by the Initial Developer are Copyright (C) 2006-2008
 the Initial Developer. All Rights Reserved.
 
 Contributor(s):
@@ -755,7 +755,7 @@ SEOrganizer.prototype = {
     var alias = aName.substr(0, offset == -1 ? aName.length : offset).toLowerCase();
     if(alias) {
       var engine = ss.getEngineByAlias(alias);
-      if(engine != null && engine instanceof Ci.nsISearchEnige &&
+      if(engine != null && engine instanceof Ci.nsISearchEngine &&
          engine.alias.toLowerCase() == alias && !engine.hidden) {
         var searchTerm = (offset != -1) ? aName.substr(offset + 1) : "";
         var submission = engine.getSubmission(searchTerm, null); // we want HTML
