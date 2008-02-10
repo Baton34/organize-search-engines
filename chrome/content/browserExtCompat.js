@@ -353,21 +353,20 @@ organizeSE__Extensions.prototype = {
       if (this.keywords.length) {
         const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
         if (count)
-          popup.appendChild(document.createElementNS(XUL_NS, 'menuseparator'));
+          organizeSE.createMenuseparator(popup);
 
         for (var i = 0, maxi = this.keywords.length; i < maxi; i++)
         {
-          if (this.keywords[i].uri && parent &&
-              parent.getElementsByAttribute('engineName', this.keywords[i].name+'\n'+this.keywords[i].keyword).length)
+          var keyword = this.keywords[i];
+          if (keyword.uri && parent &&
+              parent.getElementsByAttribute('engineName', keyword.name+'\n'+keyword.keyword).length)
           continue;
 
-          popup.appendChild(document.createElementNS(XUL_NS, 'menuitem'));
-          popup.lastChild.setAttribute('label',      this.keywords[i].name);
-          popup.lastChild.setAttribute('class',      'menuitem-iconic');
-          popup.lastChild.setAttribute('src',        this.keywords[i].icon);
-          popup.lastChild.setAttribute('keyword',    this.keywords[i].keyword);
-          popup.lastChild.setAttribute('engineName', this.keywords[i].name+'\n'+this.keywords[i].keyword);
-          popup.lastChild.id = 'secondsearch-keyword-'+encodeURIComponent(this.keywords[i].name);
+          var attrs = { src: keyword.icon, keyword: keyword.keyword,
+                        engineName: keyword.name+'\n'+keyword.keyword };
+          organizeSE.createMenuitem(popup, keyword.name, 'menuitem-iconic',
+                                    'secondsearch-keyword-'+encodeURIComponent(keyword.name),
+                                    attrs);
           if (!count)
             popup.lastChild.setAttribute('_moz-menuactive', 'true');
 

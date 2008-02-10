@@ -113,9 +113,7 @@ SEOrganizer.prototype = {
     /* compatibility to other extensions */
     this.extensions = new organizeSE__Extensions();
   },
-  _customizeToolbarListeners: [function() {
-                                 organizeSE.onCustomizeToolbarFinished();
-                               }],
+  _customizeToolbarListeners: [ organizeSE.onCustomizeToolbarFinished ],
   customizeToolbarListener: function() {
     var listeners = organizeSE._customizeToolbarListeners;
     for(var i = 0; i < listeners.length; i++) {
@@ -132,12 +130,11 @@ SEOrganizer.prototype = {
     searchbar.doSearch = this.doSearch;
     if(!("_getParentSearchbar" in searchbar._textbox))
       searchbar._textbox._getParentSearchbar = this._getParentSearchBarTrunk;
-    searchbar.__defineGetter__("_popup", this.__lookupGetter__("popup"), false);
+    searchbar.__defineGetter__("_popup", this.__lookupGetter__("popup"));
     if(!("_engineButton" in searchbar)) { // minefield compat.
-      searchbar.__defineGetter__("_engineButton", function() {
-        return document.getAnonymousElementByAttribute(searchbar, "anonid",
-                                                     "searchbar-engine-button");
-      });
+      var engineButton = document.getAnonymousElementByAttribute(searchbar,
+                                           "anonid", "searchbar-engine-button");
+      searchbar._engineButton = engineButton;
     }
     searchbar._engineButton.setAttribute("popup", "search-popup");
   },
@@ -249,14 +246,14 @@ SEOrganizer.prototype = {
   _callDynamicHandlers: function(pos, popup, toplevel, methodName) {
     var handlers = this._insertItemsHandlers;
     for(var i = 0; i < handlers.length; ++i) {
-      if(handlers[i].pos != pos || !!handlers[i].subFolders == toplevel)
-        continue;
-      try {
-        if(!handlers[i].mod)
-          this[handlers[i][methodName]](popup);
-        else
-          handlers[i][methodName].call(handlers[i].mod, popup);
-      } catch(e) { Components.reportError(e); }
+      if(handlers[i].pos == pos && !handlers[i].subFolders == toplevel) {
+        try {
+          if(!handlers[i].mod)
+            this[handlers[i][methodName]](popup);
+          else
+            handlers[i][methodName].call(handlers[i].mod, popup);
+        } catch(e) { Components.reportError(e); }
+      }
     }
   },
   insertDynamicItems: function insertDynamicItems(toplevel, popup) {
@@ -288,26 +285,16 @@ SEOrganizer.prototype = {
     var addengines = getBrowser().mCurrentBrowser.engines;
     if(!addengines || !addengines.length) return;
 
-    const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-    const separator = document.createElementNS(XUL_NS, "menuseparator");
-    separator.className = "addengine-separator";
-    popup.appendChild(separator);
-
+    this.createSeparator(popup, "addengine-separator");
     // Insert the "add this engine" items.
     for(var i = 0; i < addengines.length; i++) {
-      var menuitem = document.createElement("menuitem");
       var engineInfo = addengines[i];
       var labelStr =
            this.searchbar._stringBundle.getFormattedString("cmd_addFoundEngine",
                                                            [engineInfo.title]);
-      menuitem = document.createElementNS(XUL_NS, "menuitem");
-      menuitem.className = "menuitem-iconic addengine-item";
-      menuitem.setAttribute("label", labelStr);
-      menuitem.setAttribute("uri", engineInfo.uri);
-      if(engineInfo.icon)
-        menuitem.setAttribute("src", engineInfo.icon);
-      menuitem.setAttribute("title", engineInfo.title);
-      popup.appendChild(menuitem);
+      var attrs = {uri: engineInfo.uri, src: engineInfo.icon, title: engineInfo.title};
+      this.createMenuitem(labelStr, popup, "menuitem-iconic addengine-item",
+                          "", attrs);
     }
   },
   removeAddEngineItems: function removeAddEngineItems(popup) {
@@ -320,25 +307,18 @@ SEOrganizer.prototype = {
     }
   },
   insertOpenInTabsItems: function insertOpenInTabsItems(popup) {
-    const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-    var separator = document.createElementNS(XUL_NS, "menuseparator");
-    separator.className = "openintabs-separator";
-    popup.appendChild(separator);
+    this.createMenuseparator(popup, "openintabs-separator");
 
-    var menuitem = document.createElementNS(XUL_NS, "menuitem");
-    menuitem.className = "openintabs-item";
+    var attrs = {};
     if("BookmarkUtils" in window) {
       var label = BookmarksUtils.getLocaleString("cmd_bm_openfolder");
-      var accesskey = BookmarksUtils.getLocaleString("cmd_bm_openfolder_accesskey");
+      attrs.accesskey = BookmarksUtils.getLocaleString("cmd_bm_openfolder_accesskey");
     } else {
       var label = gNavigatorBundle.getString("menuOpenAllInTabs.label");
-      var accesskey = gNavigatorBundle.getString("menuOpenAllInTabs.accesskey");
+      attrs.accesskey = gNavigatorBundle.getString("menuOpenAllInTabs.accesskey");
     }
-    menuitem.setAttribute("label", label);
-    menuitem.setAttribute("accesskey", accesskey);
-    if(this.SEOrganizer.currentEngine.name == popup.parentNode.label)
-      menuitem.setAttribute("selected", "true");
-    popup.appendChild(menuitem);
+    attrs.selected = (this.SEOrganizer.currentEngine.name == popup.parentNode.label);
+    this.createMenuitem(popup, label, "openintabs-item", "", attrs);
   },
   removeOpenInTabsItems: function removeOpenInTabsItems(popup) {
     for(var i = 0; i < popup.childNodes.length; ++i) {
@@ -393,12 +373,8 @@ SEOrganizer.prototype = {
           var EmptyMsg = BookmarksUtils.getLocaleString("emptyFolder");
         else
           var EmptyMsg = PlacesUtils.getString("bookmarksMenuEmptyFolder");
-        const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-        var emptyElement = document.createElementNS(XUL_NS, "menuitem");
-        emptyElement.setAttribute("id", "empty-menuitem");
-        emptyElement.setAttribute("label", EmptyMsg);
-        emptyElement.setAttribute("disabled", "true");
-        target.appendChild(emptyElement);
+        organizeSE.createMenuitem(EmptyMsg, target, null, "empty-menuitem",
+                                  { disabled: "true" });
       } else {
         var topLevel = (target == event.currentTarget);
         // when the popup is hidden and shown back-to-back, popuphidden isn't
@@ -459,6 +435,25 @@ SEOrganizer.prototype = {
         return this;
       throw Cr.NS_ERROR_NO_INTERFACE;
     }
+  },
+  createSeparator: function(parentNode, className, id) {
+    const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+    var element = document.createElementNS(XUL_NS, "menuseparator");
+    if(id)         element.setAttribute("id", id);
+    if(className)  element.className = className;
+    return element;
+  },
+  createMenuitem: function(label, parentNode, className, id, attrs) {
+    const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+    var element = document.createElementNS(XUL_NS, "menuitem");
+    element.setAttribute("label", label);
+    if(id)         element.setAttribute("id", id);
+    if(className)  element.className = className;
+    if(attrs)      for(var i in attrs) {
+      if(attrs[i])   element.setAttribute(i, attrs[i]);
+    }
+    if(parentNode) parentNode.appendChild(element);
+    return element;
   },
   hasClass: function(elem, className) {
     return (" "+elem.className+" ").indexOf(" "+className+" ") != -1;
