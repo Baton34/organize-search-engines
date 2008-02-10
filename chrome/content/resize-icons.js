@@ -1,3 +1,39 @@
+/* ***** BEGIN LICENSE BLOCK *****
+Version: MPL 1.1/GPL 2.0/LGPL 2.1
+
+The contents of this file are subject to the Mozilla Public License Version
+1.1 (the "License"); you may not use this file except in compliance with
+the License. You may obtain a copy of the License at
+http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+for the specific language governing rights and limitations under the
+License.
+
+The Original Code is Organize Search Engines.
+
+The Initial Developer of the Original Code is
+Malte Kraus.
+Portions created by the Initial Developer are Copyright (C) 2007-2008
+the Initial Developer. All Rights Reserved.
+
+Contributor(s):
+  Malte Kraus <mails@maltekraus.de> (Original author)
+
+ Alternatively, the contents of this file may be used under the terms of
+ either the GNU General Public License Version 2 or later (the "GPL"), or
+ the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ in which case the provisions of the GPL or the LGPL are applicable instead
+ of those above. If you wish to allow use of your version of this file only
+ under the terms of either the GPL or the LGPL, and not to allow others to
+ use your version of this file under the terms of the MPL, indicate your
+ decision by deleting the provisions above and replace them with the notice
+ and other provisions required by the GPL or the LGPL. If you do not delete
+ the provisions above, a recipient may use your version of this file under
+ the terms of any one of the MPL, the GPL or the LGPL.
+***** END LICENSE BLOCK ***** */
+
 /* The class arranges the provided images in two rows in the provided dimensions.
    It will do both upscale and downscale the images when neccessary. If the
    number of images is odd, the image of biggest height (then width, then order)
@@ -40,27 +76,6 @@ function Resizer(width, height) {
 Resizer.prototype = {
   width: 0,
   height: 0,
-  /*_createCanvas: function() {
-    var doc = document.getElementById("IFRAME");
-    if(!doc) {
-      var doc = document.createElement("iframe");
-      document.documentElement.appendChild(doc);
-      doc.id = "IFRAME";
-    }
-    doc = doc.contentDocument.defaultView.document;
-    var canvas = doc.getElementById("CaNvAs");
-    if(!canvas) {
-        canvas = doc.createElementNS("http://www.w3.org/1999/xhtml",
-                                          "canvas");
-        doc.body.appendChild(canvas);
-        canvas.id = "CaNvAs";
-    }
-    canvas.style.width = this.width + "px";
-    canvas.style.height = this.height + "px";
-    canvas.setAttribute("width", this.width);
-    canvas.setAttribute("height", this.height);
-    this._canvas = canvas.getContext("2d");
-  },*/
   _document: this.document || Cc["@mozilla.org/appshell/window-mediator;1"]
                            .getService(Ci.nsIWindowMediator)
                            .getMostRecentWindow("navigator:browser").document,
@@ -146,28 +161,12 @@ Resizer.prototype = {
     return true;
   },
 
-  /*paintIcons: function() {
-    this._canvas.fillStyle = this._canvas.strokeStyle = "rgba(254, 254, 254, 1)"
-    this._canvas.fillRect(0, 0, this.width, this.height);
-    var num = this.icons.length;
-    var height = Math.floor(this.height / 2);
-    var width = (this.width * this.height) / ((num + (num % 2)) * height);
-
-    for(var i = 0; i < num - 1; i++) {
-      this._canvas.drawImage(this.icons[i], Math.floor(i / 2) * width, (i % 2) * height,
-                             width, height);
-    }
-
-    this._canvas.drawImage(this.icons[i], Math.floor(i / 2) * width, (i % 2) * height,
-                           width, height * ((num % 2) + 1));
-  },*/
   paintIcons: function() {
     var canvas = this._canvas;
     canvas.fillStyle = canvas.strokeStyle = "rgba(0,0,0,0)"; // transparent
     canvas.clearRect(0, 0, this.width, this.height);
     var num = this.icons.length;
-    if(!num)
-      return;
+    if(!num) return;
     var height = Math.floor(this.height / 2);
     var width = (this.width * this.height) / ((num + (num % 2)) * height);
 
