@@ -71,12 +71,9 @@ SEOrganizer.prototype = {
     var scope = aScope || document;
     var doc = ((scope.nodeName == "#document") ? scope : scope.ownerDocument);
     var result = doc.evaluate(aExpression, scope, resolver,
-                              XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-    var found = [];
-    for(var i = 0; i < result.snapshotLength; ++i) {
-      found.push(result.snapshotItem(i));
-    }
-    return found;
+                              XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+    var iter = (function() { var e; while((e = result.iterateNext())) yield e; })();
+    return [i for each(i in iter)];
   },
 
   init: function init() {
