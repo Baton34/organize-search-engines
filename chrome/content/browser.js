@@ -77,8 +77,7 @@ SEOrganizer.prototype = {
   },
 
   init: function init() {
-    var toolbox = document.getElementById("navigator-toolbox") ||
-                                     document.getElementById("browser-toolbox");
+    var toolbox = document.getElementById("navigator-toolbox");
     setTimeout(function() {
       toolbox.customizeDone = function(toolboxChanged) {
         BrowserToolboxCustomizeDone(toolboxChanged);
