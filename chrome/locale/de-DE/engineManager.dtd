@@ -5,17 +5,17 @@
 <!ENTITY restoreDefault.label                    "Vorgabe wiederherstellen">
 <!ENTITY restoreDefault.accesskey                "V">
 
-<!ENTITY new-folder.label                        "Neuer Ordner...">
+<!ENTITY new-folder.label                        "Neuer Ordner…">
 <!ENTITY new-folder.accesskey                    "N">
 <!ENTITY new-separator.label                     "Neue Trennlinie">
 <!ENTITY new-separator.accesskey                 "T">
 
-<!ENTITY move-engine.label                       "Verschieben...">
+<!ENTITY move-engine.label                       "Verschieben…">
 <!ENTITY move-engine.accesskey                   "V">
 
-<!ENTITY rename.label                            "Umbenennen...">
+<!ENTITY rename.label                            "Umbenennen…">
 <!ENTITY rename.accesskey                        "n">
-<!ENTITY editalias.label                         "Schlüsselwort...">
+<!ENTITY editalias.label                         "Schlüsselwort…">
 <!ENTITY editalias.accesskey                     "S">
 
 <!ENTITY noconflict.enableSuggest.accesskey      "&enableSuggest.accesskey;">
