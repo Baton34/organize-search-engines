@@ -219,38 +219,37 @@ organizeSE__Extensions.prototype = {
       popup.removeAttribute("onpopuphiding");
       allMenuItem.firstChild.removeAttribute("onpopupshowing");
       allMenuItem.firstChild.removeAttribute("onpopuphiding");
-      function onpopupEvent(e) {
-        if(e.target.id == "secondsearch_popup") {
-          if(e.type == "popupshowing") {
-            SecondSearch.onPopupShowing(e);
-          } else {
-            SecondSearch.onPopupHiding(e);
-          }
-        } else if(e.target.parentNode.id == "secondsearch_popup_all") {
-          if(e.type == "popupshowing") {
-            e.target.shown = true;
-            if(e.target.parentNode.datasources.indexOf("rdf:organized-internet-search-engines") != -1)
-              e.target.parentNode.builder.rebuild();
-            if(!SecondSearch.getCurrentItem(e.target))
-              e.target.firstChild.setAttribute("_moz-menuactive", "true");
-          } else {
-            e.target.shown = false;
-            organizeSE.evalXPath("//xul:menupopup", e.target).forEach(function(cur) {
-              cur.hidePopup();
-            });
-          }
+      function onPopupShowing(e) {
+        if(e.target == popup) {
+          SecondSearch.onPopupShowing(e);
+        } else if(e.target.parentNode == allMenuItem) {
+          e.target.shown = true;
+          if(e.target.parentNode.datasources != -1)
+            e.target.parentNode.builder.rebuild();
+          if(!SecondSearch.getCurrentItem(e.target))
+            e.target.firstChild.setAttribute("_moz-menuactive", "true");
         }
         e.stopPropagation();
       }
-      popup.addEventListener("popupshowing", onpopupEvent, false);
-      popup.addEventListener("popuphiding", onpopupEvent, false);
+      popup.addEventListener("popupshowing", onPopupShowing, false);
+      function onPopupHiding(e) {
+        var target = e.target;
+        if(target == popup) {
+          SecondSearch.onPopupHiding(e);
+        } else if(target.parentNode == allMenuItem) {
+          target.shown = false;
+          organizeSE.evalXPath("//xul:menupopup", target).forEach(function(cur) {
+            cur.hidePopup();
+          });
+        }
+        e.stopPropagation();
+      }
+      popup.addEventListener("popuphiding", onPopupHiding, false);
     },
     initAllEngines: function(aPopup, aUnused, aReverse) {
-      var source = this.source;
       var popup  = aPopup || this.popup;
+      var parent = aParent || null;
       var offset = 0;
-
-      var count = 0;
 
       var allMenuItem = this.allMenuItem;
       if(this.popupType == 0) { // we're in the child menu
@@ -267,9 +266,40 @@ organizeSE__Extensions.prototype = {
           popup.insertBefore(allMenuItem, popup.firstChild);
       }
 
-      count = popup.childNodes.length - 1;
+      var range = document.createRange();
+      range.selectNodeContents(popup);
+      if (popup.hasChildNodes()) {
+        if (popup.firstChild.localName == 'menu') {
+          range.setStartAfter(popup.firstChild);
+          offset = 1;
+        }
+        else if (popup.lastChild.localName == 'menu') {
+          range.setEndBefore(popup.lastChild);
+        }
+      }
+      range.deleteContents();
+      range.detach();
+
+      var count = 0;
+
+      var items = this.sourceItems;
+      var item;
+      for (var i = 0, maxi = items.snapshotLength; i < maxi; i++)
+      {
+        item = items.snapshotItem(i);
+        if (parent && parent.getElementsByAttribute('engineName', item.getAttribute('label')).length)
+          continue;
+
+        popup.appendChild(item.cloneNode(true));
+        popup.lastChild.setAttribute('engineName', popup.lastChild.getAttribute('label'));
+        popup.lastChild.id = 'secondsearch-'+(popup.lastChild.id || encodeURIComponent(popup.lastChild.getAttribute('label')));
+        if (!count)
+          popup.lastChild.setAttribute('_moz-menuactive', 'true');
+
+        count++;
+      }
+
       if (this.keywords.length) {
-        const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
         if (count)
           organizeSE.createMenuseparator(popup);
 
@@ -285,8 +315,6 @@ organizeSE__Extensions.prototype = {
           organizeSE.createMenuitem(popup, keyword.name, 'menuitem-iconic',
                                     'secondsearch-keyword-'+encodeURIComponent(keyword.name),
                                     attrs);
-          if (!count)
-            popup.lastChild.setAttribute('_moz-menuactive', 'true');
 
           count++;
         }
