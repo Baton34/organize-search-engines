@@ -202,9 +202,6 @@ organizeSE__Extensions.prototype = {
     init: function() {
       SecondSearch.__defineGetter__("source",
                                     function() { return organizeSE.popup; });
-      SecondSearch.getCurrentItem = this.getCurrentItem;
-      SecondSearch.doSearchBy = this.getDoSearchBy();
-      SecondSearch.operateSecondSearch = this.getOperateSecondSearch();
       this.filterPopupEvents();
       SecondSearch.initAllEngines = this.initAllEngines;
     },
@@ -214,85 +211,6 @@ organizeSE__Extensions.prototype = {
                              .setAttribute("sortDirection", newVal);
       document.getElementById("secondsearch_popup").parentNode
                              .setAttribute("sortDirection", newVal);
-    },
-    getCurrentItem: function(aPopup) {
-      aPopup = aPopup || this.popup;
-      var active, oldActive = [null];
-      do {
-        active = aPopup.getElementsByAttribute('_moz-menuactive', 'true');
-        if(active && active.length) {
-          oldActive = active;
-          aPopup = active[0];
-        } else
-          return oldActive[0];
-      } while(active[0].nodeName == "menu");
-      return active[0];
-    },
-    getDoSearchBy: function() {
-      var origDoSearchBy = SecondSearch.doSearchBy;
-      return function(aItem, aEvent) {
-        aItem = aEvent.target;
-        if(!aItem.hasAttribute("engineName"))
-          aItem.setAttribute("engineName", aItem.label);
-        return origDoSearchBy.call(this, aItem, aEvent);
-      };
-    },
-    getOperateSecondSearch: function() {
-      var orig = SecondSearch.operateSecondSearch;
-      function replacementFunc(e) {
-        var allMenuItem = this.allMenuItem;
-        if(allMenuItem.firstChild.shown) {
-          var item = this.getCurrentItem();
-          var isUpKey = false;
-          switch(e.keyCode) {
-            case Ci.nsIDOMKeyEvent.DOM_VK_RIGHT:
-              if(item.nodeName == "menu") {
-                item.firstChild.showPopup();
-                item.firstChild.firstChild.setAttribute("_moz-menuactive",
-                                                        "true");
-                e.stopPropagation();
-                e.preventDefault();
-                return false;
-              }
-              break;
-            case Ci.nsIDOMKeyEvent.DOM_VK_LEFT:
-              if(item.parentNode.id != "secondsearch_popup_all") {
-                item.removeAttribute("_moz-menuactive");
-                item.parentNode.hidePopup();
-                e.stopPropagation();
-                e.preventDefault();
-                return false;
-              }
-              break;
-            case Ci.nsIDOMKeyEvent.DOM_VK_UP:
-              isUpKey = true;
-            case Ci.nsIDOMKeyEvent.DOM_VK_DOWN:
-              // we can't use next/previousSibling because of menuseparators
-              function getSibling(item, direction) {
-                if(direction == -1)
-                  direction = "previousSibling";
-                else
-                  direction = "nextSibling";
-                while((item = item[direction]) && item.nodeName) {
-                  if(item.nodeName == "menu" || item.nodeName == "menuitem")
-                    return item;
-                }
-                return null;
-              }
-              var elem = getSibling(item, isUpKey ? -1 : 1);
-              if(elem) {
-                item.removeAttribute("_moz-menuactive");
-                elem.setAttribute("_moz-menuactive", "true");
-              }
-              e.stopPropagation();
-              e.preventDefault();
-              return false;
-          }
-        }
-
-        return orig.call(this, e);
-      };
-      return replacementFunc;
     },
     filterPopupEvents: function() {
       const allMenuItem = SecondSearch.allMenuItem;
