@@ -123,8 +123,8 @@ SEOrganizer.prototype = {
   wrappedJSObject: null,
   indexOutOfDate: true,
   _init: function SEOrganizer___init() {
-    this._datasource = this._rdfService.GetDataSourceBlocking(this._saveURI)
-                           .QueryInterface(Ci.nsIRDFRemoteDataSource);
+    this._datasource = this._rdfService.GetDataSourceBlocking(this._saveURI);
+    this._datasource.QueryInterface(Ci.nsIRDFRemoteDataSource);
 
     var os = Cc["@mozilla.org/observer-service;1"]
                .getService(Ci.nsIObserverService);
@@ -289,8 +289,7 @@ SEOrganizer.prototype = {
     const CUR_ENGINE_PREF = "browser.search.selectedEngine";
     if(prefs.getPrefType(CUR_ENGINE_PREF) == Ci.nsIPrefBranch.PREF_STRING) {
       var curEngine = prefs.getComplexValue(CUR_ENGINE_PREF, Ci.nsISupportsString).data
-      if(this.currentEngine.name != curEngine &&
-         !this.getEngineByName(curEngine)) {
+      if(this.currentEngine.name != curEngine && !this.getEngineByName(curEngine)) {
         var item = this.getItemByName(curEngine);
         if(item) {
           this.currentEngine = this.folderToEngine(item);
@@ -613,19 +612,13 @@ SEOrganizer.prototype = {
     var name = rdfService.GetResource(NS + "Name");
 
     function Enumerator(nsISimpleEnumerator) {
-      Array.call(this);
-      if(nsISimpleEnumerator instanceof Ci.nsISimpleEnumerator) {
-        while(nsISimpleEnumerator.hasMoreElements()) {
-          this.push(nsISimpleEnumerator.getNext());
-        }
-        this.reverse();
-      } else if(nsISimpleEnumerator instanceof Array) {
-        for(var i in nsISimpleEnumerator) {
-          this.push(nsISimpleEnumerator[i]);
-        }
+      var arr = [];
+      while(nsISimpleEnumerator.hasMoreElements()) {
+        arr.push(nsISimpleEnumerator.getNext());
       }
+      arr.reverse();
+      return arr;
     }
-    Enumerator.prototype = Array.prototype;
 
     // recursion would be much simpler but it's better avoided
     var children = [], last;
@@ -703,6 +696,12 @@ SEOrganizer.prototype = {
     this._iterateAll(function(item) {
       engine.innerEngines.push(this.getEngineByName(this.getNameByItem(item)));
     }, null, folder);
+
+    if(!engine.innerEngines.length)
+      throw Cr.NS_ERROR_FAILURE;
+    if(engine.innerEngines.length == 1)
+      return engine.innerEngines[0];
+
     if(typeof Resizer == "undefined") {
        Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader)
          .loadSubScript("chrome://seorganizer/content/resize-icons.js");

@@ -306,6 +306,8 @@ SEOrganizer.prototype = {
     }
   },
   insertOpenInTabsItems: function insertOpenInTabsItems(popup) {
+    if(this.getChildItems(popup).length <= 1) return;
+
     this.createSeparator(popup, "openintabs-separator");
 
     var attrs = {};
@@ -395,11 +397,11 @@ SEOrganizer.prototype = {
         folder = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService)
                    .GetResource(folder);
         target.engine = organizeSE.SEOrganizer.folderToEngine(folder);
-      } else if(target.engine) {
+      } else if(target.engine) { // do nothing special
       } else if(organizeSE.hasClass(target, "searchbar-engine-menuitem") ||
                 organizeSE.hasClass(target, "addengine-item")) {
         target.engine = organizeSE.SEOrganizer.getEngineByName(target.label);
-      } else {
+      } else { // huh? how did we get here?
         return;
       }
       if("onEnginePopupCommand" in searchbar) { // Firefox 2.0
