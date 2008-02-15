@@ -57,23 +57,23 @@ SEOrganizer.prototype = {
   evalXPath: function(aExpression, aScope, aNSResolver) {
     var resolver = aNSResolver || function resolver(prefix) {
       switch(prefix) {
-        case "html":
-          return "http://www.w3.org/1999/xhtml";
-        case "xbl":
-          return "http://www.mozilla.org/xbl";
-        case "rdf":
-          return "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+        case "html": return "http://www.w3.org/1999/xhtml";
+        case "xbl":  return "http://www.mozilla.org/xbl";
+        case "rdf":  return "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
         case "xul":
-        default:
-          return "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+        default:     return "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
       }
     };
     var scope = aScope || document;
     var doc = ((scope.nodeName == "#document") ? scope : scope.ownerDocument);
     var result = doc.evaluate(aExpression, scope, resolver,
                               XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-    var iter = (function() { var e; while((e = result.iterateNext())) yield e; })();
-    return [i for each(i in iter)];
+    /*var iter = (function() { var e; while((e = result.iterateNext())) yield e; })();
+    return [i for each(i in iter)];*/
+    result.__iterator__ = function() { return { next: function() {
+      var e = result.iterateNext(); if(!e) throw StopIteration; return e;
+    } }; };
+    return [i for each(i in result)];
   },
 
   init: function init() {
@@ -85,16 +85,16 @@ SEOrganizer.prototype = {
           organizeSE.customizeToolbarListener();
       };
     }, 0);
+    this._customizeToolbarListeners.push(this.onCustomizeToolbarFinished);
     this.customizeToolbarListener();
 
     var popupset = this.popupset;
 
     const SORT_DIRECTION_PREF = "extensions.seorganizer.sortDirection";
-    var prefService = Cc["@mozilla.org/preferences-service;1"]
-                        .getService(Ci.nsIPrefService)
-                        .getBranch(SORT_DIRECTION_PREF);
-    prefService.QueryInterface(Ci.nsIPrefBranch2).addObserver("", this, false);
-    var direction = prefService.getComplexValue("", Ci.nsISupportsString).data;
+    var prefs = Cc["@mozilla.org/preferences-service;1"]
+                  .getService(Ci.nsIPrefService).getBranch(SORT_DIRECTION_PREF);
+    prefs.QueryInterface(Ci.nsIPrefBranch2).addObserver("", this, false);
+    var direction = prefs.getComplexValue("", Ci.nsISupportsString).data;
     popupset.setAttribute("sortDirection", direction);
 
     popupset.builder.addListener(this.buildObserver);
@@ -113,7 +113,7 @@ SEOrganizer.prototype = {
     /* compatibility to other extensions */
     this.extensions = new organizeSE__Extensions();
   },
-  _customizeToolbarListeners: [ organizeSE.onCustomizeToolbarFinished ],
+  _customizeToolbarListeners: [ ],
   customizeToolbarListener: function() {
     var listeners = organizeSE._customizeToolbarListeners;
     for(var i = 0; i < listeners.length; i++) {
@@ -132,9 +132,7 @@ SEOrganizer.prototype = {
       searchbar._textbox._getParentSearchbar = this._getParentSearchBarTrunk;
     searchbar.__defineGetter__("_popup", this.__lookupGetter__("popup"));
     if(!("_engineButton" in searchbar)) { // minefield compat.
-      var engineButton = document.getAnonymousElementByAttribute(searchbar,
-                                           "anonid", "searchbar-engine-button");
-      searchbar._engineButton = engineButton;
+      searchbar._engineButton = searchbar.searchButton;
     }
     searchbar._engineButton.setAttribute("popup", "search-popup");
   },
@@ -211,13 +209,14 @@ SEOrganizer.prototype = {
   },
   openSearch: function openSearch() {
     // Don't open search popup if history popup is open
-    if(!this.popupOpen) {
-      this._getParentSearchbar()._engineButton.click();
-      return false;
-    }
-    return true;
+    if(this.popupOpen)
+      return true;
+    this._getParentSearchbar()._engineButton.click();
+    return false;
   },
   doSearch: function doSearch(aData, aWhere) {
+    if(typeof aWhere != "string") // Firefox 2 had a parameter "aOpenInTab"
+      aWhere = aWhere ? "tab" : "current";
     // null parameter below specifies HTML response for search
     var submission = this.currentEngine.getSubmission(aData, null);
     openUILinkIn(submission.uri.spec, aWhere, null, submission.postData);
@@ -307,10 +306,10 @@ SEOrganizer.prototype = {
     }
   },
   insertOpenInTabsItems: function insertOpenInTabsItems(popup) {
-    this.createMenuseparator(popup, "openintabs-separator");
+    this.createSeparator(popup, "openintabs-separator");
 
     var attrs = {};
-    if("BookmarkUtils" in window) {
+    if("BookmarksUtils" in window) {
       var label = BookmarksUtils.getLocaleString("cmd_bm_openfolder");
       attrs.accesskey = BookmarksUtils.getLocaleString("cmd_bm_openfolder_accesskey");
     } else {
@@ -318,7 +317,7 @@ SEOrganizer.prototype = {
       attrs.accesskey = gNavigatorBundle.getString("menuOpenAllInTabs.accesskey");
     }
     attrs.selected = (this.SEOrganizer.currentEngine.name == popup.parentNode.label);
-    this.createMenuitem(popup, label, "openintabs-item", "", attrs);
+    this.createMenuitem(label, popup, "openintabs-item", "", attrs);
   },
   removeOpenInTabsItems: function removeOpenInTabsItems(popup) {
     for(var i = 0; i < popup.childNodes.length; ++i) {
@@ -384,34 +383,33 @@ SEOrganizer.prototype = {
       }
     },
     onCommand: function onCommand(event) {
-      const target = event.originalTarget;
-      var searchbar = document.popupNode;
+      var target = event.originalTarget, searchbar = document.popupNode;
       while(searchbar && searchbar.nodeName != "searchbar")
         searchbar = searchbar.parentNode;
       if(!searchbar) return;
       if(target.getAttribute("anonid") == "open-engine-manager") {
         searchbar.openManager(event);
+        return;
+      } else if(organizeSE.hasClass(target, "openintabs-item")) {
+        var folder = target.parentNode.parentNode.id;
+        folder = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService)
+                   .GetResource(folder);
+        target.engine = organizeSE.SEOrganizer.folderToEngine(folder);
+      } else if(target.engine) {
       } else if(organizeSE.hasClass(target, "searchbar-engine-menuitem") ||
-                organizeSE.hasClass(target, "addengine-item") ||
-                organizeSE.hasClass(target, "openintabs-item")) {
-        if(organizeSE.hasClass(target, "openintabs-item")) {
-          var folder = target.parentNode.parentNode.id;
-          folder = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService)
-                     .GetResource(folder);
-          target.engine = organizeSE.SEOrganizer.folderToEngine(folder);
-        } else if(!target.engine) {
-          target.engine = organizeSE.SEOrganizer.getEngineByName(target.label);
-        }
-
-        if("onEnginePopupCommand" in searchbar) { // Firefox 2.0
-          searchbar.onEnginePopupCommand(target);
-        } else { // trunk
-          var evt = document.createEvent("XULCommandEvent");
-          evt.initCommandEvent("command", true, true, window, 1, false, false,
-                               false, false, event);
-          evt.__defineGetter__("originalTarget",function(){return target;});// xxx
-          searchbar.dispatchEvent(evt);
-        }
+                organizeSE.hasClass(target, "addengine-item")) {
+        target.engine = organizeSE.SEOrganizer.getEngineByName(target.label);
+      } else {
+        return;
+      }
+      if("onEnginePopupCommand" in searchbar) { // Firefox 2.0
+        searchbar.onEnginePopupCommand(target);
+      } else { // trunk
+        var evt = document.createEvent("XULCommandEvent");
+        evt.initCommandEvent("command", true, true, window, 1, false, false,
+                             false, false, event);
+        evt.__defineGetter__("originalTarget",function(){return target;});// xxx
+        searchbar.dispatchEvent(evt);
       }
     },
     mouseMove: function observe__mouseMove(event) { // hover effect for the button
@@ -441,6 +439,7 @@ SEOrganizer.prototype = {
     var element = document.createElementNS(XUL_NS, "menuseparator");
     if(id)         element.setAttribute("id", id);
     if(className)  element.className = className;
+    if(parentNode) parentNode.appendChild(element);
     return element;
   },
   createMenuitem: function(label, parentNode, className, id, attrs) {
@@ -491,14 +490,20 @@ SEOrganizer.prototype = {
     if(aVerb == "engine-removed" || (aVerb == "engine-changed" &&
        aEngine.__action == "hidden" && aEngine.hidden)) {
       this.offerNewEngine(aEngine);
+      this._engines = this.searchService.getVisibleEngines({ });
     } else if(aVerb == "engine-added" || (aVerb == "engine-changed" &&
               aEngine.__action == "hidden" && !aEngine.hidden)) {
       this.hideNewEngine(aEngine);
+      this._engines = this.searchService.getVisibleEngines({ });
     } else if(aVerb == "engine-current" ||
              (aVerb == "engine-changed" && aEngine.__action == "icon")) {
       this.updateDisplay();
     } else if(aVerb == "-engines-organized" && "oDenDZones_Observer" in window) {
       window.setTimeout(function() { oDenDZones_Observer.observe(); }, 0);
+    } else if(aVerb == "engine-changed" && aEngine.__action == "name") {
+      if(this.currentEngine.name == aEngine.name) {
+        this.updateDisplay();
+      }
     } /*else if(aVerb == "engine-changed" && aEngine.__action == "move") {
        // do nothing special
     }*/
