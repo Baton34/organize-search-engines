@@ -198,10 +198,9 @@ organizeSE__Extensions.prototype = {
 
   /*** Second Search ***/
   secondSearch: {
-    check: ("SecondSearch" in window),
+    get check() { return ("SecondSearch" in window); },
     init: function() {
-      SecondSearch.__defineGetter__("source",
-                                    function() { return organizeSE.popup; });
+      SecondSearch.__defineGetter__("source", function() { return organizeSE.popup; });
       this.filterPopupEvents();
       SecondSearch.initAllEngines = this.initAllEngines;
     },
@@ -213,95 +212,57 @@ organizeSE__Extensions.prototype = {
                              .setAttribute("sortDirection", newVal);
     },
     filterPopupEvents: function() {
-      const allMenuItem = SecondSearch.allMenuItem;
-      const popup = SecondSearch.popup;
-      popup.removeAttribute("onpopupshowing");
-      popup.removeAttribute("onpopuphiding");
-      allMenuItem.firstChild.removeAttribute("onpopupshowing");
-      allMenuItem.firstChild.removeAttribute("onpopuphiding");
-      function onPopupShowing(e) {
-        if(e.target == popup) {
-          SecondSearch.onPopupShowing(e);
-        } else if(e.target.parentNode == allMenuItem) {
-          e.target.shown = true;
-          if(e.target.parentNode.datasources != -1)
-            e.target.parentNode.builder.rebuild();
-          if(!SecondSearch.getCurrentItem(e.target))
-            e.target.firstChild.setAttribute("_moz-menuactive", "true");
-        }
-        e.stopPropagation();
-      }
-      popup.addEventListener("popupshowing", onPopupShowing, false);
-      function onPopupHiding(e) {
-        var target = e.target;
-        if(target == popup) {
-          SecondSearch.onPopupHiding(e);
-        } else if(target.parentNode == allMenuItem) {
-          target.shown = false;
-          organizeSE.evalXPath("//xul:menupopup", target).forEach(function(cur) {
-            cur.hidePopup();
-          });
-        }
-        e.stopPropagation();
-      }
-      popup.addEventListener("popuphiding", onPopupHiding, false);
+      SecondSearch.popup.addEventListener("popupshowing", function onPopupShowing(e) {
+        var parent = e.target.parentNode;
+        if(parent.datasources == "rdf:organized-internet-search-engines")
+          parent.builder.rebuild();
+      }, false);
+      SecondSearch.popup.addEventListener("popuphiding", function onPopupHiding(e) {
+        const XPATH = "descendant::xul:menupopup";
+        organizeSE.evalXPath(XPATH, e.target).forEach(function(elem) {
+          elem.hidePopup();
+        });
+      }, false);
     },
-    initAllEngines: function(aPopup, aUnused, aReverse) {
-      var popup  = aPopup || this.popup;
-      var parent = aParent || null;
-      var offset = 0;
+    initAllEngines: function(aPopup, aParent, aReverse) {
+      var popup  = aPopup || this.popup, parent = aParent || null;
 
       var allMenuItem = this.allMenuItem;
-      if(this.popupType == 0) { // we're in the child menu
-        this.popup.parentNode.datasources = "";
+      if(parent) { // we're in the child menu
+        this.popup.parentNode.datasources = "rdf:null";
         allMenuItem.datasources = "rdf:organized-internet-search-engines";
       } else { // we're top level
+        for(var i = popup.childNodes.length; i--;) {
+          if(popup.childNodes[i].hasAttribute("engineName") ||
+             popup.childNodes[i].id == "secondsearch-ose-sep") {
+            popup.removeChild(popup.childNodes[i]);
+          }
+        }
+
         var popupParent = popup.parentNode;
-        allMenuItem.datasources = "";
+        allMenuItem.datasources = "rdf:null";
         popupParent.datasources = "rdf:organized-internet-search-engines";
-        popupParent.builder.rebuild();
         popup = popupParent.lastChild;
         popup.id = "secondsearch_popup";
-        if(allMenuItem.parentNode != popup)
-          popup.insertBefore(allMenuItem, popup.firstChild);
+        popup.insertBefore(allMenuItem, popup.firstChild);
       }
 
-      var range = document.createRange();
-      range.selectNodeContents(popup);
-      if (popup.hasChildNodes()) {
-        if (popup.firstChild.localName == 'menu') {
-          range.setStartAfter(popup.firstChild);
-          offset = 1;
+      if(this.keywords.length) {
+        var range = document.createRange();
+        range.selectNodeContents(popup);
+        if (popup.hasChildNodes()) {
+          if (popup.firstChild == allMenuitem) {
+            range.setStartAfter(popup.firstChild);
+          }
+          else if (popup.lastChild == allMenuitem) {
+            range.setEndBefore(popup.lastChild);
+          }
         }
-        else if (popup.lastChild.localName == 'menu') {
-          range.setEndBefore(popup.lastChild);
-        }
-      }
-      range.deleteContents();
-      range.detach();
+        range.deleteContents();
+        range.detach();
 
-      var count = 0;
-
-      var items = this.sourceItems;
-      var item;
-      for (var i = 0, maxi = items.snapshotLength; i < maxi; i++)
-      {
-        item = items.snapshotItem(i);
-        if (parent && parent.getElementsByAttribute('engineName', item.getAttribute('label')).length)
-          continue;
-
-        popup.appendChild(item.cloneNode(true));
-        popup.lastChild.setAttribute('engineName', popup.lastChild.getAttribute('label'));
-        popup.lastChild.id = 'secondsearch-'+(popup.lastChild.id || encodeURIComponent(popup.lastChild.getAttribute('label')));
-        if (!count)
-          popup.lastChild.setAttribute('_moz-menuactive', 'true');
-
-        count++;
-      }
-
-      if (this.keywords.length) {
-        if (count)
-          organizeSE.createMenuseparator(popup);
+        if (popup.hasChildNodes())
+          organizeSE.createMenuseparator(popup, "secondsearch-ose-sep");
 
         for (var i = 0, maxi = this.keywords.length; i < maxi; i++)
         {
@@ -315,19 +276,10 @@ organizeSE__Extensions.prototype = {
           organizeSE.createMenuitem(popup, keyword.name, 'menuitem-iconic',
                                     'secondsearch-keyword-'+encodeURIComponent(keyword.name),
                                     attrs);
-
-          count++;
         }
-
-        if (popup.lastChild && popup.lastChild.localName == 'menuseparator')
-          popup.removeChild(popup.lastChild);
       }
 
-      if (aReverse) {
-        popup.style.MozBoxDirection = "reverse";
-      } else {
-        popup.style.MozBoxDirection = "";
-      }
+      popup.style.MozBoxDirection = (aReverse) ? "reverse" : "";
     }
   },
 
