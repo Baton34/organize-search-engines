@@ -686,6 +686,9 @@ SEOrganizer.prototype = {
         return submission;
       },
       innerEngines: [],
+      supportsResponseType: function(type) {
+        return (type == null || type == "text/html");
+      },
       QueryInterface: function(aIID) {
         if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsISearchEngine))
           return this;

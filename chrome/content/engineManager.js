@@ -394,7 +394,7 @@ EngineManagerDialog.prototype = {
   _edit: function(prop, str, colId) {
     var index = gEngineView.selectedIndex;
     var tree = gEngineView.tree.element, col = gEngineView.getNamedColumn(colId);
-    if(tree.editable) {
+    if(tree.startEditing) {
       tree.startEditing(index, col);
     } else {
       tree.focus();
