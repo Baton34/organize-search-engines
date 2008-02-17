@@ -334,5 +334,44 @@ organizeSE__Extensions.prototype = {
         }
       }
     }
+  },
+
+  /* SearchLoad Options */
+  searchLoad: {
+    get check() { 
+      return ("SearchLoad_Options" in window);
+    },
+    init: function() {
+      var funcStr = searchLoadOptions_doSearch.toString();
+      eval("var origDoSearch = function(aURL, aInNewTab, postData) {\n    var url = aURL;"
++ funcStr.substr(funcStr.indexOf("return;\n    }") + 13));
+      searchLoadOptions_doSearch = function(aText, aInNewTab) {
+        var submission = organizeSE.searchbar.currentEngine.getSubmission(aText, null);
+        if (submission) {
+          origDoSearch(submission.uri.spec, aInNewTab, submission.postData);
+          if(submission instanceof Ci.nsISimpleEnumerator) {
+            var list = submission;
+            while(list.hasMoreElements()) {
+              submission = list.getNext().QueryInterface(Ci.nsISearchSubmission);
+              origDoSearch(submission.uri.spec, true, submission.postData);
+            }
+          }
+        }
+      };
+    },
+    insertItemsHandler: {
+      pos: "after",
+      insertMethod: function(popup) {
+        var label = SearchLoad_Options.stringBundle.getString("searchoptions.label");
+        var item = organizeSE.createMenuitem(label, popup, "open-engine-manager",
+                                             "searchloadoptions-menuitem");
+				item.addEventListener("command", SearchLoad_Options.optionsDialog, false);
+      },
+      removeMethod: function() {
+        var elem = document.getElementById("searchloadoptions-menuitem");
+        if(elem)
+          elem.parentNode.removeChild(elem);
+      }
+    }
   }
 };

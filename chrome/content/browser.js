@@ -151,13 +151,14 @@ SEOrganizer.prototype = {
     var container =  document.createElementNS(XUL_NS, "box");
     container.id = "searchpopup-bottom-container";
     if(!document.getElementById("manage-engines-item")) {
-      container.insertBefore(popup.lastChild.cloneNode(true), container.firstChild);
+      var elem = popup.getElementsByAttribute("anonid", "open-engine-manager")[0];
+      container.insertBefore(elem.cloneNode(true), container.firstChild);
       container.firstChild.removeAttribute("oncommand"); // minefield compat.
       container.firstChild.id = "manage-engines-item";
     }
     if(!document.getElementById("manage-engines-menuseparator")) {
-      container.insertBefore(popup.lastChild.previousSibling.cloneNode(true), container.firstChild);
-      container.firstChild.id = "manage-engines-menuseparator";
+      container.insertBefore(this.createSeparator(0, 0, "manage-engines-menuseparator"),
+                             container.firstChild);
     }
     var popupset = this.popupset;
     if(popupset.firstChild.id != container.id)
