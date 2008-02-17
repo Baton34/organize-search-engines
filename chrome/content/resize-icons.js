@@ -62,7 +62,6 @@ function Resizer(width, height) {
   this._loading = [];
   this.icons = [];
 
-  this._createCanvas();
   for(var i = 2; i < arguments.length; i++) {
     if(arguments[i] instanceof HTMLImageElement || arguments[i] instanceof Image
        || arguments[i] instanceof HTMLCanvasElement)
@@ -76,6 +75,12 @@ function Resizer(width, height) {
 Resizer.prototype = {
   width: 0,
   height: 0,
+  __canvas: null,
+  get _canvas() {
+    if(!this.__canvas)
+      this._createCanvas();
+    return this.__canvas;
+  },
   _document: this.document || Cc["@mozilla.org/appshell/window-mediator;1"]
                            .getService(Ci.nsIWindowMediator)
                            .getMostRecentWindow("navigator:browser").document,
@@ -84,8 +89,7 @@ Resizer.prototype = {
                                                 "canvas");
     canvas.setAttribute("width", this.width);
     canvas.setAttribute("height", this.height);
-    //document.appendChild(canvas);
-    this._canvas = canvas.getContext("2d");
+    this.__canvas = canvas.getContext("2d");
   },
   onload: null,
 
@@ -109,7 +113,7 @@ Resizer.prototype = {
     var biggest = icons.length - 1; // pick one
     for(var i = 0; i < icons.length - 1; i++) {
       if(icons[i].height > icons[biggest].height ||
-         (icons[i].height == icons[biggest].height && icons[i].width > icons[biggest].width)) {
+         (icons[i].height == icons[biggest].height && icons[i].width <= icons[biggest].width)) {
         biggest = i;
       }
     }
@@ -178,7 +182,7 @@ Resizer.prototype = {
                        (i % 2) * height, width, height);
     }
 
-    // draw the last icon in doubled heiht if necessary
+    // draw the last icon in doubled height if necessary
     canvas.drawImage(this.icons[i], Math.floor(i / 2) * width, (i % 2) * height,
                      width, height * ((num % 2) + 1));
   },
