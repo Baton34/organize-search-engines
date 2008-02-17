@@ -81,9 +81,14 @@ Resizer.prototype = {
       this._createCanvas();
     return this.__canvas;
   },
-  _document: this.document || Cc["@mozilla.org/appshell/window-mediator;1"]
-                           .getService(Ci.nsIWindowMediator)
-                           .getMostRecentWindow("navigator:browser").document,
+  get _document() {
+    if(this.__parent__.document)
+      return this.__parent__.document;
+    var mediator = Cc["@mozilla.org/appshell/window-mediator;1"]
+                     .getService(Ci.nsIWindowMediator);
+    var win = mediator.getMostRecentWindow("navigator:browser");
+    return win.document;
+  },
   _createCanvas: function() {
     var canvas = this._document.createElementNS("http://www.w3.org/1999/xhtml",
                                                 "canvas");
@@ -143,11 +148,10 @@ Resizer.prototype = {
     img.src = url;
   },
   removeIconByURL: function(url) {
-    for(var i = 0; i < this.icons.length; ++i) {
+    for(var i = this.icons.length; i > -1; i--) {
       if(this.icons[i].src == url)
-        return this.removeIconByImage(this.icons[i--]);
+        this.removeIconByImage(this.icons[i]);
     }
-    return false;
   },
   addIconByImage: function(img) {
     if(!img.naturalWidth && !img.naturalHeight) { // not loaded yet
@@ -158,11 +162,9 @@ Resizer.prototype = {
     }
   },
   removeIconByImage: function(img) {
-    var idx = this.icons.indexOf(img);
-    if(idx == -1)
-      return true;
-    this.icons = this.icons.slice(0, idx).concat(this.icons.slice(idx + 1));
-    return true;
+    var idx;
+    while((idx = this.icons.indexOf(img)) != -1)
+      this.icons.splice(idx, i);
   },
 
   paintIcons: function() {
