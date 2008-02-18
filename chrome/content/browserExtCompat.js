@@ -88,6 +88,8 @@ organizeSE__Extensions.prototype = {
    **           parameter.                                                    **
    **         @method removeMethod: equivalent to insertMethod, called when   **
    **            you should remove the menuitem from the DOM.                 **
+   **         @optional method subFolders: if true, insertMethod/removeMethod **
+   **            are not called for the root folder but for child folders.    **
    **   @optional method customizeToolbarHandler: this is called when some    **
    **     element in the toolbar is rebuilt, probably because the toolbars    **
    **     were customized. You may also want to call this method from init.   **
