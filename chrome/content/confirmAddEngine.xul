@@ -36,6 +36,7 @@ Contributor(s):
 ***** END LICENSE BLOCK ***** -->
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://browser/skin/bookmarks/addBookmark.css"?>
+<?xml-stylesheet href="chrome://browser/skin/places/editBookmarkOverlay.css"?>
 
 <!DOCTYPE dialog [
   <!ENTITY % commonDialogDTD SYSTEM "chrome://global/locale/commonDialog.dtd">
@@ -64,7 +65,7 @@ Contributor(s):
 
   <hbox flex="1">
     <hbox align="start">
-      <image id="info.icon" class="spaced"/>
+      <image id="info.icon" class="spaced question-icon"/>
     </hbox>
 
     <vbox flex="1" style="max-width: 45em;">
@@ -74,6 +75,8 @@ Contributor(s):
       <vbox id="info.box" style="white-space: -moz-pre-wrap;">
         <description/>
       </vbox>
+      <description id="info.body" context="contentAreaContextMenu" tabindex="-1"
+                   style="white-space: -moz-pre-wrap;"/>
 
       <!-- textboxes -->
       <vbox id="loginContainer" hidden="true">
@@ -95,14 +98,15 @@ Contributor(s):
       </vbox>
 
       <!-- checkbox -->
-      <vbox id="checkboxContainer" align="start" collapsed="true">
+      <vbox id="checkboxContainer" align="start" collapsed="false">
         <checkbox id="checkbox" oncommand="onCheckboxClick(this);"/>
       </vbox>
 
       <!-- drop down -->
-      <vbox id="engineListContainer">
+      <hbox id="engineListContainer" align="center">
         <label id="engineListLabel" value="&createin.label;" accesskey="&createin.accesskey;" control="engineList" />
-        <menulist id="engineList" class="folder-icon" oncommand="organizeSE.onEngineListChange(this);">
+        <menulist id="engineList" class="folder-icon"
+                  oncommand="organizeSE.onEngineListChange(this);" flex="1">
           <menupopup ref="urn:organize-search-engines:folders-root"
                      datasources="rdf:organized-internet-search-engines rdf:organized-internet-search-folders"
                      sortResource="urn:organize-search-engines#Name"
@@ -120,7 +124,7 @@ Contributor(s):
             </template>
           </menupopup>
         </menulist>
-      </vbox>
+      </hbox>
     </vbox>
 
   </hbox>
