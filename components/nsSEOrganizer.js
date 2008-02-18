@@ -202,11 +202,7 @@ SEOrganizer.prototype = {
     this._removeNonExisting();
     this.endUpdateBatch();
 
-    // notify observers
-    var os = Cc["@mozilla.org/observer-service;1"].
-             getService(Ci.nsIObserverService);
-    os.notifyObservers(null, "browser-search-engine-modified",
-                       "-engines-organized");
+    this.notifyObservers();
   },
 
   _engineFolders: {},
@@ -261,8 +257,8 @@ SEOrganizer.prototype = {
     for(var i = this.getChildCount(this.getRoot()); i--;) {
       try {
         var item = this.getItemByIndex(i);
-        var engineName = this.getNameByItem(item);
         if(!this.isSeparator(item) && !this.isFolder(item)) {
+          var engineName = this.getNameByItem(item);
           var engine = this.getEngineByName(engineName);
           if(!engine || engine.hidden) {
             this._internalRemove(item);
@@ -459,6 +455,7 @@ SEOrganizer.prototype = {
         this.Unassert(aItem, pred, object.getNext(), true);
       }
     }
+    this.indexOutOfDate = true;
   },
 
   getRoot: function SEOrganizer__getRoot() {
@@ -716,6 +713,7 @@ SEOrganizer.prototype = {
       engine.iconURI = makeURI(resizer.getDataURL());
       engine.iconURL = engine.iconURI.spec;
       ss.__parent__.notifyAction(engine, "engine-changed");
+      resizer = null;
     };
     for(var i = 0; i < engine.innerEngines.length; i++) {
       resizer.addIconByURL(engine.innerEngines[i].iconURI.spec);
