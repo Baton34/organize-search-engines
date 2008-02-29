@@ -47,6 +47,7 @@ const SEARCH_ENGINE_TOPIC        = "browser-search-engine-modified";
 const NS = "urn:organize-search-engines#";
 const NS_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 const ROOT = "urn:organize-search-engines:root";
+const FOLDERS_ROOT = "urn:organize-search-engines:folders-root";
 
 var gEngineManagerDialog, gDragObserver, gEngineView, gStrings;
 var gRemovedEngines = [], gAddedEngines = [], gSortDir = "natural";
@@ -345,21 +346,23 @@ EngineManagerDialog.prototype = {
     }
   },
   move: function EngineManager__move() {
+    var selected = gEngineView.selectedItems;
     document.getElementById("engineList").focus();
     var canceled = {value: true}, returnVal = {};
     window.openDialog("chrome://seorganizer/content/moveTo.xul", "_blank",
                       "resizable,chrome,modal,dialog", canceled, returnVal);
     if(canceled.value) return;
-    if(returnVal.value == ROOT)
+    if(returnVal.value == ROOT || returnVal.value == FOLDERS_ROOT)
       var target = gEngineView._structure;
     else
       var target = gEngineView._structure.find(returnVal.value);
     if(!target) return;
 
-    var selected = gEngineView.selectedItems;
+    var selectedIndexes = gEngineView.selectedIndexes;
+
     for(var i = 0; i < selected.length; i++) {
       if(selected[i].parent != target) {
-        gEngineView.rowCountChanged(gEngineView._indexCache.indexOf(selected[i]), -1);
+        gEngineView.rowCountChanged(selectedIndexes[i], -1);
         selected[i] = gEngineView.internalMove(selected[i], target, -1);
       }
     }
@@ -520,7 +523,7 @@ EngineManagerDialog.prototype = {
       if(item.isEngine && !readOnly)
         readOnly = !item.originalEngine || item.originalEngine.wrappedJSObject._readOnly;
     }
-    onlyOneEngine = !multipleSelected && item.isEngine;
+    onlyOneEngine = !multipleSelected && !disableButtons && item.isEngine;
 
     document.getElementById("cmd_remove").setAttribute("disabled", disableButtons);
 
@@ -656,6 +659,7 @@ Structure__Container.prototype = {
   isSep: false,
   isSeq: true,
   isEngine: false,
+  iconURI: "",
   alias: "",
   modified: 0,
   originalEngine: null,
@@ -1179,9 +1183,17 @@ EngineView.prototype = {
       Components.reportError(new Error('an unknown error occured'));
       return false;
     }
+
+    // open all parent containers:
+    for(var p = parent, last = {}; p != gEngineView._structure; p = p.parent) {
+      if(!p.open) {
+        last.open = true;
+        last = p;
+      }
+    }
+    gEngineView.toggleOpenState(gEngineView._indexCache.indexOf(last));
+
     var treeParentIndex = this._indexCache.indexOf(parent);
-    if(treeParentIndex != -1 && !this.isContainerOpen(treeParentIndex))
-      this.toggleOpenState(treeParentIndex);
     var node = old.node, children = old.children;
     old.destroy();
     if(old.isSeq) {
@@ -1317,6 +1329,7 @@ EngineView.prototype = {
   },
   toggleOpenState: function(index) {
     var item = this._indexCache[index];
+    if(index == -1 || !item) return false;
     var count = item.recursiveChildCount + 1;
     var open = (item.open = !item.open);
     this.updateCache();
