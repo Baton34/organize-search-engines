@@ -152,6 +152,15 @@ EngineManagerDialog.prototype = {
     window.setTimeout(function() {
       engineList.focus();
     }, 0);
+
+    if(engineList.startEditing) {
+      var orig = engineList.startEditing;
+      engineList.startEditing = function() {
+        this.inputField.width = 0;
+        orig.apply(this, arguments);
+      };
+    }
+
   },
   onOK: function EngineManager__onOK() {
     this.onClose();
@@ -159,10 +168,9 @@ EngineManagerDialog.prototype = {
     // Set the preference
     var newSuggestEnabled = document.getElementById("enableSuggest")
                                     .getAttribute("checked");
-    newSuggestEnabled = (newSuggestEnabled == "true") ? true : false;
     var prefService = Cc["@mozilla.org/preferences-service;1"]
                         .getService(Ci.nsIPrefBranch);
-    prefService.setBoolPref(BROWSER_SUGGEST_PREF, newSuggestEnabled);
+    prefService.setBoolPref(BROWSER_SUGGEST_PREF, (newSuggestEnabled == "true"));
     var str = Cc["@mozilla.org/supports-string;1"]
                 .createInstance(Ci.nsISupportsString);
     str.data = gSortDir;
@@ -177,7 +185,7 @@ EngineManagerDialog.prototype = {
     gSEOrganizer.reload();
     if(gAddedEngines.length) {
       gSEOrganizer.beginUpdateBatch();
-      for(var i = 0; i < gAddedEngines.length; ++i) {
+      for(var i = gAddedEngines.length; i--;) {
         gSEOrganizer._internalRemove(gAddedEngines[i]);
       }
       gSEOrganizer.saveChanges();
@@ -223,59 +231,41 @@ EngineManagerDialog.prototype = {
     window.setTimeout(function timed_EngineManager__observe() {
       if(aTopic === "browser-search-engine-modified" &&
          aSubject instanceof Ci.nsISearchEngine) {
-        switch (aVerb) {
-          case "engine-added":
-            gEngineManagerDialog.newItem(gEngineManagerDialog.NEW_ITEM_RESTORED_DEFAULT_ENGINE,
-                                         aSubject);
-            gEngineView.rowCountChanged(gEngineView.lastIndex, 1);
-            break;
-          case "engine-changed":
-            var change = aSubject.wrappedJSObject.__action;
-            if(change == "update" || change == "move") {
-            } else if(change == "icon") {
-              var item = gEngineView._getItemByProperty("originalEngine", aSubject);
-              if(item) {
-                item.iconURI = (aSubject.iconURI || {spec: ""}).spec;
-                gEngineView.invalidateCell(gEngineView._indexCache.indexOf(item), "engineName");
-              }
-            } else if(change == "hidden") {
-              aVerb = aSubject.hidden ? "engine-removed" : "engine-added";
-              timed_EngineManager__observe();
-            } else if(change == "alias") {
-              var item = gEngineView._getItemByProperty("originalEngine", aSubject);
-              if(item) {
-                item.alias = aSubject.alias;
-                gEngineView.invalidateCell(gEngineView._indexCache.indexOf(item), "engineAlias");
-              }
-            } else if(change == "name") { /* that's us! */ }
-            return; // abort
-          case "engine-removed":
-            var item = gEngineView._getItemByProperty("originalEngine", aSubject);
-            if(item) {
-              var selection = gEngineView.selectedItems;
-              gEngineView.select(gEngineView._indexCache.indexOf(item), true);
-              gEngineManagerDialog.remove();
-              for(var i = 0; i < selection.length; i++) {
-                selection[i] = gEngineView._indexCache.indexOf(selection[i]);
-              }
-              gEngineView.select.apply(gEngineView, selection.concat([true]));
-            }
-            break;
-          case "engine-current":
-            return; // Not relevant
-        }
-        gEngineView.invalidate();
+        var item = gEngineView._getItemByProperty("originalEngine", aSubject);
+        if(aVerb == "engine-added") {
+          gEngineManagerDialog.newItem(gEngineManagerDialog.NEW_ITEM_RESTORED_DEFAULT_ENGINE,
+                                       aSubject);
+          gEngineView.rowCountChanged(gEngineView.lastIndex, 1);
+          gEngineView.invalidate();
+        } else if(aVerb == "engine-changed") {
+          var change = aSubject.wrappedJSObject.__action;
+          if(change == "hidden") {
+            aVerb = aSubject.hidden ? "engine-removed" : "engine-added";
+            timed_EngineManager__observe();
+          } else if(change == "icon" && item) {
+            item.iconURI = (aSubject.iconURI || {spec: ""}).spec;
+            gEngineView.invalidateCell(gEngineView._indexCache.indexOf(item), "engineName");
+          } else if(change == "alias" && item) {
+            item.alias = aSubject.alias;
+            gEngineView.invalidateCell(gEngineView._indexCache.indexOf(item), "engineAlias");
+          } /*else if(change == "update" || change == "move" || change == "name") {*/
+        } else if(aVerb == "engine-removed" && item) {
+          var selection = gEngineView.selectedItems;
+          gEngineView.select(gEngineView._indexCache.indexOf(item), true);
+          gEngineManagerDialog.remove();
+          for(var i = 0; i < selection.length; i++) {
+            selection[i] = gEngineView._indexCache.indexOf(selection[i]);
+          }
+          gEngineView.select.apply(gEngineView, selection.concat([true]));
+          gEngineView.invalidate();
+        } // else if(aVerb == "engine-current") { }
       } else if(aTopic === "nsPref:changed") {
         var prefService = aSubject.QueryInterface(Ci.nsIPrefBranch);
-        switch(aVerb) {
-          case BROWSER_SUGGEST_PREF:
-            var value = prefService.getBoolPref(BROWSER_SUGGEST_PREF);
-            document.getElementById("enableSuggest").setAttribute("checked", value);
-            break;
-          case SORT_DIRECTION_PREF:
-            this.sortBy(prefService.getComplexValue(SORT_DIRECTION_PREF,
-                                                   Ci.nsISupportsString));
-            break;
+        if(aVerb == BROWSER_SUGGEST_PREF) {
+          var value = prefService.getBoolPref(BROWSER_SUGGEST_PREF);
+          document.getElementById("enableSuggest").setAttribute("checked", value);
+        } else if(aVerb == SORT_DIRECTION_PREF) {
+          this.sortBy(prefService.getComplexValue(aVerb, Ci.nsISupportsString));
         }
       }
     }, 0); // we want to wait until other observers did their job
@@ -375,7 +365,6 @@ EngineManagerDialog.prototype = {
     }
 
     gEngineView.updateCache();
-    gEngineView.selection.clearSelection();
     var indexes = [];
     selected.forEach(function(item) {
       indexes.push(gEngineView._indexCache.indexOf(item));
@@ -418,10 +407,9 @@ EngineManagerDialog.prototype = {
     var treeInsertLoc = gEngineView.selectedIndex;
     var insertLoc, parent;
     if(treeInsertLoc === -1) {
+      parent = gEngineView._indexCache[-1]; // root
       insertLoc = -1;
-      parent = gEngineView._indexCache[-1];
-    } else if(gEngineView._indexCache[treeInsertLoc].isSeq &&
-              gEngineView._indexCache[treeInsertLoc].open) {
+    } else if(gEngineView.isContainerOpen(treeInsertLoc)) {
       parent = gEngineView._indexCache[treeInsertLoc];
       insertLoc = -1;
     } else {
@@ -430,64 +418,60 @@ EngineManagerDialog.prototype = {
     }
 
     var node, item;
-    switch(type) {
-      case this.NEW_ITEM_TYPE_SEPARATOR:
-        node = gSEOrganizer.newSeparator(parent.node);
-        item = new Structure__Item(parent, node);
-        break;
-      case this.NEW_ITEM_TYPE_FOLDER:
+    if(type == this.NEW_ITEM_TYPE_SEPARATOR) {
+      node = gSEOrganizer.newSeparator(parent.node);
+      item = new Structure__Item(parent, node);
+    } else if(type == this.NEW_ITEM_TYPE_FOLDER) {
+      var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+                      .getService(Ci.nsIPromptService);
+      var name = { value: "" };
+      var abort = prompts.prompt(window,
+                                 gStrings.getString("new-folder.title"),
+                                 gStrings.getString("new-folder.name"), name,
+                                 null, {});
+      if(!abort) return;
+      name = name.value;
+
+      while(gEngineView._getItemByProperty("name", name, item)) {
+        name = name + " ";
+      }
+
+      var node = gSEOrganizer.newFolder(name, parent.node);
+      item = new Structure__Container(parent, node);
+    } else if(type == this.NEW_ITEM_RESTORED_DEFAULT_ENGINE) {
+      if(fromOriginal) {
+        var engine = fromOriginal;
+      } else {
         var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
                         .getService(Ci.nsIPromptService);
-        var name = { value: "" };
-        var abort = prompts.prompt(window,
-                                   gStrings.getString("new-folder.title"),
-                                   gStrings.getString("new-folder.name"), name,
-                                   null, {});
-        if(!abort) return;
-        name = name.value;
-
-        while(gEngineView._getItemByProperty("name", name, item)) {
-          name = name + " ";
+        var defaults = gSEOrganizer.getDefaultEngines({}).filter(function(e) {
+          return !gEngineView.engineVisible(e);
+        });
+        if(!defaults.length)
+          return;
+        var defaultNames = [];
+        for(var i = 0; i < defaults.length; ++i) {
+          defaultNames[i] = defaults[i].name;
         }
-
-        var node = gSEOrganizer.newFolder(name, parent.node);
-        item = new Structure__Container(parent, node);
-        break;
-      case this.NEW_ITEM_RESTORED_DEFAULT_ENGINE:
-        if(fromOriginal) {
-          var engine = fromOriginal;
-        } else {
-          var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
-                          .getService(Ci.nsIPromptService);
-          var defaults = gSEOrganizer.getDefaultEngines({}).filter(function(e) {
-            return !gEngineView.engineVisible(e);
-          });
-          if(!defaults.length)
-            return;
-          var defaultNames = [];
-          for(var i = 0; i < defaults.length; ++i) {
-            defaultNames[i] = defaults[i].name;
-          }
-          var selection = {};
-          var cancel = !prompts.select(window, gStrings.getString("restore.title"),
-                                       gStrings.getString("restore.content"),
-                                       defaultNames.length, defaultNames, selection);
-          if(cancel) return;
-          var engine = defaults[selection.value];
-        }
-        node = gSEOrganizer.getItemByName(engine.name);
-        var idx = gRemovedEngines.indexOf(node);
-        if(node && idx != -1) {
-          gRemovedEngines = gRemovedEngines.slice(0, idx)
-                                        .concat(gRemovedEngines.slice(idx + 1));
-        }
-        if(!node) {
-          node = gSEOrganizer._getAnonymousResource();
-        }
-        item = new Structure__Item(parent, node, engine);
-        this.showRestoreDefaults(defaults.length != 1);
-        break;
-    }
+        var selection = {};
+        var cancel = !prompts.select(window, gStrings.getString("restore.title"),
+                                     gStrings.getString("restore.content"),
+                                     defaultNames.length, defaultNames, selection);
+        if(cancel) return;
+        var engine = defaults[selection.value];
+      }
+      node = gSEOrganizer.getItemByName(engine.name);
+      var idx = gRemovedEngines.indexOf(node);
+      if(node && idx != -1) {
+        gRemovedEngines = gRemovedEngines.slice(0, idx)
+                                      .concat(gRemovedEngines.slice(idx + 1));
+      }
+      if(!node) {
+        node = gSEOrganizer._getAnonymousResource();
+      }
+      item = new Structure__Item(parent, node, engine);
+      this.showRestoreDefaults(defaults.length != 1);
+    } else { throw Cr.NS_ERROR_INVALID_ARG; }
     item.modified = 2;
     parent.insertAt(insertLoc, item);
     gAddedEngines.push(node);
@@ -498,10 +482,7 @@ EngineManagerDialog.prototype = {
     }
     treeInsertLoc = gEngineView._indexCache.indexOf(item);
     gEngineView.rowCountChanged(treeInsertLoc, 1);
-    gEngineView.selection.clearSelection();
-    gEngineView.selection.select(treeInsertLoc);
-    gEngineView.ensureRowIsVisible(treeInsertLoc);
-    document.getElementById("engineList").focus();
+    gEngineView.select(treeInsertLoc, true);
   },
   selectAll: function EngineManager__selectAll() {
     gEngineView.selection.rangedSelect(0, gEngineView.lastIndex, false);
@@ -512,19 +493,10 @@ EngineManagerDialog.prototype = {
     gSortDir = direction;
     col.setAttribute("sortDirection", direction);
 
-    document.getElementById(direction).setAttribute("checked", "true");
-    switch(direction) {
-      case "ascending":
-      document.getElementById("descending").setAttribute("checked", "false");
-      document.getElementById("natural").setAttribute("checked", "false");
-      break;
-      case "descending":
-      document.getElementById("ascending").setAttribute("checked", "false");
-      document.getElementById("natural").setAttribute("checked", "false");
-      break;
-      default:
-      document.getElementById("ascending").setAttribute("checked", "false");
-      document.getElementById("descending").setAttribute("checked", "false");
+    var elems = ["ascending", "descending", "natural"];
+    for(var i = 0; i < elems.length; i++) {
+      var checked = (direction == elems[i]).toString();
+      document.getElementById(elems[i]).setAttribute("checked", checked);
     }
 
     gEngineView.invalidate();
@@ -532,46 +504,32 @@ EngineManagerDialog.prototype = {
 
   onSelect: function EngineManager__onSelect() {
     var indexes = gEngineView.selectedIndexes;
+
     var disableButtons = (!indexes.length);
-    var multipleSelected = (indexes.length > 1);
-    var lastSelected = false, firstSelected = false, writeableSelected = true;
-    var specialSelected = false, onlyEngines = true;
+    var multipleSelected = (indexes.length > 1), onlyOneEngine = false;
+    var lastSelected = disableButtons, firstSelected = disableButtons;
+    var readOnly = multipleSelected || disableButtons;
 
     var index, item, engine;
     for(var i = 0; i < indexes.length; i++) {
-      index = indexes[i]; item = gEngineView._indexCache[index];
-      if(item.parent.children.length - 1 == gEngineView.getLocalIndex(index))
-        lastSelected = true;
-      if(!gEngineView.getLocalIndex(index))
-        firstSelected = true;
-      if(item.isSep)
-        onlyEngines = writeableSelected = !(specialSelected = true);
-      else if(item.isSeq)
-        onlyEngines = false;
-      else if(!item.originalEngine || item.originalEngine.wrappedJSObject._readOnly)
-        writeableSelected = false;
+      index = gEngineView.getLocalIndex(indexes[i]);
+      item = gEngineView._indexCache[indexes[i]];
+      if(item.parent.children.length - 1 == index) lastSelected = true;
+      if(!index) firstSelected = true;
+      if(item.isSep) readOnly = true;
+      if(item.isEngine && !readOnly)
+        readOnly = !item.originalEngine || item.originalEngine.wrappedJSObject._readOnly;
     }
-
-    if(disableButtons) {
-      writeableSelected = false;
-      specialSelected = firstSelected = lastSelected = multipleSelected = true;
-    } else if(multipleSelected) {
-      writeableSelected = false;
-      specialSelected = true;
-    }
+    onlyOneEngine = !multipleSelected && item.isEngine;
 
     document.getElementById("cmd_remove").setAttribute("disabled", disableButtons);
 
-    document.getElementById("cmd_rename").setAttribute("disabled",
-                                        multipleSelected || !writeableSelected);
+    document.getElementById("cmd_rename").setAttribute("disabled", readOnly);
     document.getElementById("cmd_move-engine").setAttribute("disabled", disableButtons);
-    document.getElementById("cmd_editalias").setAttribute("disabled",
-                                              !onlyEngines || multipleSelected);
+    document.getElementById("cmd_editalias").setAttribute("disabled", !onlyOneEngine);
 
-    document.getElementById("cmd_moveup").setAttribute("disabled",
-                                                       firstSelected);
-    document.getElementById("cmd_movedown").setAttribute("disabled",
-                                                         lastSelected);
+    document.getElementById("cmd_moveup").setAttribute("disabled", firstSelected);
+    document.getElementById("cmd_movedown").setAttribute("disabled", lastSelected);
   },
 
   loadAddEngines: function EngineManager__loadAddEngines() {

@@ -106,7 +106,34 @@ Contributor(s):
     <key id="key_remove" keycode="VK_DELETE" command="cmd_remove" />
     <key id="key_ok" key="W" modifiers="accel" command="cmd_ok" />
     <key id="key_selectAll" key="A" modifiers="accel" command="cmd_selectAll" />
+    <key id="key_rename" keycode="VK_ENTER" command="cmd_rename" />
+    <key id="key_rename2" keycode="VK_RETURN" command="cmd_rename" />
   </keyset>
+
+  <popupset id="engineManagerPopupset">
+    <menupopup id="list-context">
+      <menuitem label="&rename.label;" accesskey="&rename.accesskey;"
+                id="context-rename" command="cmd_rename" />
+      <menuitem label="&editalias.label;" accesskey="&editalias.accesskey;"
+                id="context-alias" command="cmd_editalias" />
+      <menuseparator />
+      <menuitem label="&up.label;" accesskey="&noconflict.up.accesskey;"
+                id="context-up" command="cmd_moveup" />
+      <menuitem label="&dn.label;" accesskey="&noconflict.dn.accesskey;"
+                id="context-down" command="cmd_movedown" />
+      <menuseparator />
+      <menu id="context-new" label="&context.new.label;" accesskey="&context.new.accesskey;">
+        <menupopup>
+          <menuitem label="&new-folder.label;" accesskey="&new-folder.accesskey;"
+                    id="context-new-folder" command="cmd_new-folder" />
+          <menuitem label="&new-separator.label;" accesskey="&new-separator.accesskey;"
+                    id="context-new-separator" command="cmd_new-separator" />
+        </menupopup>
+      </menu>
+      <menuitem key="key_remove" label="&remove.label;" accesskey="&noconflict.remove.accesskey;"
+                id="context-remove" command="cmd_remove" />
+    </menupopup>
+  </popupset>
 
 
   <toolbox>
@@ -214,9 +241,9 @@ Contributor(s):
                  persist="width ordinal hidden" flex="1" />
         <splitter class="tree-splitter"/>
         <treecol id="engineAlias" label="&aliascol.label;"
-                 persist="width ordinal hidden" flex="1" />
+                 persist="width ordinal hidden" />
       </treecols>
-      <treechildren />
+      <treechildren context="list-context" />
     </tree>
   </hbox>
 

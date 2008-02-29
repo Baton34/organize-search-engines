@@ -100,23 +100,28 @@ const seOrganizer_dragObserver = {
     }
   },
   onDrop: function(event, dropData, session) {
+    var target = event.target;
     this.onDragExit(event, session);
     organizeSE.popup.hidePopup();
     if(dropData instanceof Ci.nsIFile)
       dropData = { data: dropData.leafName };
     if(!dropData.data)
       return;
-    if(this.overButton(event.target)) {
+    if(this.overButton(target)) {
       var searchbar = organizeSE.searchbar;
-      searchbar.doSearch(dropData.data, !event.altKey);
-      //searchbar.value = dropData.data;
-      //searchbar.handleSearchCommand(event);
+      searchbar.value = dropData.data;
+      var evt = document.createEvent("Event");
+      evt.initEvent("textentered", true, true);
+      searchbar._textbox.dispatchEvent(evt);
     } else {
       var items;
-      if(event.target.nodeName == "menuitem") {
+      function hasClass(className) { return organizeSE.hasClass(target, className); };
+      if(hasClass("openintabs-item"))
+        target = target.parentNode.parentNode;
+      if(target.nodeName == "menuitem" && hasClass("searchbar-engine-menuitem")) {
         items = [event.target];
-      } else if(event.target.nodeName == "menu") {
-        items = organizeSE.getChildItems(event.target);
+      } else if(target.nodeName == "menu") {
+        items = organizeSE.getChildItems(target);
       }
       var submission, engine;
       for(var i = 0; i < items.length; ++i) {
