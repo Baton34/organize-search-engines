@@ -304,7 +304,7 @@ EngineManagerDialog.prototype = {
             if(items[i].open)
               removedCount++;
             if(items[i].children[j].isSeq) {
-              items.push(items[i].children[j].children);
+              items.push(items[i].children[j]);
               if(!items[i].open) // don't count items in open folders in closed folders
                 items[i].children[j].open = false;
             }
