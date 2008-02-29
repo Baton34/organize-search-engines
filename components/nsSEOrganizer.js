@@ -302,8 +302,8 @@ SEOrganizer.prototype = {
           if(this._removeNonExisting(true)) {
             this.notifyObservers();
           }
-          if(aEngine == this.currentEngine) {
-            if(aEngine != this.defaultEngine) {
+          if(aEngine.name == this.currentEngine.name) {
+            if(aEngine.name != this.defaultEngine.name) {
               this.currentEngine = this.defaultEngine;
             } else {
               var engines = this.getVisibleEngines({});
