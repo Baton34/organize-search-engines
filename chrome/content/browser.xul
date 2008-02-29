@@ -52,6 +52,7 @@ Contributor(s):
               ondragover="nsDragAndDrop.dragOver(event, seOrganizer_dragObserver);"
               ondragexit="nsDragAndDrop.dragExit(event, seOrganizer_dragObserver);"
               ondragdrop="nsDragAndDrop.drop(event, seOrganizer_dragObserver);">
+      <box id="searchpopup-bottom-container" />
 
       <template id="searchbar-template">
         <rule rdf:type="urn:organize-search-engines#separator">

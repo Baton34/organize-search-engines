@@ -147,22 +147,20 @@ SEOrganizer.prototype = {
     // drag 'n' drop stuff:
     seOrganizer_dragObserver.init();
 
-    // now lets copy the manage engines items to where we need it
-    var container =  document.createElementNS(XUL_NS, "box");
-    container.id = "searchpopup-bottom-container";
+    var popupset = this.popupset;
+    var container = document.getElementById("searchpopup-bottom-container");
     if(!document.getElementById("manage-engines-item")) {
-      var elem = popup.getElementsByAttribute("anonid", "open-engine-manager")[0];
-      container.insertBefore(elem.cloneNode(true), container.firstChild);
-      container.firstChild.removeAttribute("oncommand"); // minefield compat.
-      container.firstChild.id = "manage-engines-item";
+      var elem = popup.getElementsByAttribute("anonid", "open-engine-manager");
+      if(elem.length) {
+        container.insertBefore(elem[0].cloneNode(true), container.firstChild);
+        container.firstChild.removeAttribute("oncommand"); // minefield compat.
+        container.firstChild.id = "manage-engines-item";
+      }
     }
     if(!document.getElementById("manage-engines-menuseparator")) {
       container.insertBefore(this.createSeparator(0, 0, "manage-engines-menuseparator"),
                              container.firstChild);
     }
-    var popupset = this.popupset;
-    if(popupset.firstChild.id != container.id)
-      popupset.insertBefore(container, popupset.firstChild);
 
     popupset.builder.rebuild();
 
@@ -192,13 +190,11 @@ SEOrganizer.prototype = {
   rebuildPopupDynamic: function () { this.rebuildPopup(); },
   // opens the manager in a _resizable_ window
   openManager: function openManager() {
-    const wm = Cc["@mozilla.org/appshell/window-mediator;1"]
-                 .getService(Ci.nsIWindowMediator);
-
+    var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
     var window = wm.getMostRecentWindow("Browser:SearchManager");
-    if (window)
+    if(window) {
       window.focus()
-    else {
+    } else {
       setTimeout(function () {
         openDialog("chrome://browser/content/search/engineManager.xul",
                    "_blank", "chrome,dialog,modal,centerscreen,resizable,all");
@@ -216,7 +212,7 @@ SEOrganizer.prototype = {
     return false;
   },
   doSearch: function doSearch(aData, aWhere) {
-    if(typeof aWhere != "string") // Firefox 2 had a parameter "aOpenInTab"
+    if(typeof aWhere != "string") // Firefox 2 had a boolean parameter aOpenInTab
       aWhere = aWhere ? "tab" : "current";
     // null parameter below specifies HTML response for search
     var submission = this.currentEngine.getSubmission(aData, null);
@@ -235,7 +231,8 @@ SEOrganizer.prototype = {
     mod: null,
     insertMethod: "insertAddEngineItems",
     removeMethod: "removeAddEngineItems",
-    pos: "before"
+    pos: "before",
+    subFolders: false
   }, {
     mod: null,
     insertMethod: "insertOpenInTabsItems",
@@ -243,28 +240,28 @@ SEOrganizer.prototype = {
     pos: "after",
     subFolders: true
   } ],
-  _callDynamicHandlers: function(pos, popup, toplevel, methodName) {
+  _callDynamicHandlers: function(pos, popup, isSubFolder, methodName) {
     var handlers = this._insertItemsHandlers;
     for(var i = 0; i < handlers.length; ++i) {
-      if(handlers[i].pos == pos && !handlers[i].subFolders == toplevel) {
-        try {
-          if(!handlers[i].mod)
-            this[handlers[i][methodName]](popup);
-          else
-            handlers[i][methodName].call(handlers[i].mod, popup);
-        } catch(e) { Components.reportError(e); }
-      }
+      if(handlers[i].pos != pos || handlers[i].subFolders != isSubFolder)
+        continue;
+      try {
+        if(handlers[i].mod)
+          handlers[i][methodName].call(handlers[i].mod, popup);
+        else
+          this[handlers[i][methodName]](popup);
+      } catch(e) { Components.reportError(e); }
     }
   },
   insertDynamicItems: function insertDynamicItems(toplevel, popup) {
-    this._callDynamicHandlers("before", popup, toplevel, "insertMethod");
+    this._callDynamicHandlers("before", popup, !toplevel, "insertMethod");
     if(toplevel) this.insertManageEngineItems(popup);
-    this._callDynamicHandlers("after", popup, toplevel, "insertMethod");
+    this._callDynamicHandlers("after", popup, !toplevel, "insertMethod");
   },
   removeDynamicItems: function removeDynamicItems(toplevel, popup) {
-    this._callDynamicHandlers("before", popup, toplevel, "removeMethod");
+    this._callDynamicHandlers("before", popup, !toplevel, "removeMethod");
     if(toplevel) this.removeManageEngineItems(popup);
-    this._callDynamicHandlers("after", popup, toplevel, "removeMethod");
+    this._callDynamicHandlers("after", popup, !toplevel, "removeMethod");
   },
   insertManageEngineItems: function insertManageEnginesItems(popup) {
     var sep = document.getElementById("manage-engines-menuseparator").cloneNode(true);
