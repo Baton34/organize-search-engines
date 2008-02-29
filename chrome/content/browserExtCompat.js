@@ -59,9 +59,10 @@ organizeSE__Extensions.prototype = {
           i.insertItemsHandler.mod = i;
           organizeSE._insertItemsHandlers.push(i.insertItemsHandler);
         }
-        if("customizeToolbarHandler" in i) {
+        if("customizeToolbarHandler" in i)
           organizeSE._customizeToolbarListeners.push(i.customizeToolbarHandler);
-        }
+        if(!("subFolders" in i))
+          i.subFolders = false;
       }
     }
   },
