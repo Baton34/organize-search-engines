@@ -232,7 +232,7 @@ Contributor(s):
   <description>&engineManager.intro;</description>
 
   <hbox flex="1">
-    <tree id="engineList" flex="1" rows="10" editable="true"
+    <tree id="engineList" flex="1" rows="15" editable="true"
           enableColumnDrag="true" flags="dont-build-content"
           onselect="gEngineManagerDialog.onSelect();"
           ondraggesture="gEngineManagerDialog.startDrag(event);">
