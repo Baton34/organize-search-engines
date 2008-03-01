@@ -45,15 +45,18 @@ SEOrganizer.prototype = {
     return this.getChildItems(this.popup);
   },
   getChildItems: function(parent) {
-    if(parent.getElementsByClassName) { // minefield only
-      return parent.getElementsByClassName('searchbar-engine-menuitem');
-    } else { // fall back on xpath
-      var xpath = "descendant::xul:menuitem[contains(concat(' ', @class, ' '),\
-                                            ' searchbar-engine-menuitem ')]";
-      return this.evalXPath(xpath, parent);
-    }
+    return this.getElementsByClassName('searchbar-engine-menuitem', parent);
   },
 
+  getElementsByClassName: function(className, parent) {
+    if("getElementsByClassName" in (parent || document)) { // minefield only
+      return (parent || document).getElementsByClassName(className);
+    } else { // fall back on xpath
+      var xpath = "descendant::xul:menuitem[contains(concat(' ', @class, ' '),"
+                                            + "' " + className + " ')]";
+      return this.evalXPath(xpath, parent || document);
+    }
+  },
   evalXPath: function(aExpression, aScope, aNSResolver) {
     var resolver = aNSResolver || function resolver(prefix) {
       switch(prefix) {
@@ -65,11 +68,11 @@ SEOrganizer.prototype = {
       }
     };
     var scope = aScope || document;
-    var doc = ((scope.nodeName == "#document") ? scope : scope.ownerDocument);
+    var doc = (scope.nodeName == "#document") ? scope : scope.ownerDocument;
     var result = doc.evaluate(aExpression, scope, resolver,
                               XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-    /*var iter = (function() { var e; while((e = result.iterateNext())) yield e; })();
-    return [i for each(i in iter)];*/
+    /*function iter() { var e; while((e = result.iterateNext())) yield e; };
+    return [i for each(i in iter())];*/
     result.__iterator__ = function() { return { next: function() {
       var e = result.iterateNext(); if(!e) throw StopIteration; return e;
     } }; };
@@ -272,11 +275,8 @@ SEOrganizer.prototype = {
     popup.appendChild(item);
   },
   removeManageEngineItems: function removeManageEngineItems(popup) {
-    var item;
-    while((item = document.getElementById("manage-engines-menuseparator-live")))
-      item.parentNode.removeChild(item);
-    while((item = document.getElementById("manage-engines-item-live")))
-      item.parentNode.removeChild(item);
+    this._cleanUpPopupID("manage-engines-menuseparator-live");
+    this._cleanUpPopupID("manage-engines-item-live");
   },
   insertAddEngineItems: function insertAddEngineItems(popup) {
     var addengines = getBrowser().mCurrentBrowser.engines;
@@ -284,30 +284,23 @@ SEOrganizer.prototype = {
 
     this.createSeparator(popup, "addengine-separator");
     // Insert the "add this engine" items.
+    var stringBundle = this.searchbar._stringBundle, engineInfo, attrs, label;
+    const CLASS_NAME = "menuitem-iconic addengine-item";
     for(var i = 0; i < addengines.length; i++) {
-      var engineInfo = addengines[i];
-      var labelStr =
-           this.searchbar._stringBundle.getFormattedString("cmd_addFoundEngine",
-                                                           [engineInfo.title]);
-      var attrs = {uri: engineInfo.uri, src: engineInfo.icon, title: engineInfo.title};
-      this.createMenuitem(labelStr, popup, "menuitem-iconic addengine-item",
-                          "", attrs);
+      engineInfo = addengines[i];
+      attrs = {uri: engineInfo.uri, src: engineInfo.icon, title: engineInfo.title};
+      label = stringBundle.getFormattedString("cmd_addFoundEngine", [attrs.title]);
+      this.createMenuitem(label, popup, CLASS_NAME, "", attrs);
     }
   },
   removeAddEngineItems: function removeAddEngineItems(popup) {
-    for(var i = 0; i < popup.childNodes.length; ++i) {
-      if(popup.childNodes[i].className.indexOf("addengine-item") != -1 ||
-         popup.childNodes[i].className.indexOf("addengine-separator") != -1) {
-        popup.removeChild(popup.childNodes[i]);
-        --i;
-      }
-    }
+    this._cleanUpPopupClass("addengine-item", popup);
+    this._cleanUpPopupClass("addengine-separator", popup);
   },
   insertOpenInTabsItems: function insertOpenInTabsItems(popup) {
     if(this.getChildItems(popup).length <= 1) return;
 
     this.createSeparator(popup, "openintabs-separator");
-
     var attrs = {};
     if("BookmarksUtils" in window) {
       var label = BookmarksUtils.getLocaleString("cmd_bm_openfolder");
@@ -320,13 +313,18 @@ SEOrganizer.prototype = {
     this.createMenuitem(label, popup, "openintabs-item", "", attrs);
   },
   removeOpenInTabsItems: function removeOpenInTabsItems(popup) {
-    for(var i = 0; i < popup.childNodes.length; ++i) {
-      if(organizeSE.hasClass(popup.childNodes[i], "openintabs-item") ||
-         organizeSE.hasClass(popup.childNodes[i], "openintabs-separator")) {
-        popup.removeChild(popup.childNodes[i]);
-        --i;
-      }
+    this._cleanUpPopupClass("openintabs-item", popup);
+    this._cleanUpPopupClass("openintabs-separator", popup);
+  },
+  _cleanUpPopupClass: function(className, popup) {
+    var elems = this.getElementsByClassName(className, popup);
+    for(var i = elems.length; i--;) {
+      elems[i].parentNode.removeChild(elems[i]);
     }
+  },
+  _cleanUpPopupID: function(id) {
+    for(var item; (item = document.getElementById(id));)
+      item.parentNode.removeChild(item);
   },
 
   get searchbar() {
@@ -352,16 +350,11 @@ SEOrganizer.prototype = {
   },
 
   buildObserver: { /* nsIXULBuilderListener */
-    popupHidden: function observe__popuphidden(event) {
-      if(event.target == event.currentTarget) {
-        organizeSE.removeDynamicItems(true, event.target);
+    popupHidden: function observe__popuphidden(e) {
+      organizeSE.removeDynamicItems((e.target == e.currentTarget), e.target);
+      if(e.target == e.currentTarget)
         organizeSE.searchbar._engineButton.removeAttribute("open");
-      } else {
-        organizeSE.removeDynamicItems(false, event.target);
-      }
-      var item = document.getElementById("empty-menuitem");
-      if(item)
-        item.parentNode.removeChild(item);
+      organizeSE._cleanUpPopupID("empty-menuitem");
     },
     popupShowing: function observe__popupshowing(event) {
       var target = event.target;
