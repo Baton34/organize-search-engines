@@ -6,7 +6,7 @@
 
     <em:id>organize-search-engines@maltekraus.de</em:id>
     <em:name>Organize Search Engines</em:name>
-    <em:version>1.2</em:version>
+    <em:version>1.4rc3</em:version>
     <em:description>Organize your search engines with separators and folders.</em:description>
 
     <em:optionsURL>chrome://browser/content/search/engineManager.xul</em:optionsURL>
@@ -15,7 +15,7 @@
 
     <em:creator>Malte Kraus</em:creator>
     <em:contributor>ReVox: help sorting out the crash on cancel</em:contributor>
-    <em:contributor>Wawuschel: help sorting out the crash with context search and menu editor</em:contributor>
+    <em:contributor>Wawuschel: testing, testing, testing</em:contributor>
 
     <em:translator>Andrea</em:translator>
     <em:translator>Mikes Kaszmán István</em:translator>
