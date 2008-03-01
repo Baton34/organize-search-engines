@@ -156,11 +156,22 @@ EngineManagerDialog.prototype = {
 
     if(engineList.startEditing) {
       var orig = engineList.startEditing;
-      engineList.startEditing = function() {
+      engineList.startEditing = function start(row, col) {
+        if(start.caller.name == "onxblclick" && gEngineView.isContainer(row))
+          return; // ignore double clicks on folders, these are used for collapsing
         this.inputField.width = 0;
         orig.apply(this, arguments);
       };
     }
+    engineList.addEventListener("keypress", function(event) {
+      if(engineList._editingColumn) return;
+      if(event.keyCode == event.DOM_VK_ENTER || event.keyCode == event.DOM_VK_RETURN) {
+        if(event.shiftKey)
+          document.getElementById("cmd_editalias").doCommand();
+        else
+          document.getElementById("cmd_rename").doCommand();
+      }
+    }, true);
 
   },
   onOK: function EngineManager__onOK() {
@@ -232,7 +243,7 @@ EngineManagerDialog.prototype = {
     window.setTimeout(function timed_EngineManager__observe() {
       if(aTopic === "browser-search-engine-modified" &&
          aSubject instanceof Ci.nsISearchEngine) {
-        var item = gEngineView._getItemByProperty("originalEngine", aSubject);
+        var item = gEngineView._structure.find("originalEngine", aSubject);
         if(aVerb == "engine-added") {
           gEngineManagerDialog.newItem(gEngineManagerDialog.NEW_ITEM_RESTORED_DEFAULT_ENGINE,
                                        aSubject);
@@ -355,7 +366,7 @@ EngineManagerDialog.prototype = {
     if(returnVal.value == ROOT || returnVal.value == FOLDERS_ROOT)
       var target = gEngineView._structure;
     else
-      var target = gEngineView._structure.find(returnVal.value);
+      var target = gEngineView._structure.find("nodeID", returnVal.value);
     if(!target) return;
 
     var selectedIndexes = gEngineView.selectedIndexes;
@@ -387,6 +398,8 @@ EngineManagerDialog.prototype = {
     var index = gEngineView.selectedIndex;
     var tree = gEngineView.tree.element, col = gEngineView.getNamedColumn(colId);
     if(tree.startEditing) {
+      if(tree._editingColumn)
+        return;
       tree.startEditing(index, col);
     } else {
       tree.focus();
@@ -435,7 +448,7 @@ EngineManagerDialog.prototype = {
       if(!abort) return;
       name = name.value;
 
-      while(gEngineView._getItemByProperty("name", name, item)) {
+      while(gEngineView._structure.find("name", name, item)) {
         name = name + " ";
       }
 
@@ -593,9 +606,7 @@ Structure.prototype = {
   alias: "",
   modified: 0,
   destroy: function Structure__destroy() {
-    this.node = null;
-    this.parent = null;
-    this.children = null;
+    this.node = this.parent = this.children = null;
   },
 
   isAncestorOf: function Structure__Item__isAncestorOf(item) {
@@ -649,7 +660,7 @@ function Structure__Container(parent, node, children, open) {
   this.modified = 0;
 }
 Structure__Container.prototype = {
-  node: null,
+  node: null, nodeID: "",
   parent: null,
   _name: "",
   get name() { return this._name; },
@@ -671,6 +682,7 @@ Structure__Container.prototype = {
 function Structure__Item(parent, node, engine) {
   this.parent = parent;
   this.node = node;
+  this.nodeID = node.ValueUTF8;
   this.modified = engine ? 1 : 0;
   if(!engine || !(engine instanceof Ci.nsISearchEngine))
     engine = null;
@@ -700,7 +712,7 @@ function Structure__Item(parent, node, engine) {
   }
 }
 Structure__Item.prototype = {
-  node: null,
+  node: null, nodeID: "",
   parent: null,
   _name: "",
   get name() { return this._name; },
@@ -846,12 +858,13 @@ Structure__Container.prototype.commit = Structure.prototype.commit =
   }
 };
 Structure__Container.prototype.find = Structure.prototype.find =
-           function Structure__General__find(nodeID) {
+           function Structure__General__find(property, value, besides) {
   for(var i = 0, tmp; i < this.children.length; i++) {
-    if(this.children[i].node.ValueUTF8 == nodeID)
+    if(this.children[i] != besides && property in this.children[i] &&
+       this.children[i][property] == value)
       return this.children[i];
-    if(this.children[i] instanceof Structure__Container) {
-      tmp = this.children[i].find(nodeID);
+    if(this.children[i].isSeq) {
+      tmp = this.children[i].find(property, value, besides);
       if(tmp)
         return tmp;
     }
@@ -1007,25 +1020,7 @@ EngineView.prototype = {
   },
 
   engineVisible: function engineVisible(engine) {
-    return !!this._getItemByProperty("originalEngine", engine);
-  },
-  _getItemByProperty: function(property, value, besides) {
-    var folds = [{s: this._structure, i: 0}], lastIndex;
-    while(folds.length) {
-      lastIndex = folds.length - 1;
-      for(var i = folds[lastIndex].i; i < folds[lastIndex].s.children.length; ++i) {
-        if(!folds[lastIndex].s.children[i].isSep) {
-          if(folds[lastIndex].s.children[i][property] == value &&
-             (!besides || folds[lastIndex].s.children[i] != besides))
-            return folds[lastIndex].s.children[i];
-        } else if(folds[lastIndex].s.children[i].isSeq) {
-          folds[lastIndex].i = i + 1;
-          folds.push({s: folds[lastIndex++].s.children[i], i: i = -1});
-        }
-      }
-      folds = folds.slice(0, lastIndex);
-    }
-    return null;
+    return !!this._structure.find("originalEngine", engine);
   },
   getLocalIndex: function getLocalIndex(idx) {
     return this._indexCache[idx].parent.children.indexOf(this._indexCache[idx]);
@@ -1299,7 +1294,7 @@ EngineView.prototype = {
     if(!item) return;
     if(col.id == "engineName") {
       if(item.name == value) return;
-      while(gEngineView._getItemByProperty("name", value, item)) {
+      while(gEngineView._structure.find("name", value, item)) {
         value = value + " ";
       }
       item.name = value;
@@ -1308,9 +1303,10 @@ EngineView.prototype = {
       value = value.replace(/ /g, "").toLowerCase();
       if(item.alias == value) return;
 
-      var other;
-      while(value && (other = gEngineView._getItemByProperty("alias", value, item))) {
-        this.setCellText(gEngineView._indexCache.indexOf(other), col, "");
+      var other = gEngineView._structure.find("alias", value, item);
+      while(value && other) {
+        gEngineView.setCellText(gEngineView._indexCache.indexOf(other), col, "");
+        other = gEngineView._structure.find("alias", value, item);
       }
       gSEOrganizer.getEngines({}).forEach(function(engine) {
         if(!gEngineView.engineVisible(engine) && engine.alias == value)

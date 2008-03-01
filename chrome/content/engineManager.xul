@@ -106,16 +106,16 @@ Contributor(s):
     <key id="key_remove" keycode="VK_DELETE" command="cmd_remove" />
     <key id="key_ok" key="W" modifiers="accel" command="cmd_ok" />
     <key id="key_selectAll" key="A" modifiers="accel" command="cmd_selectAll" />
-    <key id="key_rename" keycode="VK_ENTER" command="cmd_rename" />
-    <key id="key_rename2" keycode="VK_RETURN" command="cmd_rename" />
+    <key id="fake_key_rename" keycode="VK_RETURN" />
+    <key id="fake_key_editalias" keycode="VK_RETURN" modifiers="shift" />
   </keyset>
 
   <popupset id="engineManagerPopupset">
     <menupopup id="list-context">
       <menuitem label="&rename.label;" accesskey="&rename.accesskey;"
-                id="context-rename" command="cmd_rename" />
+                id="context-rename" command="cmd_rename" key="fake_key_rename" />
       <menuitem label="&editalias.label;" accesskey="&editalias.accesskey;"
-                id="context-alias" command="cmd_editalias" />
+                id="context-alias" command="cmd_editalias" key="fake_key_editalias" />
       <menuseparator />
       <menuitem label="&up.label;" accesskey="&noconflict.up.accesskey;"
                 id="context-up" command="cmd_moveup" />
