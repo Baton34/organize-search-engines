@@ -1210,7 +1210,7 @@ EngineView.prototype = {
   getCellText: function EngineView__getCellText(row, col) {
     var rowItem = this._indexCache[row];
     if(col.id == "engineName")
-      return rowItem.isSep ? "" : rowItem.name;
+      return rowItem.isSep ? "" : rowItem.name.replace(/\s+$/, "");
     else if(col.id == "engineAlias")
       return rowItem.isSep ? "" : rowItem.alias;
     return "";
