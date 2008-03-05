@@ -484,6 +484,7 @@ SEOrganizer.prototype = {
        aEngine.__action == "hidden" && aEngine.hidden)) {
       this.offerNewEngine(aEngine);
       this._engines = this.searchService.getVisibleEngines({ });
+      this.updateDisplay(); // maybe the current engine was removed
     } else if(aVerb == "engine-added" || (aVerb == "engine-changed" &&
               aEngine.__action == "hidden" && !aEngine.hidden)) {
       this.hideNewEngine(aEngine);
@@ -493,8 +494,8 @@ SEOrganizer.prototype = {
       this.updateDisplay();
     } else if(aVerb == "-engines-organized" && "oDenDZones_Observer" in window) {
       window.setTimeout(function() { oDenDZones_Observer.observe(); }, 0);
-    } else if(aVerb == "engine-changed" && aEngine.__action == "name") {
-      if(this.currentEngine.name == aEngine.name) {
+    } else if(aVerb == "engine-changed" && aEngine.__action == "name" &&
+              this.currentEngine.name == aEngine.name) {
         this.updateDisplay();
       }
     } /*else if(aVerb == "engine-changed" && aEngine.__action == "move") {

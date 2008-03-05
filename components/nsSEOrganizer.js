@@ -131,7 +131,7 @@ SEOrganizer.prototype = {
     os.addObserver(this, "browser-search-engine-modified", false);
 
     // call *both* and save if at least one returned true
-    if(this._addMissingEnginesToRDF() | this._removeNonExisting())
+    if(this._removeNonExisting() | this._addMissingEnginesToRDF())
       this.saveChanges();
 
     this._modifySearchService();
@@ -254,13 +254,17 @@ SEOrganizer.prototype = {
   // remove engines from the rdf that do not exist (anymore)
   _removeNonExisting: function removeNonExisting(save) {
     var modified = false;
-    for(var i = this.getChildCount(this.getRoot()); i--;) {
+    var resources = this.GetAllResources();
+    var name = this._rdfService.GetResource(NS + "Name");
+    while(resources.hasMoreElements()) {
       try {
-        var item = this.getItemByIndex(i);
-        if(!this.isSeparator(item) && !this.isFolder(item)) {
+        var item = resources.getNext().QueryInterface(Ci.nsIRDFResource);
+        if(item.Value != ROOT && this.hasArcOut(item, name)) {
+          var isEngine = !this.isFolder(item); // it has a name property, so can't be a separator
           var engineName = this.getNameByItem(item);
           var engine = this.getEngineByName(engineName);
-          if(!engine || engine.hidden) {
+          if((isEngine && (!engine || engine.hidden)) ||
+             !this.ArcLabelsIn(item).hasMoreElements()) {
             this._internalRemove(item);
             modified = true;
           }
@@ -287,7 +291,7 @@ SEOrganizer.prototype = {
       var curEngine = prefs.getComplexValue(CUR_ENGINE_PREF, Ci.nsISupportsString).data
       if(this.currentEngine.name != curEngine && !this.getEngineByName(curEngine)) {
         var item = this.getItemByName(curEngine);
-        if(item) {
+        if(item && this.isFolder(item)) {
           this.currentEngine = this.folderToEngine(item);
         }
       }
@@ -301,16 +305,6 @@ SEOrganizer.prototype = {
           this.beginUpdateBatch();
           if(this._removeNonExisting(true)) {
             this.notifyObservers();
-          }
-          if(aEngine.name == this.currentEngine.name) {
-            if(aEngine.name != this.defaultEngine.name) {
-              this.currentEngine = this.defaultEngine;
-            } else {
-              var engines = this.getVisibleEngines({});
-              if(engines.length) {
-                this.currentEngine = engines[0];
-              }
-            }
           }
           this.endUpdateBatch();
           break;
@@ -875,7 +869,7 @@ SEOrganizer.prototype = {
     return this._datasource.GetAllCmds(source);
   },
   GetAllResources: function nsIRDFDataSource__GetAllResources() {
-    return this._datasource.GetAllResource();
+    return this._datasource.GetAllResources();
   },
   GetSource: function nsIRDFDataSource__GetSource(property, target, truthValue) {
     return this._datasource.GetSource(property, target, truthValue);
