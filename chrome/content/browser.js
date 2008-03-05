@@ -496,8 +496,7 @@ SEOrganizer.prototype = {
       window.setTimeout(function() { oDenDZones_Observer.observe(); }, 0);
     } else if(aVerb == "engine-changed" && aEngine.__action == "name" &&
               this.currentEngine.name == aEngine.name) {
-        this.updateDisplay();
-      }
+      this.updateDisplay();
     } /*else if(aVerb == "engine-changed" && aEngine.__action == "move") {
        // do nothing special
     }*/
