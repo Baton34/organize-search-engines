@@ -52,8 +52,7 @@ SEOrganizer.prototype = {
     if("getElementsByClassName" in (parent || document)) { // minefield only
       return (parent || document).getElementsByClassName(className);
     } else { // fall back on xpath
-      var xpath = "descendant::xul:menuitem[contains(concat(' ', @class, ' '),"
-                                            + "' " + className + " ')]";
+      var xpath = "descendant::*[contains(concat(' ',@class,' '),' "+className+" ')]";
       return this.evalXPath(xpath, parent || document);
     }
   },
