@@ -1,0 +1,35 @@
+<!ENTITY namecol.label "Nom">
+<!ENTITY aliascol.label "Paraula clau">
+<!ENTITY addEngine.accesskey "G">
+<!ENTITY restoreDefault.label "Restaura el motor predeterminat">
+<!ENTITY restoreDefault.accesskey "R">
+<!ENTITY new-folder.label "Carpeta nova...">
+<!ENTITY new-folder.accesskey "C">
+<!ENTITY new-separator.label "Separador nou">
+<!ENTITY new-separator.accesskey "S">
+<!ENTITY move-engine.label "Mou...">
+<!ENTITY move-engine.accesskey "M">
+<!ENTITY rename.label "Anomena i desa...">
+<!ENTITY rename.accesskey "n">
+<!ENTITY editalias.label "Edita la paraula clau...">
+<!ENTITY editalias.accesskey "E">
+<!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">
+<!ENTITY noconflict.remove.accesskey "&remove.accesskey;">
+<!ENTITY noconflict.up.accesskey "&up.accesskey;">
+<!ENTITY noconflict.dn.accesskey "&dn.accesskey;">
+<!ENTITY fileMenu.label "Fitxer">
+<!ENTITY fileMenu.accesskey "F">
+<!ENTITY closeCmd.label "Tanca">
+<!ENTITY closeCmd.accesskey "T">
+<!ENTITY viewMenu.label "Visualitza">
+<!ENTITY viewMenu.accesskey "V">
+<!ENTITY menuitem.view.command.toolbar.label "Barra d&apos;eines">
+<!ENTITY menuitem.view.command.toolbar.accesskey "B">
+<!ENTITY menuitem.view.show_columns.label "Mostra les columnes">
+<!ENTITY menuitem.view.show_columns.accesskey "M">
+<!ENTITY menuitem.view.unsorted.label "Desordenat">
+<!ENTITY menuitem.view.unsorted.accesskey "e">
+<!ENTITY sortAscending.label "Ascendent">
+<!ENTITY sortAscending.accesskey "A">
+<!ENTITY sortDescending.label "Descendent">
+<!ENTITY sortDescending.accesskey "D">
