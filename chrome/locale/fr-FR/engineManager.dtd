@@ -1,5 +1,6 @@
 <!ENTITY namecol.label "Nom">
 <!ENTITY aliascol.label "Mot-clé">
+<!ENTITY addEngine.accesskey "G">
 <!ENTITY restoreDefault.label "Restaurer le moteur de recherche par défaut">
 <!ENTITY restoreDefault.accesskey "e">
 <!ENTITY new-folder.label "Nouveau dossier…">
@@ -12,6 +13,12 @@
 <!ENTITY rename.accesskey "n">
 <!ENTITY editalias.label "Éditer le mot-clé…">
 <!ENTITY editalias.accesskey "M">
+<!ENTITY context.new.label "New">
+<!ENTITY context.new.accesskey "e">
+<!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">
+<!ENTITY noconflict.remove.accesskey "&remove.accesskey;">
+<!ENTITY noconflict.up.accesskey "&up.accesskey;">
+<!ENTITY noconflict.dn.accesskey "&dn.accesskey;">
 <!ENTITY fileMenu.label "Fichier">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY closeCmd.label "Fermer">
