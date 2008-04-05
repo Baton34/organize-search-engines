@@ -188,6 +188,9 @@ EngineManagerDialog.prototype = {
     str.data = gSortDir;
     prefService.setComplexValue(SORT_DIRECTION_PREF, Ci.nsISupportsString, str);
 
+    if("suggestthemall" in window)
+      suggestthemall.onOK();
+
     // Commit the changes
     gEngineView.commit();
   },
