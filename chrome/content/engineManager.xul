@@ -136,7 +136,7 @@ Contributor(s):
   </popupset>
 
 
-  <toolbox>
+  <toolbox id="toolbars">
     <menubar id="main-menubar">
       <menu label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
         <menupopup>
@@ -229,9 +229,9 @@ Contributor(s):
     </toolbar>
   </toolbox>
   <separator class="thin" />
-  <description>&engineManager.intro;</description>
+  <description id="engineManager-intro">&engineManager.intro;</description>
 
-  <hbox flex="1">
+  <hbox flex="1" id="engineList-container">
     <tree id="engineList" flex="1" rows="15" editable="true"
           enableColumnDrag="true" flags="dont-build-content"
           onselect="gEngineManagerDialog.onSelect();"
@@ -247,7 +247,7 @@ Contributor(s):
     </tree>
   </hbox>
 
-  <hbox pack="end">
+  <hbox pack="end" id="buttons">
     <button command="cmd_ok" id="btn_ok" />
     <button command="cmd_cancel" id="btn_cancel" />
   </hbox>
