@@ -15,3 +15,4 @@ locale    seorganizer  nl-NL        jar:chrome/seorganizer.jar!/locale/nl-NL/
 locale    seorganizer  pl-PL        jar:chrome/seorganizer.jar!/locale/pl-PL/
 locale    seorganizer  pt-BR        jar:chrome/seorganizer.jar!/locale/pt-BR/
 locale    seorganizer  ca-AD        jar:chrome/seorganizer.jar!/locale/ca-AD/
+locale    seorganizer  ja-JP        jar:chrome/seorganizer.jar!/locale/ja-JP/
