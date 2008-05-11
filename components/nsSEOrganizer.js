@@ -648,71 +648,75 @@ SEOrganizer.prototype = {
   },
 
   folderToEngine: function(folder) {
-    var engine = {
-      alias: "", searchForm: "",
-      hidden: false, _remove: function() {},
-      iconURI: null, iconURL: "",
-      name: this.getNameByItem(folder),
-      type: 4,
-      addParam: function() { throw Cr.NS_ERROR_FAILURE },
-      getSubmission: function(data, type) {
-        var i = -1;
-        var submission = {
-          getNext: function() {
-            i++;
-            var submission = engine.innerEngines[i].getSubmission(data, type);
-            this.postData = submission.postData;
-            this.uri = submission.uri;
-            return submission;
-          },
-          hasMoreElements: function() { return i + 1 < engine.innerEngines.length; },
-          QueryInterface: function(aIID) {
-            if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsISimpleEnumerator) ||
-               aIID.equals(Ci.nsISearchSubmission))
-              return this;
-            throw Cr.NS_ERROR_NO_INTERFACE;
-          }
-        };
-        submission.getNext();
-        return submission;
-      },
-      innerEngines: [],
-      supportsResponseType: function(type) {
-        return (type == null || type == "text/html");
-      },
-      QueryInterface: function(aIID) {
-        if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsISearchEngine))
-          return this;
-        throw Cr.NS_ERROR_NO_INTERFACE;
-      }
-    };
-    engine.wrappedJSObject = engine;
-    this._iterateAll(function(item) {
-      engine.innerEngines.push(this.getEngineByName(this.getNameByItem(item)));
-    }, null, folder);
-
-    if(!engine.innerEngines.length)
-      throw Cr.NS_ERROR_FAILURE;
-    if(engine.innerEngines.length == 1)
-      return engine.innerEngines[0];
-
-    if(typeof Resizer == "undefined") {
-       Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader)
-         .loadSubScript("chrome://seorganizer/content/resize-icons.js");
-    }
     var ss = this._searchService.wrappedJSObject;
-    var resizer = new Resizer(16, 16);
-    resizer.onload = function iconLoadCallback() {
-      resizer.paintIcons();
-      engine.iconURI = makeURI(resizer.getDataURL());
-      engine.iconURL = engine.iconURI.spec;
-      ss.__parent__.notifyAction(engine, "engine-changed");
-      resizer = null;
-    };
-    for(var i = 0; i < engine.innerEngines.length; i++) {
-      resizer.addIconByURL(engine.innerEngines[i].iconURI.spec);
+    var name = this.getNameByItem(folder);
+    var engine;
+    if(!(engine = ss.getEngineByName(name))) {
+      engine = {
+        alias: "", searchForm: "",
+        hidden: false, _remove: function() {},
+        iconURI: null, iconURL: "",
+        name: name,
+        type: 4,
+        addParam: function() { throw Cr.NS_ERROR_FAILURE },
+        getSubmission: function(data, type) {
+          var i = -1;
+          var submission = {
+            getNext: function() {
+              i++;
+              var submission = engine.innerEngines[i].getSubmission(data, type);
+              this.postData = submission.postData;
+              this.uri = submission.uri;
+              return submission;
+            },
+            hasMoreElements: function() { return i + 1 < engine.innerEngines.length; },
+            QueryInterface: function(aIID) {
+              if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsISimpleEnumerator) ||
+                 aIID.equals(Ci.nsISearchSubmission))
+                return this;
+              throw Cr.NS_ERROR_NO_INTERFACE;
+            }
+          };
+          submission.getNext();
+          return submission;
+        },
+        innerEngines: [],
+        supportsResponseType: function(type) {
+          return (type == null || type == "text/html");
+        },
+        QueryInterface: function(aIID) {
+          if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsISearchEngine))
+            return this;
+          throw Cr.NS_ERROR_NO_INTERFACE;
+        }
+      };
+      engine.wrappedJSObject = engine;
+      this._iterateAll(function(item) {
+        engine.innerEngines.push(this.getEngineByName(this.getNameByItem(item)));
+      }, null, folder);
+
+      if(!engine.innerEngines.length)
+        throw Cr.NS_ERROR_FAILURE;
+      if(engine.innerEngines.length == 1)
+        return engine.innerEngines[0];
+
+      if(typeof Resizer == "undefined") {
+         Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader)
+           .loadSubScript("chrome://seorganizer/content/resize-icons.js");
+      }
+      var resizer = new Resizer(16, 16);
+      resizer.onload = function iconLoadCallback() {
+        resizer.paintIcons();
+        engine.iconURI = makeURI(resizer.getDataURL());
+        engine.iconURL = engine.iconURI.spec;
+        ss.__parent__.notifyAction(engine, "engine-changed");
+        resizer = null;
+      };
+      for(var i = 0; i < engine.innerEngines.length; i++) {
+        resizer.addIconByURL(engine.innerEngines[i].iconURI.spec);
+      }
+      ss._addEngineToStore(engine);
     }
-    ss._addEngineToStore(engine);
     return engine;
   },
 
