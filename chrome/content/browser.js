@@ -219,10 +219,12 @@ SEOrganizer.prototype = {
     // null parameter below specifies HTML response for search
     var submission = this.currentEngine.getSubmission(aData, null);
     openUILinkIn(submission.uri.spec, aWhere, null, submission.postData);
-    if(submission instanceof Ci.nsISimpleEnumerator) {
-      var list = submission;
+    organizeSE.doSearch(submission);
+  },
+  doSearch2: function doSearch2(list) {
+    if(list instanceof Ci.nsISimpleEnumerator) {
       while(list.hasMoreElements()) {
-        submission = list.getNext().QueryInterface(Ci.nsISearchSubmission);
+        var submission = list.getNext().QueryInterface(Ci.nsISearchSubmission);
         gBrowser.loadOneTab(submission.uri.spec, null, null, submission.postData,
                             true, false);
       }

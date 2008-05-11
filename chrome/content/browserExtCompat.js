@@ -376,5 +376,16 @@ organizeSE__Extensions.prototype = {
           elem.parentNode.removeChild(elem);
       }
     }
+  },
+
+  /* TabMix Plus */
+  tabmix: {
+    get check() {
+      return ("TMP_SearchLoadURL" in window);
+    },
+    init: function() {
+      eval("TMP_SearchLoadURL = " + TMP_SearchLoadURL.toString().replace(/return;/,
+                                                       "organizeSE.doSearch2(submission);"));
+    }
   }
 };
