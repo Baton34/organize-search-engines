@@ -164,7 +164,7 @@ Resizer.prototype = {
   removeIconByImage: function(img) {
     var idx;
     while((idx = this.icons.indexOf(img)) != -1)
-      this.icons.splice(idx, i);
+      this.icons.splice(idx, 1);
   },
 
   paintIcons: function() {
