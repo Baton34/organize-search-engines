@@ -1,3 +1,5 @@
+/* -*- js-standard: mozdomwindow,chromewindow,mozscript;
+       js-import:browser.js; js-var:;                     -*- */
 /* ***** BEGIN LICENSE BLOCK *****
 Version: MPL 1.1/GPL 2.0/LGPL 2.1
 
@@ -34,7 +36,7 @@ Contributor(s):
  the terms of any one of the MPL, the GPL or the LGPL.
 ***** END LICENSE BLOCK ***** */
 
-const seOrganizer_dragObserver = {
+var seOrganizer_dragObserver = {
   init: function() {
     var searchbar = organizeSE.searchbar;
     if(!searchbar)

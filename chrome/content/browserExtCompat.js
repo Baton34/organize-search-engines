@@ -1,3 +1,5 @@
+/* -*- js-standard: mozdomwindow,chromewindow,mozscript;
+       js-import:browser.js;                              -*- */
 /* ***** BEGIN LICENSE BLOCK *****
 Version: MPL 1.1/GPL 2.0/LGPL 2.1
 
@@ -34,7 +36,7 @@ Contributor(s):
  the terms of any one of the MPL, the GPL or the LGPL.
 ***** END LICENSE BLOCK ***** */
 
-function organizeSE__Extensions() {
+var organizeSE__Extensions = function organizeSE__Extensions() {
   this.init();
 };
 organizeSE__Extensions.prototype = {
@@ -385,7 +387,7 @@ organizeSE__Extensions.prototype = {
     },
     init: function() {
       eval("TMP_SearchLoadURL = " + TMP_SearchLoadURL.toString().replace(/return;/,
-                                                       "organizeSE.doSearch2(submission);"));
+                                          "organizeSE.doSearch2(submission);"));
     }
   }
 };

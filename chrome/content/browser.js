@@ -1,3 +1,6 @@
+/* -*- js-standard: mozdomwindow,chromewindow,mozscript;
+       js-import:browserDragDrop.js,browserExtCompat.js;
+       js-var:oDenDZones_Observer;                        -*- */
 /* ***** BEGIN LICENSE BLOCK *****
 Version: MPL 1.1/GPL 2.0/LGPL 2.1
 
