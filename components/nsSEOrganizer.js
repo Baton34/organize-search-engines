@@ -1,3 +1,5 @@
+/* -*- js-standard: mozdomwindow,chromewindow,mozscript;
+       js-import:../chrome/content/resize-icons.js; js-var:;              -*- */
 /* ***** BEGIN LICENSE BLOCK *****
 Version: MPL 1.1/GPL 2.0/LGPL 2.1
 
