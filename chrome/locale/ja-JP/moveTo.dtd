@@ -1,0 +1,4 @@
+<!ENTITY window.title "項目の移動">
+<!ENTITY move-to.label "移動先:">
+<!ENTITY move-to.accesskey "M">
+<!ENTITY search-engines.toplevel "検索エンジン">
