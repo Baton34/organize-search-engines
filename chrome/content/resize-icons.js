@@ -56,7 +56,7 @@ example usage:
           resizer.addIconByImage(document.getElementsByTagName("img")[0]);
       }, 1500);
 */
-function Resizer(width, height) {
+var Resizer = function Resizer(width, height) {
   this.width = width;
   this.height = height;
   this._loading = [];
