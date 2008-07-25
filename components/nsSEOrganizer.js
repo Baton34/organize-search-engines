@@ -893,23 +893,18 @@ SEOrganizer.prototype = {
     } else if(property.ValueUTF8 === NS + "Selected" &&
               !this.isSeparator(source) && truthValue) {
       try {
-        if(this.isFolder(source)) {
-          var name = this.currentEngine.name;
-          var found = (name == this.getNameByItem(source));
-          function find(item) {
+        var name = this.currentEngine.name;
+        var found = (name == this.getNameByItem(source));
+        if(!found && this.isFolder(source)) {
+          this._iterateAll(function find(item) {
             if(this.getNameByItem(item) == name) {
               found = true;
               throw new Error("_iterateAll::succeeded");
             }
-          }
-          this._iterateAll(find, null, source);
-          return this._rdfService.GetLiteral(found.toString());
-        } else {
-          return (this.getNameByItem(source) == this.currentEngine.name).toString();
+          }, null, source);
         }
-      } catch(e) {
-        return this._rdfService.GetLiteral("false");
-      }
+      } catch(e) { }
+      return this._rdfService.GetLiteral(found.toString());
     } else if(property.Value == NS + "Name" && this.isSeparator(source)
               && truthValue) {
       try { // make the built-in sorting mechanism work
