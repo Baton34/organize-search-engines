@@ -63,8 +63,9 @@ var Resizer = function Resizer(width, height) {
   this.icons = [];
 
   for(var i = 2; i < arguments.length; i++) {
-    if(arguments[i] instanceof HTMLImageElement || arguments[i] instanceof Image
-       || arguments[i] instanceof HTMLCanvasElement)
+    if(arguments[i] instanceof HTMLImageElement || arguments[i] instanceof Image ||
+       arguments[i] instanceof HTMLCanvasElement ||
+       (arguments[i] instanceof XULElement && arguments[i].nodeName == "image"))
       this.addIconByImage(arguments[i]);
     else if(arguments[i] instanceof Ci.nsIURI)
       this.addIconByURL(arguments[i].spec);
@@ -75,19 +76,26 @@ var Resizer = function Resizer(width, height) {
 Resizer.prototype = {
   width: 0,
   height: 0,
+  icons: null,
   __canvas: null,
   get _canvas() {
     if(!this.__canvas)
       this._createCanvas();
     return this.__canvas;
   },
+  __document: null,
   get _document() {
-    if(this.__parent__.document)
-      return this.__parent__.document;
-    var mediator = Cc["@mozilla.org/appshell/window-mediator;1"]
-                     .getService(Ci.nsIWindowMediator);
-    var win = mediator.getMostRecentWindow("navigator:browser");
-    return win.document;
+    if(!this.__document) {
+      if(this.__parent__.document) {
+        this.__document = this.__parent__.document;
+      } else {
+        var mediator = Cc["@mozilla.org/appshell/window-mediator;1"]
+                         .getService(Ci.nsIWindowMediator);
+        var win = mediator.getMostRecentWindow("navigator:browser");
+        this.__document = win.document;
+      }
+    }
+    return this.__document;
   },
   _createCanvas: function() {
     var canvas = this._document.createElementNS("http://www.w3.org/1999/xhtml",
@@ -136,8 +144,7 @@ Resizer.prototype = {
       This.icons.push(img);
       var idx = This._loading.indexOf(img);
       if(idx != -1) {
-        This._loading = This._loading.slice(0, idx)
-                                     .concat(This._loading.slice(idx + 1));
+        This._loading.splice(idx, 1);
       }
       This._iconAdded(img);
     }, false);
