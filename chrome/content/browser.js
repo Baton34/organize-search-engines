@@ -105,16 +105,6 @@ SEOrganizer.prototype = {
     popupset.builder.addListener(this.buildObserver);
     popupset.builder.rebuild();
 
-    /* make Firefox support search aliases */
-    if(!("bookmarkService" in window)) { // we aren't on a places-enabled build
-      var searchRegexp = /(BMSVC\.resolveKeyword\(aURL,\saPostDataRef\))/;
-      var replacement =
-             "$1 ||\norganizeSE.SEOrganizer.resolveKeyword(aURL, aPostDataRef)";
-      var newFuncString = getShortcutOrURI.toSource()
-                                          .replace(searchRegexp, replacement);
-      eval("getShortcutOrURI = " + newFuncString);
-    }
-
     /* compatibility to other extensions */
     this.extensions = new organizeSE__Extensions();
   },
@@ -467,15 +457,11 @@ SEOrganizer.prototype = {
       } else { // huh? how did we get here?
         return;
       }
-      if("onEnginePopupCommand" in searchbar) { // Firefox 2.0
-        searchbar.onEnginePopupCommand(target);
-      } else { // trunk
-        var evt = document.createEvent("XULCommandEvent");
-        evt.initCommandEvent("command", true, true, window, 1, false, false,
-                             false, false, event);
-        evt.__defineGetter__("originalTarget",function(){return target;});// xxx
-        searchbar.dispatchEvent(evt);
-      }
+      var evt = document.createEvent("XULCommandEvent");
+      evt.initCommandEvent("command", true, true, window, 1, false, false,
+                           false, false, event);
+      evt.__defineGetter__("originalTarget",function(){return target;});// xxx
+      searchbar.dispatchEvent(evt);
     },
     mouseMove: function observe__mouseMove(event) { // hover effect for the button
       var domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
