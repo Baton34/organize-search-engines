@@ -16,7 +16,7 @@ The Original Code is Organize Search Engines.
 
 The Initial Developer of the Original Code is
 Malte Kraus.
-Portions created by the Initial Developer are Copyright (C) 2006-2008
+Portions created by the Initial Developer are Copyright (C) 2006-2009
 the Initial Developer. All Rights Reserved.
 
 Contributor(s):
@@ -39,6 +39,7 @@ Contributor(s):
 <?xml-stylesheet href="chrome://seorganizer/skin/engineManager.css"?>
 
 <?xml-stylesheet href="chrome://global/skin/tree.css"?>
+<?xml-stylesheet href="chrome://browser/skin/places/places.css"?>
 
 <!DOCTYPE window [
   <!ENTITY % default SYSTEM "chrome://browser/locale/engineManager.dtd">
@@ -51,11 +52,12 @@ Contributor(s):
 
 <window id="engineManager"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
         onload="gEngineManagerDialog.init();"
         onunload="gEngineManagerDialog.onCancel(event);"
         title="&engineManager.title;"
         persist="screenX screenY width height"
+        height="600"
+        width="650"
         windowtype="Browser:SearchManager">
 
   <stringbundleset>
@@ -91,6 +93,8 @@ Contributor(s):
     <command id="cmd_editalias" oncommand="gEngineManagerDialog.editAlias();"
              disabled="true"/>
     <command id="cmd_rename" oncommand="gEngineManagerDialog.editName();"
+             disabled="true"/>
+    <command id="cmd_properties" oncommand="gEngineManagerDialog.properties();"
              disabled="true"/>
 
     <command id="cmd_move-engine" oncommand="gEngineManagerDialog.move();"
@@ -132,6 +136,9 @@ Contributor(s):
       </menu>
       <menuitem key="key_remove" label="&remove.label;" accesskey="&noconflict.remove.accesskey;"
                 id="context-remove" command="cmd_remove" />
+      <menuseparator />
+      <menuitem label="&properties.label;" accesskey="&properties.accesskey;"
+                id="context-properties" command="cmd_properties" />
     </menupopup>
   </popupset>
 
@@ -248,7 +255,7 @@ Contributor(s):
   </hbox>
 
   <hbox pack="end" id="buttons">
-    <button command="cmd_ok" id="btn_ok" />
-    <button command="cmd_cancel" id="btn_cancel" />
+    <button command="cmd_ok" id="btn_ok" icon="accept" />
+    <button command="cmd_cancel" id="btn_cancel" icon="cancel" />
   </hbox>
 </window>

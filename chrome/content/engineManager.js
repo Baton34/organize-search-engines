@@ -17,7 +17,7 @@ The Original Code is Organize Search Engines.
 
 The Initial Developer of the Original Code is
 Malte Kraus.
-Portions created by the Initial Developer are Copyright (C) 2006-2008
+Portions created by the Initial Developer are Copyright (C) 2006-2009
 the Initial Developer. All Rights Reserved.
 
 Contributor(s):
@@ -57,6 +57,16 @@ var gRemovedEngines = [], gAddedEngines = [], gSortDir = "natural";
 const CONTRACT_ID =
          "@mozilla.org/rdf/datasource;1?name=organized-internet-search-engines";
 var gSEOrganizer;
+
+function LOG(msg) {
+  msg = "Organize Search Engines:   " + msg;
+  var consoleService = Cc["@mozilla.org/consoleservice;1"]
+                         .getService(Ci.nsIConsoleService);
+  consoleService.logStringMessage(msg);
+  //dump(msg + "\n");
+  return msg;
+}
+
 
 function gResort(orig) {
   function sortCallback(item1, item2) {
@@ -151,6 +161,8 @@ EngineManagerDialog.prototype = {
     var cancel = document.getElementById("btn_cancel");
     cancel.setAttribute("label", dlgStrings.getString("button-cancel"));
     cancel.setAttribute("accesskey", dlgStrings.getString("accesskey-cancel"));
+    // the button order on windows is different from linux/mac
+    cancel.ordinal = (Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS == "WINNT") ? 1 : 0;
 
     window.setTimeout(function() {
       engineList.focus();
@@ -175,6 +187,10 @@ EngineManagerDialog.prototype = {
       }
     }, true);
 
+    var suggestall = document.getElementById("suggestthemallHbox");
+    if(suggestall) {
+      document.documentElement.insertBefore(suggestall, engineList.parentNode.nextSibling);
+    }
   },
   onOK: function EngineManager__onOK() {
     this.onClose();
@@ -201,6 +217,11 @@ EngineManagerDialog.prototype = {
 
     gSEOrganizer.reload();
     if(gAddedEngines.length) {
+      for(var i = 0; i < gEngineView._indexCache.length; i++) {
+        var engine = gEngineView._indexCache[i].originalEngine;
+        if(engine && engine.wrappedJSObject.__updateToEngine)
+          delete engine.wrappedJSObject.__updateToEngine;
+      }
       gSEOrganizer.beginUpdateBatch();
       for(var i = gAddedEngines.length; i--;) {
         gSEOrganizer._internalRemove(gAddedEngines[i]);
@@ -402,23 +423,9 @@ EngineManagerDialog.prototype = {
   _edit: function(prop, str, colId) {
     var index = gEngineView.selectedIndex;
     var tree = gEngineView.tree.element, col = gEngineView.getNamedColumn(colId);
-    if(tree.startEditing) {
-      if(tree._editingColumn)
-        return;
-      tree.startEditing(index, col);
-    } else {
-      tree.focus();
-      var item = gEngineView.selectedItem;
-      var value = { value: item[prop] };
-      var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
-                      .getService(Ci.nsIPromptService);
-      var title = gStrings.getFormattedString(str + ".title", [item.name]);
-      var content = gStrings.getFormattedString(str + ".name", [item.name]);
-      var abort = !prompts.prompt(window, title, content, value, null, {});
-      if(abort) return;
-      gEngineView.setCellText(index, col, value.value);
-      gEngineView.ensureRowIsVisible(index);
-    }
+    if(tree._editingColumn)
+      return;
+    tree.startEditing(index, col);
   },
 
   get NEW_ITEM_TYPE_SEPARATOR()          {  return "separator";       },
@@ -443,21 +450,7 @@ EngineManagerDialog.prototype = {
       node = gSEOrganizer.newSeparator(parent.node);
       item = new Structure__Item(parent, node);
     } else if(type == this.NEW_ITEM_TYPE_FOLDER) {
-      var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
-                      .getService(Ci.nsIPromptService);
-      var name = { value: "" };
-      var abort = prompts.prompt(window,
-                                 gStrings.getString("new-folder.title"),
-                                 gStrings.getString("new-folder.name"), name,
-                                 null, {});
-      if(!abort) return;
-      name = name.value;
-
-      while(gEngineView._structure.find("name", name, item)) {
-        name = name + " ";
-      }
-
-      var node = gSEOrganizer.newFolder(name, parent.node);
+      var node = gSEOrganizer.newFolder("", parent.node);
       item = new Structure__Container(parent, node);
     } else if(type == this.NEW_ITEM_RESTORED_DEFAULT_ENGINE) {
       if(fromOriginal) {
@@ -504,6 +497,15 @@ EngineManagerDialog.prototype = {
     treeInsertLoc = gEngineView._indexCache.indexOf(item);
     gEngineView.rowCountChanged(treeInsertLoc, 1);
     gEngineView.select(treeInsertLoc, true);
+    if(type == this.NEW_ITEM_TYPE_FOLDER)
+      this.editName();
+  },
+  properties: function EngineManager__properties() {
+    var item = gEngineView.selectedItem;
+    openDialog("chrome://seorganizer/content/engineProperties.xul", "engineProps", "modal,dialog", item);
+    if(!item.modified)
+      item.modified = 1;
+    gEngineView.invalidateRow(gEngineView.selectedIndex);
   },
   selectAll: function EngineManager__selectAll() {
     gEngineView.selection.rangedSelect(0, gEngineView.lastIndex, false);
@@ -539,7 +541,7 @@ EngineManagerDialog.prototype = {
       if(!index) firstSelected = true;
       if(item.isSep) readOnly = true;
       if(item.isEngine && !readOnly)
-        readOnly = !item.originalEngine || item.originalEngine.wrappedJSObject._readOnly;
+        readOnly = !item.originalEngine;
     }
     onlyOneEngine = !multipleSelected && !disableButtons && item.isEngine;
 
@@ -548,6 +550,7 @@ EngineManagerDialog.prototype = {
     document.getElementById("cmd_rename").setAttribute("disabled", readOnly);
     document.getElementById("cmd_move-engine").setAttribute("disabled", disableButtons);
     document.getElementById("cmd_editalias").setAttribute("disabled", !onlyOneEngine);
+    document.getElementById("cmd_properties").setAttribute("disabled", !onlyOneEngine);
 
     document.getElementById("cmd_moveup").setAttribute("disabled", firstSelected);
     document.getElementById("cmd_movedown").setAttribute("disabled", lastSelected);
@@ -732,7 +735,6 @@ Structure__Item.prototype = {
   originalEngine: null,
   alias: "",
   commit: function Structure__Item__commit() {
-    var engine = this.originalEngine;
     if(this.modified == 2) {
       var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                          .getService(Ci.nsIRDFService);
@@ -743,37 +745,43 @@ Structure__Item.prototype = {
       } else {
         var namePred = rdfService.GetResource(NS + "Name");
         gSEOrganizer.Assert(this.node, namePred, rdfService.GetLiteral(this.name), true);
-        engine.hidden = false;
+        this.originalEngine.hidden = false;
       }
     }
-    if(this.modified && engine) {
-      if(this.alias != engine.alias) {
-        engine.alias = this.alias;
+    if(this.modified && this.originalEngine) {
+      var engine = this.originalEngine.wrappedJSObject;
+      var changed = false;
+      if(engine.__updateToEngine) { // properties were changed
+        var replace = engine.__updateToEngine.wrappedJSObject;
+        for(var property in replace) {
+          if(!(replace.__lookupGetter__(property) || replace.__lookupSetter__(property)) &&
+             replace.hasOwnProperty(property) && property != "__updateToEngine")
+            engine[property] = replace[property];
+        }
+        delete engine.__updateToEngine;
+        if(this.iconURI != engine._iconURI.spec)
+          engine._setIcon(this.iconURI, true);
+
+        var globalObject = engine.__parent__;
+        globalObject.engineMetadataService.setAttr(engine, "updatedatatype", engine._dataType.toString());
+        if(engine._hasUpdates && !globalObject.engineMetadataService.getAttr(engine, "updateexpir"))
+          globalObject.engineUpdateService.scheduleNextUpdate(engine);
+
+        engine.__action = "properties";
+        changed = true;
       }
+      if(engine.alias != this.alias)
+        engine.alias = this.alias;
       if(engine.name != this.name) {
         var oldName = engine.name;
 
-        engine = engine.wrappedJSObject;
         var realSearchService = gSEOrganizer._searchService.wrappedJSObject;
         delete realSearchService._engines[oldName];
         realSearchService._engines[this.name] = engine;
         engine._name = this.name;
-        engine._serializeToFile();
-        var os = Cc["@mozilla.org/observer-service;1"]
-                   .getService(Ci.nsIObserverService);
-        engine.__action = "name";
-        os.notifyObservers(engine, SEARCH_ENGINE_TOPIC, "engine-changed");
-        delete engine.__action;
-
-        var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
-                           .getService(Ci.nsIRDFService);
-        var namePred = rdfService.GetResource(NS + "Name");
-        oldName = rdfService.GetLiteral(oldName);
-        gSEOrganizer.Assert(this.node, namePred,
-                            rdfService.GetLiteral(this.name), true);
-        try {
-          gSEOrganizer.Unassert(this.node, namePred, oldName);
-        } catch(e) {}
+        if(!engine.__action)
+          engine.__action = "name";
+        changed = true;
       }
       if(gSEOrganizer.getNameByItem(this.node) != this.name) {
         var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
@@ -786,6 +794,13 @@ Structure__Item.prototype = {
         } catch(e) {}
         gSEOrganizer.Assert(this.node, namePred,
                             rdfService.GetLiteral(this.name), true);
+      }
+      if(changed) {
+        if(!engine._readOnly)
+          engine._lazySerializeToFile();
+        // inform everybody of the changes, also stores our changes in the cache
+        Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService)
+          .notifyObservers(engine, SEARCH_ENGINE_TOPIC, "engine-changed");
       }
     }
   },
@@ -1209,8 +1224,12 @@ EngineView.prototype = {
     var aserv = Cc["@mozilla.org/atom-service;1"].getService(Ci.nsIAtomService);
     if(this.isSeparator(row))
       props.AppendElement(aserv.getAtom("separator"));
-    if(col.id == "engineName")
+    if(col.id == "engineName") {
       props.AppendElement(aserv.getAtom("Name"));
+      props.AppendElement(aserv.getAtom("title"));
+    }
+    if(this.isContainer(row) && this.isContainerOpen(row))
+      props.AppendElement(aserv.getAtom("open"));
   },
   getCellText: function EngineView__getCellText(row, col) {
     var rowItem = this._indexCache[row];
@@ -1224,8 +1243,10 @@ EngineView.prototype = {
   getColumnProperties: function EngineView__getColumnProperties(col, props) {
     var aserv = Cc["@mozilla.org/atom-service;1"].getService(Ci.nsIAtomService);
     props.AppendElement(aserv.getAtom(col.id));
-    if(col.id == "engineName")
+    if(col.id == "engineName") {
       props.AppendElement(aserv.getAtom("Name"));
+      props.AppendElement(aserv.getAtom("title"));
+    }
   },
   getImageSrc: function EngineView__getImageSrc(row, col) {
     if(col.id == "engineName")
@@ -1273,14 +1294,18 @@ EngineView.prototype = {
     return this._indexCache[index].isSeq;
   },
   isContainerEmpty: function EngineView__isContainerEmpty(index) {
+    if(!this.isContainer(index))
+      return true;
     return this._indexCache[index].children.length === 0;
   },
   isContainerOpen: function EngineView__isContainerOpen(index) {
+    if(!this.isContainer(index))
+      return false;
     return this._indexCache[index].open;
   },
   isEditable: function EngineView__isEditable(row, col) {
     var item = this._indexCache[row];
-    var editableEngine = (item.originalEngine && !item.originalEngine.wrappedJSObject._readOnly);
+    var editableEngine = !!item.originalEngine;
     return (col.id == "engineName" && (item.isSeq || editableEngine)) ||
            (col.id == "engineAlias" && item.isEngine);
   },
@@ -1336,6 +1361,8 @@ EngineView.prototype = {
     this.updateCache();
     this.rowCountChanged(index + 1, (open ? 1 : -1) * count);
     this.invalidateCell(index, "engineName");
+    this.ensureRowIsVisible(index + 1 + (open ? 1 : 0) * count);
+    this.ensureRowIsVisible(index);
     return open;
   }
 };

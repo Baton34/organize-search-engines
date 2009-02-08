@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<!-- ***** BEGIN LICENSE BLOCK *****
+Version: MPL 1.1/GPL 2.0/LGPL 2.1
+
+The contents of this file are subject to the Mozilla Public License Version
+1.1 (the "License"); you may not use this file except in compliance with
+the License. You may obtain a copy of the License at
+http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+for the specific language governing rights and limitations under the
+License.
+
+The Original Code is Organize Search Engines.
+
+The Initial Developer of the Original Code is
+Malte Kraus.
+Portions created by the Initial Developer are Copyright (C) 2009
+the Initial Developer. All Rights Reserved.
+
+Contributor(s):
+  Malte Kraus <mails@maltekraus.de> (Original author)
+
+ Alternatively, the contents of this file may be used under the terms of
+ either the GNU General Public License Version 2 or later (the "GPL"), or
+ the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ in which case the provisions of the GPL or the LGPL are applicable instead
+ of those above. If you wish to allow use of your version of this file only
+ under the terms of either the GPL or the LGPL, and not to allow others to
+ use your version of this file under the terms of the MPL, indicate your
+ decision by deleting the provisions above and replace them with the notice
+ and other provisions required by the GPL or the LGPL. If you do not delete
+ the provisions above, a recipient may use your version of this file under
+ the terms of any one of the MPL, the GPL or the LGPL.
+***** END LICENSE BLOCK ***** -->
+<?xml-stylesheet href="chrome://global/skin/"?>
+
+<!DOCTYPE window [
+  <!ENTITY % manager SYSTEM "chrome://seorganizer/locale/engineManager.dtd">
+  %manager;
+  <!ENTITY % properties SYSTEM "chrome://seorganizer/locale/engineProperties.dtd">
+  %properties;
+]>
+
+<dialog id="engineProperties"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        xmlns:html="http://www.w3.org/1999/xhtml"
+        onload="init();"
+        ondialogaccept="storeChanges();"
+        title="&engineProperties.title;"
+        style="width: 50ch;">
+
+  <script type="application/x-javascript" src="chrome://seorganizer/content/engineProperties.js" />
+
+  <grid flex="1">
+    <columns>
+      <column flex="0" />
+      <column flex="1" />
+    </columns>
+    <rows>
+      <row>
+        <label control="name-textbox" value="&prop.name.label;" accesskey="&prop.name.accesskey;" />
+        <textbox id="name-textbox" value="" />
+      </row>
+      <row>
+        <label control="icon-button" value="&prop.icon.label;" accesskey="&prop.icon.accesskey;" />
+        <hbox>
+          <box align="center" id="icon-image-container">
+            <html:canvas id="icon-image" width="16" height="16" style="background-image: url(moz-icon:///?size=menu);" />
+          </box>
+          <button id="icon-button" icon="open" oncommand="iconMethods.browseIcon();" label="&prop.icon.browse.label;" accesskey="&prop.icon.browse.accesskey;" />
+          <button id="icon-download-button" oncommand="iconMethods.downloadIcon(this);" icon="refresh" label="&prop.icon.download.label;" accesskey="&prop.icon.download.accesskey;" />
+        </hbox>
+      </row>
+      <row>
+        <label control="keyword-textbox" value="&prop.keyword.label;" accesskey="&prop.keyword.accesskey;" />
+        <textbox id="keyword-textbox" value="" />
+      </row>
+      <row>
+        <label control="description-textbox" value="&prop.description.label;" accesskey="&prop.description.accesskey;" />
+        <textbox id="description-textbox" value="" />
+      </row>
+      <row>
+        <label control="homepage-textbox" value="&prop.homepage.label;" accesskey="&prop.homepage.accesskey;" />
+        <textbox id="homepage-textbox" value="" />
+      </row>
+      <row>
+        <label control="url-textbox" value="&prop.searchurl.label;" accesskey="&prop.searchurl.accesskey;" />
+        <textbox id="url-textbox" value="" />
+      </row>
+      <row>
+        <label control="method-radio" value="&prop.httpmethod.label;" accesskey="&prop.httpmethod.accesskey;" />
+        <radiogroup orient="horizontal" id="method-radio">
+          <radio id="method-radio-get" label="GET" />
+          <radio id="method-radio-post" label="POST" />
+        </radiogroup>
+      </row>
+      <row flex="1">
+        <vbox align="start">
+          <label control="params-list" value="&prop.parameter.label;" accesskey="&prop.parameter.accesskey;" />
+          <button id="add-param" oncommand="this.parentNode.nextSibling.view.performAction('add');" label="&prop.parameter.add.label;" accesskey="&prop.parameter.add.accesskey;" />
+          <button id="remove-param" oncommand="this.parentNode.nextSibling.view.performAction('remove');" label="&prop.parameter.remove.label;" accesskey="&prop.parameter.remove.accesskey;" />
+        </vbox>
+        <tree id="params-tree" rows="4" editable="true" hidecolumnpicker="true"
+              flags="dont-build-content">
+          <treecols>
+            <treecol id="params" flex="1" editable="true" hideheader="true" />
+          </treecols>
+          <treechildren/>
+        </tree>
+      </row>
+      <row id="update-url-row">
+        <label control="update-url-textbox" value="&prop.update.url.label;" accesskey="&prop.update.url.accesskey;" />
+        <textbox id="update-url-textbox" value="" onchange="checkUpdates();" onkeyup="checkUpdates();" />
+      </row>
+      <row id="update-data-type">
+        <label control="update-data-type-menulist" value="&prop.update.datatype.label;" accesskey="&prop.update.datatype.accesskey;" />
+        <menulist id="update-data-type-menulist">
+          <menupopup>
+            <menuitem value="DATA_XML"  label="&prop.update.datatype.openmozsearch.label;" accesskey="&prop.update.datatype.openmozsearch.accesskey;" />
+            <menuitem value="DATA_TEXT" selected="true" label="&prop.update.datatype.sherlock.label;" accesskey="&prop.update.datatype.sherlock.accesskey;" />
+          </menupopup>
+        </menulist>
+      </row>
+      <row id="update-icon-url-row">
+        <label control="update-icon-url-textbox" value="&prop.update.icon.label;" accesskey="&prop.update.icon.accesskey;" />
+        <textbox id="update-icon-url-textbox" value="" onchange="checkUpdates();" onkeyup="checkUpdates();" />
+      </row>
+      <row id="update-interval-row">
+        <label control="update-interval-textbox" value="&prop.update.interval.label;" accesskey="&prop.update.interval.accesskey;" />
+        <hbox>
+          <textbox id="update-interval-textbox" type="number" min="1" style="width: 7ch;" />
+          <label control="update-interval-textbox" flex="1" value="&prop.update.interval.days.label;" />
+        </hbox>
+      </row>
+    </rows>
+  </grid>
+
+  <!-- parse a html page for the icon downlaod -->
+  <iframe id="favicon" type="content" src="about:blank" collapsed="true" />
+
+</dialog>
