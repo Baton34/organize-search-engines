@@ -170,7 +170,7 @@ SEOrganizer.prototype = {
     popupset.builder.rebuild();
 
     window.setTimeout(function() {
-      if(!("searchOnTab" in window) && popup.parentNode) // yeah, I know
+      if(!(("searchOnTab" in window)) && popup.parentNode) // yeah, I know
         popup.parentNode.removeChild(popup);
     }, 1);
   },
@@ -217,20 +217,88 @@ SEOrganizer.prototype = {
     return false;
   },
   doSearch: function doSearch(aData, aWhere) {
-    if(typeof aWhere != "string") // Firefox 2 had a boolean parameter aOpenInTab
-      aWhere = aWhere ? "tab" : "current";
+    var allLinks = [];
     // null parameter below specifies HTML response for search
-    var submission = this.currentEngine.getSubmission(aData, null);
-    openUILinkIn(submission.uri.spec, aWhere, null, submission.postData);
-    organizeSE.doSearch(submission);
-  },
-  doSearch2: function doSearch2(list) {
-    if(list instanceof Ci.nsISimpleEnumerator) {
-      while(list.hasMoreElements()) {
-        var submission = list.getNext().QueryInterface(Ci.nsISearchSubmission);
-        gBrowser.loadOneTab(submission.uri.spec, null, null, submission.postData,
-                            true, false);
+    var submission = organizeSE.SEOrganizer.currentEngine.getSubmission(aData, null);
+    allLinks.push(submission);
+    //organizeSE.doSearch2(submission);
+    if(submission instanceof Ci.nsISimpleEnumerator) {
+      while(submission.hasMoreElements()) {
+        allLinks.push(submission.getNext().QueryInterface(Ci.nsISearchSubmission));
       }
+    }
+
+    if(allLinks.length == 1) {
+      openUILinkIn(allLinks[0].uri.spec, aWhere, null, allLinks[0].postData);
+    } else if(aWhere == "window") {
+      var win = openDialog(getBrowserURL(), "_blank", "chrome,all,dialog=no",
+                           allLinks[0].uri.spec, null, null, allLinks[0].postData, false);
+      // we can't use any utility functions because we want to handle post data
+      win.addEventListener("load", function() {
+        win.setTimeout(function() {
+          for(var i = 1; i < allLinks.length; i++) {
+            win.gBrowser.loadOneTab(allLinks[i].uri.spec, null, null, allLinks[i].postData,
+                                    true, false);
+          }
+        }, 0);
+      }, false);
+    } else {
+    // from http://mxr.mozilla.org/mozilla1.8/source/browser/components/places/content/controller.js#1333
+      // Check prefs to see whether to open over existing tabs.
+      var prefs = Cc["@mozilla.org/preferences-service;1"]
+                    .getService(Ci.nsIPrefService).getBranch("browser.tabs.");
+      var doReplace = prefs.getBoolPref("loadFolderAndReplace");
+      var loadInBackground = prefs.getBoolPref("loadBookmarksInBackground");
+      // Get the start index to open tabs at
+      var browser = getBrowser();
+      var tabPanels = browser.browsers;
+      var tabCount = tabPanels.length;
+      var firstIndex;
+      // If browser.tabs.loadFolderAndReplace pref is set, load over all the
+      // tabs starting with the first one.
+      if (doReplace)
+        firstIndex = 0;
+      // If the pref is not set, only load over the blank tabs at the end, if any.
+      else {
+        for (firstIndex = tabCount - 1; firstIndex >= 0; --firstIndex)
+          if (browser.browsers[firstIndex].currentURI.spec != "about:blank")
+            break;
+        ++firstIndex;
+      }
+
+      // Open each uri in the folder in a tab.
+      var index = firstIndex;
+      for (var i = 0; i < allLinks.length; i++) {
+        // If there are tabs to load over, load the uri into the next tab.
+        if (index < tabCount)
+          tabPanels[index].loadURIWithFlags(allLinks[i].uri.spec,
+                                            Ci.nsIWebNavigation.LOAD_FLAGS_NONE,
+                                            null, null, allLinks[i].postData);
+        // Otherwise, create a new tab to load the uri into.
+        else
+          browser.addTab(allLinks[i].uri.spec, null, null, allLinks[i].postData);
+        ++index;
+      }
+
+      // focus the first tab if prefs say to
+      if (!loadInBackground || doReplace) {
+        // Select the first tab in the group.
+        // Set newly selected tab after quick timeout, otherwise hideous focus problems
+        // can occur because new presshell is not ready to handle events
+        function selectNewForegroundTab(browser, tab) {
+          browser.selectedTab = tab;
+        }
+        var tabs = browser.mTabContainer.childNodes;
+        setTimeout(selectNewForegroundTab, 0, browser, tabs[firstIndex]);
+      }
+
+      // Close any remaining open tabs that are left over.
+      // (Always skipped when we append tabs)
+      for (var i = tabCount - 1; i >= index; --i)
+        browser.removeTab(tabs[i]);
+
+      // and focus the content
+      content.focus();
     }
   },
 
@@ -494,13 +562,12 @@ SEOrganizer.prototype = {
       this.hideNewEngine(aEngine);
       this._engines = this.searchService.getVisibleEngines({ });
     } else if(aVerb == "engine-current" ||
-             (aVerb == "engine-changed" && aEngine.__action == "icon")) {
+              (aVerb == "engine-changed" && ["icon", "name"].indexOf(aEngine.__action) != -1)) {
       this.updateDisplay();
-    } else if(aVerb == "-engines-organized" && "oDenDZones_Observer" in window) {
-      window.setTimeout(function() { oDenDZones_Observer.observe(); }, 0);
-    } else if(aVerb == "engine-changed" && aEngine.__action == "name" &&
-              this.currentEngine.name == aEngine.name) {
+    } else if(aVerb == "-engines-organized") {
       this.updateDisplay();
+      if("oDenDZones_Observer" in window)
+        window.setTimeout(function() { oDenDZones_Observer.observe(); }, 0);
     } /*else if(aVerb == "engine-changed" && aEngine.__action == "move") {
        // do nothing special
     }*/
