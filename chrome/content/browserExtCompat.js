@@ -164,7 +164,9 @@ organizeSE__Extensions.prototype = {
 
   /*** searchOnTab ***/
   searchOnTab: {
-    check: ("searchOnTab" in window),
+    get check() {
+      return ("searchOnTab" in window);
+    },
     wait: 0,
     insertItemsHandler: {
       pos: "before",
@@ -187,14 +189,15 @@ organizeSE__Extensions.prototype = {
       }
     },
     init: function organizeEngines__searchOnTab__init() {
-      const container = document.getElementById("searchpopup-bottom-container");
+      var container = document.getElementById("searchpopup-bottom-container");
       var sot_item = document.getElementById("sot_menuitem");
-      var sot_separator = sot_item.previousSibling;
+      var sot_separator = sot_item.nextSibling;
       sot_separator.id = "sot_separator";
       container.insertBefore(sot_item, container.firstChild);
       container.insertBefore(sot_separator, container.firstChild);
 
-      const popup = organizeSE.popup;
+      var popup = document.getAnonymousElementByAttribute(organizeSE.searchbar,
+                                                   "anonid", "searchbar-popup");
       popup.parentNode.removeChild(popup);
 
       window.setTimeout(function() { organizeSE.popupset.builder.rebuild(); }, 1);
