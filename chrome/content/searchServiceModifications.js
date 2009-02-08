@@ -120,7 +120,7 @@ Contributor(s):
   notifyAction = function notify(aEngine, aVerb) {
     var caller = "";
     if(aVerb == "engine-changed" && notify.caller && notify.caller.name) {
-      caller = notify.caller.name;
+      caller = aEngine.wrappedJSObject.__action || notify.caller.name;
       if(caller == "SRCH_SVC_addEngineToStore")
         caller = "update";
       else if(caller == "SRCH_ENG_setIcon" || caller == "iconLoadCallback")
@@ -131,7 +131,7 @@ Contributor(s):
         caller = "hidden";
       else if(caller == "SRCH_SVC_setAlias")
         caller = "alias";
-      // in engineManager.js, there's also a caller "name" for renames
+      // there's also a caller "name" for renames and "properties" for everything
       aEngine.wrappedJSObject.__action = caller;
     }
     if(aVerb == "engine-added" || aVerb == "engine-removed" || caller == "move") {
