@@ -652,8 +652,8 @@ SEOrganizer.prototype = {
   folderToEngine: function(folder) {
     var ss = this._searchService.wrappedJSObject;
     var name = this.getNameByItem(folder);
-    var engine;
-    if(!(engine = ss.getEngineByName(name))) {
+    var engine = ss.getEngineByName(name);
+    if(!engine) {
       engine = {
         alias: "", searchForm: "",
         hidden: false, _remove: function() {},
@@ -661,14 +661,14 @@ SEOrganizer.prototype = {
         name: name,
         type: 4,
         addParam: function() { throw Cr.NS_ERROR_FAILURE },
+        _file: { parent: {path: "[fake]/" + name + ".xml" }},
+        _serializeToJSON: function() {return ""},
         getSubmission: function(data, type) {
           var i = -1;
           var submission = {
             getNext: function() {
               i++;
               var submission = engine.innerEngines[i].getSubmission(data, type);
-              this.postData = submission.postData;
-              this.uri = submission.uri;
               return submission;
             },
             hasMoreElements: function() { return i + 1 < engine.innerEngines.length; },
@@ -679,7 +679,11 @@ SEOrganizer.prototype = {
               throw Cr.NS_ERROR_NO_INTERFACE;
             }
           };
-          submission.getNext();
+
+          var first = submission.getNext();
+          submission.postData = first.postData;
+          submission.uri = first.uri;
+
           return submission;
         },
         innerEngines: [],
@@ -711,6 +715,7 @@ SEOrganizer.prototype = {
         resizer.paintIcons();
         engine.iconURI = makeURI(resizer.getDataURL());
         engine.iconURL = engine.iconURI.spec;
+        engine.__action = "icon";
         ss.__parent__.notifyAction(engine, "engine-changed");
         resizer = null;
       };
@@ -747,26 +752,6 @@ SEOrganizer.prototype = {
   _rdfService: null,
   _datasource: null,
   _searchService: null,
-
-  /* make Firefox support search aliases */
-  resolveKeyword: function(aName, aPostData) {
-    var ss = this._searchService;
-    var offset = aName.indexOf(" ");
-    var alias = aName.substr(0, offset == -1 ? aName.length : offset).toLowerCase();
-    if(alias) {
-      var engine = ss.getEngineByAlias(alias);
-      if(engine != null && engine instanceof Ci.nsISearchEngine &&
-         engine.alias.toLowerCase() == alias && !engine.hidden) {
-        var searchTerm = (offset != -1) ? aName.substr(offset + 1) : "";
-        var submission = engine.getSubmission(searchTerm, null); // we want HTML
-        if(submission.uri) {
-          aPostData.value = submission.postData;
-          return submission.uri.spec;
-        }
-      }
-    }
-    return null;
-  },
 
   /* nsIBrowserSearchService */
   addEngine: function nsIBrowserSearchService__addEngine(engineURL, type, iconURL) {
