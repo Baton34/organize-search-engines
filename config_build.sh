@@ -3,7 +3,7 @@
 APP_NAME=organize-search-engines
 CHROME_PROVIDERS="content skin locale"
 CLEAN_UP=1
-ROOT_FILES=
+ROOT_FILES="LICENSE.txt SOURCE.txt"
 ROOT_DIRS="defaults components"
 BEFORE_BUILD="../components.sh $APP_NAME nsISEOrganizer"
 AFTER_BUILD=
