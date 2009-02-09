@@ -116,30 +116,20 @@ var seOrganizer_dragObserver = {
       evt.initEvent("textentered", true, true);
       searchbar._textbox.dispatchEvent(evt);
     } else {
-      var items;
+      var engine;
       function hasClass(className) { return organizeSE.hasClass(target, className); };
       if(hasClass("openintabs-item"))
         target = target.parentNode.parentNode;
       if(target.nodeName == "menuitem" && hasClass("searchbar-engine-menuitem")) {
-        items = [event.target];
+        engine = target.engine;
       } else if(target.nodeName == "menu") {
-        items = organizeSE.getChildItems(target);
+        var folder = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService)
+                       .GetResource(target.id);
+        engine = organizeSE.SEOrganizer.folderToEngine(folder);
       }
-      var submission, engine;
-      for(var i = 0; i < items.length; ++i) {
-        engine = organizeSE.SEOrganizer.getEngineByName(items[i].label);
-        if(engine) {
-          submission = engine.getSubmission(dropData.data, null);
-          if(submission) {
-            // load the first search in the current tab if the alt key was pressed
-            if(!i && (event.altKey) || content.location.href == "about:blank")
-              loadURI(submission.uri.spec, null, submission.postData, false);
-            else
-              getBrowser().loadOneTab(submission.uri.spec, null, null,
-                                      submission.postData, null, false);
-          }
-        }
-      }
+      var where = whereToOpenLink(event, true, true);
+      if(where == "current") where = "tab";
+      organizeSE.searchbar.doSearch(dropData.data, where, engine);
     }
   },
   getSupportedFlavours: function() {
