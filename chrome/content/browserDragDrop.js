@@ -41,7 +41,7 @@ var seOrganizer_dragObserver = {
     var searchbar = organizeSE.searchbar;
     if(!searchbar)
       return;
-    var button = searchbar._engineButton;
+    var button = searchbar.searchButton;
     button.setAttribute("ondragenter", "seOrganizer_dragObserver.onDragEnter(event);");
     button.setAttribute("ondragover", "nsDragAndDrop.dragOver(event, seOrganizer_dragObserver);");
     button.setAttribute("ondragexit", "nsDragAndDrop.dragExit(event, seOrganizer_dragObserver);");

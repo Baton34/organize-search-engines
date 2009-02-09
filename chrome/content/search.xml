@@ -1,0 +1,237 @@
+<?xml version="1.0"?>
+<!-- ***** BEGIN LICENSE BLOCK *****
+Version: MPL 1.1/GPL 2.0/LGPL 2.1
+
+The contents of this file are subject to the Mozilla Public License Version
+1.1 (the "License"); you may not use this file except in compliance with
+the License. You may obtain a copy of the License at
+http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+for the specific language governing rights and limitations under the
+License.
+
+The Original Code is Organize Search Engines.
+
+The Initial Developer of the Original Code is
+Malte Kraus.
+Portions created by the Initial Developer are Copyright (C) 2009
+the Initial Developer. All Rights Reserved.
+
+Contributor(s):
+  Malte Kraus <mails@maltekraus.de> (Original author)
+
+ Alternatively, the contents of this file may be used under the terms of
+ either the GNU General Public License Version 2 or later (the "GPL"), or
+ the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ in which case the provisions of the GPL or the LGPL are applicable instead
+ of those above. If you wish to allow use of your version of this file only
+ under the terms of either the GPL or the LGPL, and not to allow others to
+ use your version of this file under the terms of the MPL, indicate your
+ decision by deleting the provisions above and replace them with the notice
+ and other provisions required by the GPL or the LGPL. If you do not delete
+ the provisions above, a recipient may use your version of this file under
+ the terms of any one of the MPL, the GPL or the LGPL.
+***** END LICENSE BLOCK ***** -->
+<bindings id="OrganizedSearchBindings" xmlns="http://www.mozilla.org/xbl">
+
+  <binding id="searchbar" extends="chrome://browser/content/search/search.xml#searchbar">
+    <implementation implements="nsIObserver">
+
+      <constructor><![CDATA[
+        this.searchButton.setAttribute("popup", "search-popup");
+
+        if("organizeSE" in window && organizeSE.extensions)
+          organizeSE.customizeToolbarListener();
+
+        var popup = document.getAnonymousElementByAttribute(this, "anonid",
+                                                            "searchbar-popup");
+        // searchOnTab needs it, so let the popup stay around when it's there
+        if(!(("searchOnTab" in window)) && popup.parentNode)
+          popup.parentNode.removeChild(popup);
+
+        this.rebuildPopup();
+      ]]></constructor>
+
+      <property name="_popup" readonly="true">
+        <getter><![CDATA[
+          return document.getElementById("search-popupset").lastChild;
+        ]]></getter>
+      </property>
+
+      <method name="rebuildPopup"><body>
+        document.getElementById("search-popupset").builder.rebuild();
+      </body></method>
+      <property name="rebuildPopupDynamic" readonly="true" onget="return this.rebuildPopup;"/>
+
+      <!-- opens the manager in a *resizable* window -->
+      <method name="openManager"><body><![CDATA[
+        var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
+        var window = wm.getMostRecentWindow("Browser:SearchManager");
+        if(window) {
+          window.focus()
+        } else {
+          setTimeout(function () {
+            openDialog("chrome://browser/content/search/engineManager.xul",
+                       "_blank", "chrome,dialog,modal,centerscreen,resizable,all");
+          }, 0);
+        }
+      ]]></body></method>
+
+      <field name="_rebuildTimer" />
+      <method name="observe">
+        <parameter name="aEngine"/>
+        <parameter name="aTopic"/>
+        <parameter name="aVerb"/>
+        <body><![CDATA[
+          if(aTopic != "browser-search-engine-modified")
+            return;
+
+          this._popup.hidePopup();
+
+          if(aEngine)
+            aEngine = aEngine.wrappedJSObject;
+          if(aVerb == "engine-changed" && (!aEngine ||
+             aEngine.__action == "alias" || aEngine.__action == "update")) {
+            return; // ignore
+          }
+
+          if(aVerb == "engine-removed" || (aVerb == "engine-changed" &&
+             aEngine.__action == "hidden" && aEngine.hidden)) {
+            this.offerNewEngine(aEngine);
+            this._engines = null; // empty cache
+            this.updateDisplay(); // maybe the current engine was removed
+          } else if(aVerb == "engine-added" || (aVerb == "engine-changed" &&
+                    aEngine.__action == "hidden" && !aEngine.hidden)) {
+            this._engines = null; // empty cache
+            this.hideNewEngine(aEngine);
+          } else if(aVerb == "engine-current" ||
+                    (aVerb == "engine-changed" && ["icon", "name"].indexOf(aEngine.__action) != -1)) {
+            this.updateDisplay();
+          } else if(aVerb == "-engines-organized") {
+            this.updateDisplay();
+            if("oDenDZones_Observer" in window)
+              window.setTimeout(function() { oDenDZones_Observer.observe(); }, 0);
+          } else if(aVerb == "engine-changed" && aEngine.__action == "move") {
+             this._engines = null; // empty cache
+          }
+
+          // lazily rebuild the popup in case of many notifications at once
+          if(this._rebuildTimer)
+            window.clearTimeout(this._rebuildTimer);
+          this._rebuildTimer = window.setTimeout(function(This) {
+            This._popup.hidePopup();
+            This.rebuildPopup();
+            This._rebuildTimer = null;
+          }, 100, this);
+        ]]></body>
+      </method>
+
+      <!-- allow engine folders -->
+      <method name="doSearch">
+        <parameter name="aData"/>
+        <parameter name="aWhere"/>
+        <body><![CDATA[
+          var allLinks = [];
+          // null parameter below specifies HTML response for search
+          var submission = organizeSE.SEOrganizer.currentEngine.getSubmission(aData, null);
+          allLinks.push(submission);
+          if(submission instanceof Ci.nsISimpleEnumerator) {
+            while(submission.hasMoreElements()) {
+              allLinks.push(submission.getNext().QueryInterface(Ci.nsISearchSubmission));
+            }
+          }
+
+          if(allLinks.length == 1) {
+            openUILinkIn(allLinks[0].uri.spec, aWhere, null, allLinks[0].postData);
+          } else if(aWhere == "window") {
+            var win = openDialog(getBrowserURL(), "_blank", "chrome,all,dialog=no",
+                                 allLinks[0].uri.spec, null, null, allLinks[0].postData, false);
+            // we can't use any utility functions because we want to handle post data
+            win.addEventListener("load", function() {
+              win.setTimeout(function() {
+                for(var i = 1; i < allLinks.length; i++) {
+                  win.gBrowser.loadOneTab(allLinks[i].uri.spec, null, null, allLinks[i].postData,
+                                          true, false);
+                }
+              }, 0);
+            }, false);
+          } else {
+          // from http://mxr.mozilla.org/mozilla1.8/source/browser/components/places/content/controller.js#1333
+            // Check prefs to see whether to open over existing tabs.
+            var prefs = Cc["@mozilla.org/preferences-service;1"]
+                          .getService(Ci.nsIPrefService).getBranch("browser.tabs.");
+            var doReplace = prefs.getBoolPref("loadFolderAndReplace");
+            var loadInBackground = prefs.getBoolPref("loadBookmarksInBackground");
+            // Get the start index to open tabs at
+            var browser = getBrowser();
+            var tabPanels = browser.browsers;
+            var tabCount = tabPanels.length;
+            var firstIndex;
+            // If browser.tabs.loadFolderAndReplace pref is set, load over all the
+            // tabs starting with the first one.
+            if (doReplace)
+              firstIndex = 0;
+            // If the pref is not set, only load over the blank tabs at the end, if any.
+            else {
+              for (firstIndex = tabCount - 1; firstIndex >= 0; --firstIndex)
+                if (browser.browsers[firstIndex].currentURI.spec != "about:blank")
+                  break;
+              ++firstIndex;
+            }
+
+            // Open each uri in the folder in a tab.
+            var index = firstIndex;
+            for (var i = 0; i < allLinks.length; i++) {
+              // If there are tabs to load over, load the uri into the next tab.
+              if (index < tabCount)
+                tabPanels[index].loadURIWithFlags(allLinks[i].uri.spec,
+                                                  Ci.nsIWebNavigation.LOAD_FLAGS_NONE,
+                                                  null, null, allLinks[i].postData);
+              // Otherwise, create a new tab to load the uri into.
+              else
+                browser.addTab(allLinks[i].uri.spec, null, null, allLinks[i].postData);
+              ++index;
+            }
+
+            // focus the first tab if prefs say to
+            if (!loadInBackground || doReplace) {
+              // Select the first tab in the group.
+              // Set newly selected tab after quick timeout, otherwise hideous focus problems
+              // can occur because new presshell is not ready to handle events
+              function selectNewForegroundTab(browser, tab) {
+                browser.selectedTab = tab;
+              }
+              var tabs = browser.mTabContainer.childNodes;
+              setTimeout(selectNewForegroundTab, 0, browser, tabs[firstIndex]);
+            }
+
+            // Close any remaining open tabs that are left over.
+            // (Always skipped when we append tabs)
+            for (var i = tabCount - 1; i >= index; --i)
+              browser.removeTab(tabs[i]);
+
+            // and focus the content
+            content.focus();
+          }
+        ]]></body>
+      </method>
+    </implementation>
+  </binding>
+
+  <binding id="searchbar-textbox" extends="chrome://browser/content/search/search.xml#searchbar-textbox">
+    <implementation>
+      <method name="openSearch">
+        <body><![CDATA[
+          // Don't open search popup if history popup is open
+          if(this.popupOpen)
+            return true;
+          // click the button to open the *external* popup
+          document.getBindingParent(this).searchButton.click();
+          return false;
+        ]]></body>
+      </method>
+    </implementation>
+  </binding>
+</bindings>

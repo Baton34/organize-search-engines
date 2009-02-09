@@ -14,3 +14,10 @@ menuitem.openintabs-item[selected="true"] {
 menuseparator.searchbar-engine-menuseparator {
   min-width: 5em;
 }
+
+searchbar {
+  -moz-binding: url(chrome://seorganizer/content/search.xml#searchbar);
+}
+.searchbar-textbox {
+  -moz-binding: url(chrome://seorganizer/content/search.xml#searchbar-textbox);
+}

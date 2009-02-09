@@ -293,24 +293,11 @@ organizeSE__Extensions.prototype = {
 
   /*** Thinger ***/
   thinger: {
-    _xpath: "//xul:toolbar/xul:toolbaritem[@class='thinger-item' and @thingtype='search']",
     init: function() {
-      this._default = organizeSE.SEOrganizer.currentEngine.name;
-      this.customizeToolbarHandler.call(organizeSE);
       var popupset = document.getElementById("search-popupset");
       popupset.addEventListener("popupshowing", this, false);
     },
     wait: 0,
-    customizeToolbarHandler: function() {
-      var This = organizeSE.extensions.thinger;
-      var searchbars = organizeSE.evalXPath(this._xpath);
-      for(var i = 0; i < searchbars.length; i++) {
-        var elem = searchbars[i];
-        var anon = document.getAnonymousNodes(elem);
-        if(anon && anon[0])
-          organizeSE._replaceSearchbarProperties(anon[0]);
-      }
-    },
     get check() {
       return "thinger" in window;
     },
