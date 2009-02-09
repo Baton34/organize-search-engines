@@ -6,13 +6,13 @@ content   seorganizer               chrome/content/
 skin      seorganizer  classic/1.0  chrome/skin/classic/
 
 locale    seorganizer  en-US        chrome/locale/en-US/
-locale    seorganizer  de           chrome/locale/de-DE/
-locale    seorganizer  it           chrome/locale/it-IT/
-locale    seorganizer  hu           chrome/locale/hu-HU/
-locale    seorganizer  fr           chrome/locale/fr-FR/
-locale    seorganizer  he           chrome/locale/he-IL/
-locale    seorganizer  nl           chrome/locale/nl-NL/
-locale    seorganizer  pl           chrome/locale/pl-PL/
+locale    seorganizer  de-DE        chrome/locale/de-DE/
+locale    seorganizer  it-IT        chrome/locale/it-IT/
+locale    seorganizer  hu-HU        chrome/locale/hu-HU/
+locale    seorganizer  fr-FR        chrome/locale/fr-FR/
+locale    seorganizer  he-IL        chrome/locale/he-IL/
+locale    seorganizer  nl-NL        chrome/locale/nl-NL/
+locale    seorganizer  pl-PL        chrome/locale/pl-PL/
 locale    seorganizer  pt-BR        chrome/locale/pt-BR/
 locale    seorganizer  ca-AD        chrome/locale/ca-AD/
-locale    seorganizer  ja           chrome/locale/ja-JP/
+locale    seorganizer  ja-JP        chrome/locale/ja-JP/
