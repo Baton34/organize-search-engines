@@ -48,7 +48,6 @@ Contributor(s):
 
 // add the folder chooser when a new engine is installed
 (function _replaceAddEngineConfirmation() {
-  const BUNDLE = this.SIDEBAR_BUNDLE || this.SEARCH_BUNDLE;
 
   Engine.prototype._confirmAddEngine = function confirmAddEngine() {
     var windowWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"]
@@ -57,22 +56,16 @@ Contributor(s):
     if(!parent)
       return {confirmed: false, useNow: false};
 
-    var comparator = Cc["@mozilla.org/xpcom/version-comparator;1"]
-                       .getService(Ci.nsIVersionComparator);
-    var app  = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo)
-                 .QueryInterface(Ci.nsIXULRuntime);
-    var version = comparator.compare(app.version, "3.0a0pre");
 
     var seOrganizer = Cc["@mozilla.org/rdf/datasource;1?name=organized-internet-search-engines"].getService().wrappedJSObject;
 
     var sbs = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService);
-    var stringBundle = sbs.createBundle(BUNDLE);
+    var stringBundle = sbs.createBundle(SEARCH_BUNDLE);
 
     var titleMessage = stringBundle.GetStringFromName("addEngineConfirmTitle");
 
     // Display only the hostname portion of the URL.
-    var dialogMessage = (version < 1) ? "addEngineConfirmText" : "addEngineConfirmation";
-    dialogMessage = stringBundle.formatStringFromName(dialogMessage,
+    var dialogMessage = stringBundle.formatStringFromName("addEngineConfirmation",
                                                [this._name, this._uri.host], 2);
     var checkboxMessage = stringBundle.GetStringFromName("addEngineUseNowText");
     var addButtonLabel = stringBundle.GetStringFromName("addEngineAddButtonLabel");

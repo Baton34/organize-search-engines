@@ -1,0 +1,15 @@
+#commonDialog {
+  min-width: 29em;
+  min-height: 8.5em;
+  -moz-user-focus: ignore;
+}
+
+vbox[id="info.box"],
+description[id="info.body"] {
+  white-space: -moz-pre-wrap;
+  white-space: pre-wrap;
+}
+
+#commonDialog > hbox[flex="1"] > vbox[flex="1" {
+  max-width: 45em;
+}

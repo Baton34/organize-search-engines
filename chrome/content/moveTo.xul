@@ -35,7 +35,7 @@ Contributor(s):
  the terms of any one of the MPL, the GPL or the LGPL.
 ***** END LICENSE BLOCK ***** -->
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://browser/skin/bookmarks/addBookmark.css"?>
+<?xml-stylesheet href="chrome://browser/skin/places/places.css"?>
 <?xml-stylesheet href="chrome://global/skin/tree.css"?>
 
 <!DOCTYPE dialog SYSTEM "chrome://seorganizer/locale/moveTo.dtd">
@@ -76,10 +76,10 @@ Contributor(s):
       <treechildren>
         <treeitem container="true" open="true" id="urn:organize-search-engines:root">
           <treerow>
-            <treecell label="&search-engines.toplevel;" properties="Name" />
+            <treecell label="&search-engines.toplevel;" properties="title" />
           </treerow>
         </treeitem>
-        <treeseparator id="no" />
+        <treeseparator id="no" properties="title separator" />
       </treechildren>
 
       <template>
@@ -87,7 +87,7 @@ Contributor(s):
           <treechildren>
             <treeitem uri="rdf:*">
               <treerow>
-                <treecell label="rdf:urn:organize-search-engines#Name" properties="Name" />
+                <treecell label="rdf:urn:organize-search-engines#Name" properties="title" />
               </treerow>
             </treeitem>
           </treechildren>
