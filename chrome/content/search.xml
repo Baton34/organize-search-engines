@@ -132,10 +132,11 @@ Contributor(s):
       <method name="doSearch">
         <parameter name="aData"/>
         <parameter name="aWhere"/>
+        <parameter name="aEngine"/>
         <body><![CDATA[
           var allLinks = [];
           // null parameter below specifies HTML response for search
-          var submission = organizeSE.SEOrganizer.currentEngine.getSubmission(aData, null);
+          var submission = (aEngine || this.currentEngine).getSubmission(aData, null);
           allLinks.push(submission);
           if(submission instanceof Ci.nsISimpleEnumerator) {
             while(submission.hasMoreElements()) {
