@@ -17,7 +17,7 @@ The Original Code is Organize Search Engines.
 
 The Initial Developer of the Original Code is
 Malte Kraus.
-Portions created by the Initial Developer are Copyright (C) 2006-2008
+Portions created by the Initial Developer are Copyright (C) 2006-2009
 the Initial Developer. All Rights Reserved.
 
 Contributor(s):
@@ -208,6 +208,7 @@ SEOrganizer.prototype = {
   },
 
   _engineFolders: {},
+  _engineIndexes: {}, // zero-base index
   // check if every installed (and visible) engine is in the rdf
   _addMissingEnginesToRDF: function addMissing(save) {
     var rdfService = this._rdfService;
@@ -220,30 +221,44 @@ SEOrganizer.prototype = {
     var name = rdfService.GetResource(NS + "Name");
     var engines = searchService.getVisibleEngines({});
 
-    var container, parent;
     var modified = false;
     for(var i = 0; i < engines.length; ++i) {
       if(!this.itemWithNameExists(engines[i].name)) {
-        container = null;
-        if(engines[i].name.replace(/\s+$/g, "") in this._engineFolders) {
-          var parent = this._engineFolders[engines[i].name];
+        var container = rootContainer;
+        var index = Number.POSITIVE_INFINITY;
+        var cleanName = engines[i].name.replace(/\s+$/g, "");
+        if(cleanName in this._engineFolders) {
+          index = this._engineIndexes[cleanName];
+          if(typeof index == "undefined")
+            index = Number.POSITIVE_INFINITY;
+          else
+            delete this._engineIndexes[cleanName];
+          var parent = this._engineFolders[cleanName];
+          delete this._engineFolders[cleanName];
           if(parent == FOLDERS_ROOT)
             parent = ROOT;
           try {
             parent = rdfService.GetResource(parent);
-            delete this._engineFolders[engines[i].name];
             container = Cc["@mozilla.org/rdf/container;1"]
                           .createInstance(Ci.nsIRDFContainer);
             container.Init(this, parent);
-          } catch(e) { }
+          } catch(e) {
+            container = rootContainer;
+          }
         }
         try {
           var current = this._getAnonymousResource();
-          (container || rootContainer).AppendElement(current);
+          if(index < container.GetCount() && index >= 0)
+            container.InsertElementAt(current, index, true);
+          else
+            container.AppendElement(current);
           var currentName = rdfService.GetLiteral(engines[i].name);
           this.Assert(current, name, currentName, true);
           modified = true;
-        } catch(e) {}
+        } catch(e) {
+          LOG(index);
+          Components.reportError(e);
+        }
       }
     }
     if(modified) {
