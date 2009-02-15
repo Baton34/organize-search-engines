@@ -458,9 +458,7 @@ EngineManagerDialog.prototype = {
       } else {
         var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
                         .getService(Ci.nsIPromptService);
-        var defaults = gSEOrganizer.getDefaultEngines({}).filter(function(e) {
-          return !gEngineView.engineVisible(e);
-        });
+        var defaults = gSEOrganizer.getDefaultEngines({}).filter(function(e) !gEngineView.engineVisible(e));
         if(!defaults.length)
           return;
         var defaultNames = [];
