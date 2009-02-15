@@ -37,6 +37,7 @@ Contributor(s):
 <bindings id="OrganizedSearchBindings" xmlns="http://www.mozilla.org/xbl">
 
   <binding id="searchbar" extends="chrome://browser/content/search/search.xml#searchbar">
+
     <implementation implements="nsIObserver">
 
       <constructor><![CDATA[
@@ -130,14 +131,19 @@ Contributor(s):
 
       <!-- allow engine folders -->
       <method name="doSearch">
-        <parameter name="aData"/>
-        <parameter name="aWhere"/>
-        <parameter name="aEngine"/>
+        <parameter name="aData" />
+        <parameter name="aWhere" />
+        <parameter name="aEngine" />
+        <parameter name="aSubmission" />
         <body><![CDATA[
-          var allLinks = [];
-          // null parameter below specifies HTML response for search
-          var submission = (aEngine || this.currentEngine).getSubmission(aData, null);
-          allLinks.push(submission);
+          var allLinks = [], submission;
+          if(aSubmission) { // needed for extension support, the first tab is openend by another extension
+            submission = aSubmission;
+          } else {
+            // null parameter below specifies HTML response for search
+            submission = (aEngine || this.currentEngine).getSubmission(aData, null);
+            allLinks.push(submission);
+          }
           if(submission instanceof Ci.nsISimpleEnumerator) {
             while(submission.hasMoreElements()) {
               allLinks.push(submission.getNext().QueryInterface(Ci.nsISearchSubmission));
