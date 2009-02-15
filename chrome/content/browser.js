@@ -18,7 +18,7 @@ The Original Code is Organize Search Engines.
 
 The Initial Developer of the Original Code is
 Malte Kraus.
-Portions created by the Initial Developer are Copyright (C) 2006-2008
+Portions created by the Initial Developer are Copyright (C) 2006-2009
 the Initial Developer. All Rights Reserved.
 
 Contributor(s):
@@ -39,7 +39,7 @@ Contributor(s):
 
 var organizeSE;
 function SEOrganizer() {
-  window.addEventListener("load", function(e) { organizeSE.init(e); }, false);
+  window.addEventListener("load", function(e) organizeSE.init(e), false);
   window.addEventListener("unload", this.uninit, false);
 };
 SEOrganizer.prototype = {
@@ -48,17 +48,9 @@ SEOrganizer.prototype = {
     return this.getChildItems(this.popup);
   },
   getChildItems: function(parent) {
-    return this.getElementsByClassName('searchbar-engine-menuitem', parent);
+    return parent.getElementsByClassName('searchbar-engine-menuitem');
   },
 
-  getElementsByClassName: function(className, parent) {
-    if("getElementsByClassName" in (parent || document)) { // minefield only
-      return (parent || document).getElementsByClassName(className);
-    } else { // fall back on xpath
-      var xpath = "descendant::*[contains(concat(' ',@class,' '),' "+className+" ')]";
-      return this.evalXPath(xpath, parent || document);
-    }
-  },
   evalXPath: function(aExpression, aScope, aNSResolver) {
     var resolver = aNSResolver || function resolver(prefix) {
       switch(prefix) {
@@ -73,29 +65,30 @@ SEOrganizer.prototype = {
     var doc = (scope.nodeName == "#document") ? scope : scope.ownerDocument;
     var result = doc.evaluate(aExpression, scope, resolver,
                               XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-    function iter() { var e; while((e = result.iterateNext())) yield e; };
+    function iter() { var e; while((e = result.iterateNext())) yield e; }
     return [i for each(i in iter())];
   },
 
   init: function init() {
-    this._customizeToolbarListeners.push(this.onCustomizeToolbarFinished);
-    this.customizeToolbarListener();
+    /* compatibility to other extensions */
+    this.extensions = new organizeSE__Extensions();
 
-    var popupset = this.popupset;
+    seOrganizer_dragObserver.init(); // drag 'n' drop stuff
+
+    // this has already been called from the searchbar binding, but at that
+    this.customizeToolbarListener(); // time there were no registered listeners
 
     const SORT_DIRECTION_PREF = "extensions.seorganizer.sortDirection";
     var prefs = Cc["@mozilla.org/preferences-service;1"]
                   .getService(Ci.nsIPrefService).getBranch(SORT_DIRECTION_PREF);
     prefs.QueryInterface(Ci.nsIPrefBranch2).addObserver("", this, false);
-    var direction = prefs.getComplexValue("", Ci.nsISupportsString).data;
-    popupset.setAttribute("sortDirection", direction);
 
+    var popupset = this.popupset;
+    popupset.setAttribute("sortDirection", prefs.getCharPref(""));
     popupset.builder.addListener(this.buildObserver);
     popupset.builder.rebuild();
-
-    /* compatibility to other extensions */
-    this.extensions = new organizeSE__Extensions();
   },
+
   _customizeToolbarListeners: [ ],
   // this is called from init() and from the searchbar binding
   customizeToolbarListener: function() {
@@ -103,10 +96,6 @@ SEOrganizer.prototype = {
     for(var i = 0; i < listeners.length; i++) {
       listeners[i].call(organizeSE);
     }
-  },
-  // we have to re-init the searchbar after customizing the toolbar
-  onCustomizeToolbarFinished: function() {
-    seOrganizer_dragObserver.init(); // drag 'n' drop stuff
   },
 
   uninit: function uninit() {
@@ -194,15 +183,11 @@ SEOrganizer.prototype = {
     if(this.getChildItems(popup).length <= 1) return;
 
     this.createSeparator(popup, "openintabs-separator");
-    var attrs = {};
-    if("BookmarksUtils" in window) {
-      var label = BookmarksUtils.getLocaleString("cmd_bm_openfolder");
-      attrs.accesskey = BookmarksUtils.getLocaleString("cmd_bm_openfolder_accesskey");
-    } else {
-      var label = gNavigatorBundle.getString("menuOpenAllInTabs.label");
-      attrs.accesskey = gNavigatorBundle.getString("menuOpenAllInTabs.accesskey");
-    }
-    attrs.selected = (this.SEOrganizer.currentEngine.name == popup.parentNode.label);
+    var label = gNavigatorBundle.getString("menuOpenAllInTabs.label");
+    var attrs = {
+      accesskey: gNavigatorBundle.getString("menuOpenAllInTabs.accesskey"),
+      selected: (this.SEOrganizer.currentEngine.name == popup.parentNode.label)
+    };
     this.createMenuitem(label, popup, "openintabs-item", "", attrs);
   },
   removeOpenInTabsItems: function removeOpenInTabsItems(popup) {
@@ -210,7 +195,7 @@ SEOrganizer.prototype = {
     this._cleanUpPopupClass("openintabs-separator", popup);
   },
   _cleanUpPopupClass: function(className, popup) {
-    var elems = this.getElementsByClassName(className, popup);
+    var elems = popup.getElementsByClassName(className);
     for(var i = elems.length; i--;) {
       elems[i].parentNode.removeChild(elems[i]);
     }
@@ -224,7 +209,7 @@ SEOrganizer.prototype = {
     return document.getElementById("searchbar");
   },
   get popup() {
-    return document.getElementById("search-popupset").lastChild;
+    return document.getElementById("search-popup");
   },
   get popupset() {
     return document.getElementById("search-popupset");
@@ -254,10 +239,7 @@ SEOrganizer.prototype = {
       // code taken from Firefox' bookmarksMenu.js::showEmptyItem
       // not reusing that method to remain compatible to places
       if(!target.childNodes.length) {
-        if("BookmarksUtils" in window)
-          var EmptyMsg = BookmarksUtils.getLocaleString("emptyFolder");
-        else
-          var EmptyMsg = PlacesUtils.getString("bookmarksMenuEmptyFolder");
+        var EmptyMsg = PlacesUtils.getString("bookmarksMenuEmptyFolder");
         organizeSE.createMenuitem(EmptyMsg, target, null, "empty-menuitem",
                                   { disabled: "true" });
       } else {
@@ -289,9 +271,9 @@ SEOrganizer.prototype = {
         return;
       }
       var evt = document.createEvent("XULCommandEvent");
-      evt.initCommandEvent("command", true, true, window, 1, false, false,
-                           false, false, event);
-      evt.__defineGetter__("originalTarget",function(){return target;});// xxx
+      evt.initCommandEvent("command", true, true, window, 1, event.ctrlKey,
+                           event.altKey, event.shiftKey, event.metaKey, event);
+      evt.__defineGetter__("originalTarget", function() target);// xxx
       searchbar.dispatchEvent(evt);
     },
     mouseMove: function observe__mouseMove(event) { // hover effect for the button
@@ -299,7 +281,7 @@ SEOrganizer.prototype = {
       domUtils.setContentState(organizeSE.searchbar.searchButton, 4);
     },
     didRebuild: function observe__didRebuild() {
-      const popup = organizeSE.popup;
+      var popup = organizeSE.popupset.lastChild;
       popup.id = "search-popup";
       popup.className = "searchbar-popup";
       popup.setAttribute("anonid", "searchbar-popup");
