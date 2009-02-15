@@ -69,7 +69,7 @@ mkdir --parents --verbose $TMP_DIR/chrome
 JAR_FILE=$TMP_DIR/chrome/$APP_NAME.jar
 echo "Generating $JAR_FILE..."
 for CHROME_SUBDIR in $CHROME_PROVIDERS; do
-  find "chrome/$CHROME_SUBDIR" -path '*svn*' -prune -o -type f -print | grep -v \~ >> files
+  find "chrome/$CHROME_SUBDIR" -path '*.svn*' -prune -o -type f -print | grep -v \~ >> files
 done
 
 zip -0 -r $JAR_FILE `cat files`
