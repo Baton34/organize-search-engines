@@ -36,7 +36,7 @@ Contributor(s):
  the terms of any one of the MPL, the GPL or the LGPL.
 ***** END LICENSE BLOCK ***** */
 
-var organizeSE__Extensions = function organizeSE__Extensions() {
+function organizeSE__Extensions() {
   this.init();
 };
 organizeSE__Extensions.prototype = {
@@ -59,12 +59,12 @@ organizeSE__Extensions.prototype = {
         }
         if("insertItemsHandler" in i) {
           i.insertItemsHandler.mod = i;
+          if(!("subFolders" in i.insertItemsHandler))
+            i.insertItemsHandler.subFolders = false;
           organizeSE._insertItemsHandlers.push(i.insertItemsHandler);
         }
         if("customizeToolbarHandler" in i)
           organizeSE._customizeToolbarListeners.push(i.customizeToolbarHandler);
-        if(!("subFolders" in i))
-          i.subFolders = false;
       }
     }
   },
@@ -91,46 +91,32 @@ organizeSE__Extensions.prototype = {
    **           parameter.                                                    **
    **         @method removeMethod: equivalent to insertMethod, called when   **
    **            you should remove the menuitem from the DOM.                 **
-   **         @optional method subFolders: if true, insertMethod/removeMethod **
-   **            are not called for the root folder but for child folders.    **
+   **         @optional property subFolders: insertMethod/removeMethod are    **
+   **            not called for the root folder but for child folders if true **
    **   @optional method customizeToolbarHandler: this is called when some    **
    **     element in the toolbar is rebuilt, probably because the toolbars    **
    **     were customized. You may also want to call this method from init.   **
    ****************************************************************************/
 
-  /*** Auto Context ***/
+  /*** Auto Context 1.4.5.3 ***/
   autocontext: {
     get check() {
       return ("gOverlayAutoContext" in window);
     },
     sortDirectionHandler: function sortDirectionHandler(newVal) {
-      const menu = document.getElementById("autocontext-searchmenu");        
-      menu.setAttribute("sortDirection", newVal);
+      document.getElementById("autocontext-searchmenu").setAttribute("sortDirection", newVal);
     },
+    wait: 0,
     init: function() {
       const menu = document.getElementById("autocontext-searchmenu");
       menu.addEventListener("popupshowing", this.onPopupShowing, true);
-      gOverlayAutoContext.loadSearch = this.getSearch();
-    },
-    getSearch: function() {
-      var origSearch = gOverlayAutoContext.loadSearch;
-      return function (aEvent) {
-        const target = aEvent.target;
-        target.engine = organizeSE.SEOrganizer.getEngineByName(target.label);
-        origSearch.apply(this, arguments);
-      };
+      gOverlayAutoContext.loadSearch = organizeSE.extensions.contextSearch.search;
     },
     onPopupShowing: function(event) {
-      if(event.target == event.currentTarget) {
-        event.target.id = "autocontext-searchmenupopup";
-        const menu = document.getElementById("autocontext-searchmenu");        
-        menu.builder.rebuild();
-      } else {
-        event.stopPropagation();
-      }
+      organizeSE.extensions.contextSearch.onPopupShowing(event);
     }
   },
-  /*** Context Search ***/
+  /*** Context Search 0.4.3 ***/
   contextSearch: {
     get check() {
       return ("contextsearch" in window);
@@ -138,36 +124,50 @@ organizeSE__Extensions.prototype = {
     sortDirectionHandler: function sortDirectionHandler(newVal) {
       contextsearch.contextitem.setAttribute("sortDirection", newVal);
     },
+    wait: 0,
     init: function() {
       contextsearch.rebuildmenu = function() { };
-      const menu = document.getElementById("context-searchmenu");
-      menu.addEventListener("popupshowing", this.onPopupShowing, true);
-      contextsearch.search = this.getSearch();
+      contextsearch.contextitem.addEventListener("popupshowing", this.onPopupShowing, true);
+      contextsearch.search = this.search;
     },
-    getSearch: function() {
-      var origSearch = contextsearch.search;
-      return function (aEvent) {
-        const target = aEvent.target;
-        target.engine = organizeSE.SEOrganizer.getEngineByName(target.label);
-        origSearch.apply(this, arguments);
-      };
+    search: function(e) {
+      var text;
+      if(e.currentTarget.id == "autocontext-searchmenupopup")
+        text = gOverlayAutoContext.getNewBrowserSelection();
+      else
+        text = contextsearch.getBrowserSelection(null, e);
+
+      var where = whereToOpenLink(e, false, true);
+      if(where == "current") where = "tab";
+
+      var target = e.target, engine;
+      if(organizeSE.hasClass(target, "openintabs-item")) {
+        var folder = target.parentNode.parentNode.id;
+        folder = seOrganizer_dragObserver.RDFService.GetResource(folder);
+        engine = organizeSE.SEOrganizer.folderToEngine(folder);
+      } else {
+        engine = organizeSE.SEOrganizer.getEngineByName(target.label)
+      }
+      organizeSE.searchbar.doSearch(text, where, engine);
     },
     onPopupShowing: function(event) {
-      if(event.target == event.currentTarget) {
-        event.target.id = "context-searchpopup";
-        contextsearch.contextitem.builder.rebuild();
+      if(event.target.parentNode == event.currentTarget) {
+        event.target.id = (event.currentTarget.id == "autocontext-searchmenu") ?
+                          "autocontext-searchmenupopup" : "context-searchpopup";
+        event.currentTarget.builder.rebuild();
       } else {
+        organizeSE.removeOpenInTabsItems(event.target);
+        organizeSE.insertOpenInTabsItems(event.target);
         event.stopPropagation();
       }
     }
   },
 
-  /*** searchOnTab ***/
+  /*** searchOnTab 1.0.2 ***/
   searchOnTab: {
     get check() {
       return ("searchOnTab" in window);
     },
-    wait: 0,
     insertItemsHandler: {
       pos: "before",
       insertMethod: function organizeEngines__searchOnTab__ihandler(popup) {
@@ -188,6 +188,7 @@ organizeSE__Extensions.prototype = {
           item.parentNode.removeChild(item);
       }
     },
+    wait: 0,
     init: function organizeEngines__searchOnTab__init() {
       var container = document.getElementById("searchpopup-bottom-container");
       var sot_item = document.getElementById("sot_menuitem");
@@ -291,8 +292,8 @@ organizeSE__Extensions.prototype = {
     }
   },
 
-  /*** Thinger ***/
-  thinger: {
+  /*** Thinger is not compatible with Firefox 3 ***/
+  /*thinger: {
     init: function() {
       var popupset = document.getElementById("search-popupset");
       popupset.addEventListener("popupshowing", this, false);
@@ -302,82 +303,83 @@ organizeSE__Extensions.prototype = {
       return "thinger" in window;
     },
     handleEvent: function(event) {
-      if(event.type == "popupshowing") {
-        var searchbar = document.popupNode;
-        while(searchbar && searchbar.nodeName != "searchbar")
-          searchbar = searchbar.parentNode;
-        if(!searchbar)
-           return;
+      if(event.type != "popupshowing")
+        return;
+      var searchbar = document.document.getBindingParent(document.popupNode);
+      var popup = event.target;
 
-        var popup = event.target;
-        for(var i = 0; i < popup.childNodes.length; i++) {
-          if(popup.childNodes[i].hasAttribute("selected"))
-            popup.childNodes[i].removeAttribute("selected");
-        }
-        var SEOrganizer = organizeSE.SEOrganizer;
-        var name = searchbar.currentEngine.name;
-        var item = SEOrganizer.getItemByName(name);
-        while(item) {
-          var elem = document.getElementById(item.ValueUTF8);
-          if(elem)
-            elem.setAttribute("selected", "true");
-          try {
-            item = SEOrganizer.getParent(item);
-          } catch(e) {
-            item = null;
-          }
-        }
+      for(var i = 0; i < popup.childNodes.length; i++) {
+        if(popup.childNodes[i].hasAttribute("selected"))
+          popup.childNodes[i].removeAttribute("selected");
+      }
+      var SEOrganizer = organizeSE.SEOrganizer;
+      var name = searchbar.currentEngine.name;
+      var item = SEOrganizer.getItemByName(name), elem;
+      while(item && item.ValueUTF8 != "urn:organize-search-engines:root") {
+        if((elem = document.getElementById(item.ValueUTF8)))
+          elem.setAttribute("selected", "true");
+        item = SEOrganizer.getParent(item);
       }
     }
-  },
+  },*/
 
-  /* SearchLoad Options */
+  /* SearchLoad Options 0.5.6 */
   searchLoad: {
     get check() { 
       return ("SearchLoad_Options" in window);
     },
     init: function() {
       var funcStr = searchLoadOptions_doSearch.toString();
-      eval("var origDoSearch = function(aURL, aInNewTab, postData) {\n    var url = aURL;"
-+ funcStr.substr(funcStr.indexOf("return;\n    }") + 13));
-      searchLoadOptions_doSearch = function(aText, aInNewTab) {
-        var submission = organizeSE.searchbar.currentEngine.getSubmission(aText, null);
-        if (submission) {
-          origDoSearch(submission.uri.spec, aInNewTab, submission.postData);
-          if(submission instanceof Ci.nsISimpleEnumerator) {
-            var list = submission;
-            while(list.hasMoreElements()) {
-              submission = list.getNext().QueryInterface(Ci.nsISearchSubmission);
-              origDoSearch(submission.uri.spec, true, submission.postData);
-            }
-          }
-        }
-      };
+      funcStr = funcStr.replace(/function .+/, ""); // strip first line
+      funcStr = funcStr.substr(0, funcStr.length - 1); // strip last line
+      funcStr = funcStr.replace(/(if \(keyPressed\))/, "\
+organizeSE.extensions.searchLoad.doSearch(aData, submission);\
+$1");
+      searchLoadOptions_doSearch = new Function("aData", "keyPressed",
+                                                "shiftPressed", funcStr);
+    },
+    doSearch: function(aData, aSubmission) {
+      if(aSubmission instanceof Ci.nsISimpleEnumerator) {
+        aSubmission = organizeSE.searchbar.currentEngine.getSubmission(aData, null);
+        organizeSE.searchbar.doSearch(aData, "tabshifted", null, aSubmission);
+      }
     },
     insertItemsHandler: {
       pos: "after",
       insertMethod: function(popup) {
-        var label = SearchLoad_Options.stringBundle.getString("searchoptions.label");
-        var item = organizeSE.createMenuitem(label, popup, "open-engine-manager",
-                                             "searchloadoptions-menuitem");
-				item.addEventListener("command", SearchLoad_Options.optionsDialog, false);
+        SearchLoad_Options.enginesPopup = popup;
+        SearchLoad_Options.addMenuItem();
       },
-      removeMethod: function() {
-        var elem = document.getElementById("searchloadoptions-menuitem");
-        if(elem)
-          elem.parentNode.removeChild(elem);
+      removeMethod: function(popup) {
+        SearchLoad_Options.enginesPopup = popup;
+        var node = document.getElementById("searchloadoptions-menuitem");
+        if(node)
+          node.parentNode.removeChild(node);
       }
     }
   },
 
-  /* TabMix Plus */
+  /* TabMix Plus 0.3.7.4pre.090107 */
   tabmix: {
     get check() {
       return ("TMP_SearchLoadURL" in window);
     },
     init: function() {
-      eval("TMP_SearchLoadURL = " + TMP_SearchLoadURL.toString().replace(/return;/,
-                                          "organizeSE.doSearch2(submission);"));
+      TMP_SearchLoadURL = this.TMP_SearchLoadURL;
+    },
+    // rewriting that tmp method is easier than modifiying it with eval
+    TMP_SearchLoadURL: function(aData, aEvent, aWhere) {
+      if(TMP_getBoolPref(tabxBranch, "loadSearchInBackground", false)) {
+        if(aWhere == "tab")
+          aWhere = "tabshifted";
+        else if(aWhere == "tabshifted")
+          aWhere = "tab";
+      }
+      if((aWhere == "tab" || aWhere == "tabshifted") &&
+         !TMP_whereToOpen(true, false).inNew) {
+        aWhere = "current";
+      }
+      organizeSE.searchbar.doSearch(aData, aWhere);
     }
   }
 };
