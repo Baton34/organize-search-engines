@@ -3,7 +3,7 @@ overlay   chrome://browser/content/browser.xul                chrome://seorganiz
 overlay   chrome://addtosearchbox/content/engineInfos.xul     chrome://seorganizer/content/addToSearchbarCompat.xul
 
 content   seorganizer               chrome/content/
-skin      seorganizer  classic/1.0  chrome/skin/classic/
+skin      seorganizer  classic/1.0  chrome/skin/
 
 locale    seorganizer  en-US        chrome/locale/en-US/
 locale    seorganizer  de-DE        chrome/locale/de-DE/
