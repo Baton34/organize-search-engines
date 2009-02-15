@@ -52,7 +52,9 @@ Contributor(s):
               sortResource="urn:organize-search-engines#Name" sortDirection="natural"
               ondragover="nsDragAndDrop.dragOver(event, seOrganizer_dragObserver);"
               ondragexit="nsDragAndDrop.dragExit(event, seOrganizer_dragObserver);"
-              ondragdrop="nsDragAndDrop.drop(event, seOrganizer_dragObserver);">
+              ondragdrop="nsDragAndDrop.drop(event, seOrganizer_dragObserver);"
+
+              ondraggesture="nsDragAndDrop.startDrag(event, seOrganizer_dragObserver);">
 
       <box id="searchpopup-bottom-container">
         <menuseparator id="manage-engines-menuseparator" />

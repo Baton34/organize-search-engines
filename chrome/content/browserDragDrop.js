@@ -17,7 +17,7 @@ The Original Code is Organize Search Engines.
 
 The Initial Developer of the Original Code is
 Malte Kraus.
-Portions created by the Initial Developer are Copyright (C) 2006-2008
+Portions created by the Initial Developer are Copyright (C) 2006-2009
 the Initial Developer. All Rights Reserved.
 
 Contributor(s):
@@ -38,10 +38,11 @@ Contributor(s):
 
 var seOrganizer_dragObserver = {
   init: function() {
-    var searchbar = organizeSE.searchbar;
-    if(!searchbar)
-      return;
-    var button = searchbar.searchButton;
+    organizeSE._customizeToolbarListeners.push(this.onCustomizeToolbarFinished);
+  },
+
+  onCustomizeToolbarFinished: function() {
+    var button = this.searchbar.searchButton;
     button.setAttribute("ondragenter", "seOrganizer_dragObserver.onDragEnter(event);");
     button.setAttribute("ondragover", "nsDragAndDrop.dragOver(event, seOrganizer_dragObserver);");
     button.setAttribute("ondragexit", "nsDragAndDrop.dragExit(event, seOrganizer_dragObserver);");
@@ -62,24 +63,100 @@ var seOrganizer_dragObserver = {
 
   _closeTimer: null,
 
+  RDFService: Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService),
+  onDragStart: function(event, transferData, action) {
+    var target = event.target;
+    if(target.getAttribute("anonid") == "open-engine-manager")
+      return;
+    transferData.data = new TransferData();
+    if(organizeSE.hasClass(target, "addengine-item")) {
+      transferData.data.addDataForFlavour("application/x-moz-search-engine-to-add", target);
+    } else {
+      if(organizeSE.hasClass(target, "openintabs-item"))
+        target = target.parentNode.parentNode;
+
+      var object = this.RDFService.GetResource(target.id);
+      transferData.data.addDataForFlavour("application/x-moz-search-engine", object);
+    }
+  },
   onDragOver: function(event, flavour, session) {
+    var target = event.target;
+    var type = flavour.contentType;
+
     if(this._closeTimer) {
       window.removeEventListener("dragover", this._closeTimer, false);
       this._closeTimer = null;
     }
-    var target = event.target;
+
     this.closePopups(target);
-    var className = " " + target.className + " ";
-    session.canDrop = (className.indexOf(" searchbar-engine-menuitem ") != -1 ||
-                       className.indexOf(" searchbar-engine-menu ") != -1 ||
-                       this.overButton(target));
+
+    if(this.isEngineType(type)) {
+      session.canDrop = this.overPopup(target) && target != session.sourceNode;
+    } else {
+      var className = " " + target.className + " ";
+      session.canDrop = className.indexOf(" searchbar-engine-menuitem ") != -1 ||
+                        className.indexOf(" searchbar-engine-menu ") != -1 ||
+                        this.overButton(target);
+    }
+
+    // from http://mxr.mozilla.org/mozilla-central/source/browser/components/places/content/menu.xml
+    // Autoscroll the popup strip if we drag over the scroll buttons
+    var anonid = event.originalTarget.getAttribute("anonid");
+    var scrollDir = anonid == "scrollbutton-up" ? -1 :
+                    anonid == "scrollbutton-down" ? 1 : 0;
+    if(scrollDir != 0) {
+      event.target.firstChild._scrollBox.scrollByIndex(scrollDir);
+      session.canDrop = false;
+    }
+
+    var popup = target.parentNode, dropNode = this.getDropTarget(target), dropDir = 0;
+    // drag & drop feedback
+    if(this.isEngineType(type)) {
+      dropDir = this.getDropDir(event);
+      // again from menu.xml
+      // Check if we should hide the drop indicator for this target
+      if(session.canDrop && popup._indicatorBar) {
+        if(target.nodeName == "menu" && dropDir == 0) {
+          popup._indicatorBar.hidden = true;
+        } else {
+          // We should display the drop indicator relative to the arrowscrollbox
+          var sbo = popup._scrollBox.scrollBoxObject;
+          var newMarginTop = 0;
+          if(scrollDir == 0) {
+            if(dropDir == 1 && dropNode.nextSibling)
+              dropNode = dropNode.nextSibling;
+            newMarginTop = dropNode ? dropNode.boxObject.screenY - sbo.screenY :
+                                      sbo.height;
+          } else if(scrollDir == 1)
+            newMarginTop = sbo.height;
+
+          // set the new marginTop based on arrowscrollbox
+          newMarginTop += sbo.y - popup._scrollBox.boxObject.y;
+          popup._indicatorBar.firstChild.style.marginTop = newMarginTop + "px";
+          popup._indicatorBar.hidden = false;
+        }
+      } else if(popup._indicatorBar)
+        popup._indicatorBar.hidden = true;
+
+      session.dragAction = Ci.nsIDragService.DRAGDROP_ACTION_MOVE;
+    } else {
+      session.dragAction = Ci.nsIDragService.DRAGDROP_ACTION_COPY; // is copy correct?
+    }
+
     switch(target.nodeName) {
       case "menu":
+        if(dropDir != 0) {
+          target.removeAttribute("_moz-menuactive");
+          break;
+        }
         if(target.getAttribute("open") != "true")
           target.firstChild.showPopup();
-        // no break!
+        //else
+          //target.setAttribute("_moz-menuactive", "true");
+        //break;
       case "menuitem":
-        target.setAttribute("_moz-menuactive", "true");
+        if(!this.isEngineType(type))
+          target.setAttribute("_moz-menuactive", "true");
         break;
     }
   },
@@ -88,6 +165,10 @@ var seOrganizer_dragObserver = {
     if(target.nodeName == "menu" || target.nodeName == "menuitem") {
       target.removeAttribute("_moz-menuactive");
     }
+    if(target.parentNode.nodeName == "menupopup")
+      target.parentNode._indicatorBar.hidden = true;
+    if(target.nodeName == "menu")
+        target.removeAttribute("dragover-into");
     if((!event.relatedTarget || !this.isOurElement(event.relatedTarget)) &&
        !this._closeTimer) {
       var closeTime = new Date().getTime() + this.springLoadedMenuDelay;
@@ -97,43 +178,123 @@ var seOrganizer_dragObserver = {
           window.removeEventListener("dragover", This._closeTimer, false);
           organizeSE.popup.hidePopup();
         }
-      }
+      };
       window.addEventListener("dragover", this._closeTimer, false);
     }
   },
   onDrop: function(event, dropData, session) {
-    var target = event.target;
+    var target = this.getDropTarget(event.target);
     this.onDragExit(event, session);
-    organizeSE.popup.hidePopup();
-    if(dropData instanceof Ci.nsIFile)
-      dropData = { data: dropData.leafName };
-    if(!dropData.data)
-      return;
-    if(this.overButton(target)) {
-      var searchbar = organizeSE.searchbar;
-      searchbar.value = dropData.data;
-      var evt = document.createEvent("Event");
-      evt.initEvent("textentered", true, true);
-      searchbar._textbox.dispatchEvent(evt);
-    } else {
-      var engine;
-      function hasClass(className) { return organizeSE.hasClass(target, className); };
-      if(hasClass("openintabs-item"))
-        target = target.parentNode.parentNode;
-      if(target.nodeName == "menuitem" && hasClass("searchbar-engine-menuitem")) {
-        engine = target.engine;
-      } else if(target.nodeName == "menu") {
-        var folder = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService)
-                       .GetResource(target.id);
-        engine = organizeSE.SEOrganizer.folderToEngine(folder);
+
+    var type = dropData.flavour.contentType;
+    if(this.isEngineType(type)) {
+      var item = dropData.data;
+      var SEOrganizer = organizeSE.SEOrganizer;
+
+      var parent = null, index;
+      var drop = this.RDFService.GetResource(target.id);
+      var dropDir = this.getDropDir(event);;
+      if(SEOrganizer.isFolder(drop) && dropDir == 0) {
+        parent = drop;
+        index = -1;
+      } else {
+        parent = SEOrganizer.getParent(drop);
+        index = SEOrganizer.indexOf(drop, false) + Math.max(0, dropDir);
       }
-      var where = whereToOpenLink(event, true, true);
-      if(where == "current") where = "tab";
-      organizeSE.searchbar.doSearch(dropData.data, where, engine);
+
+      // don't let the template builder handle our changes - this would close
+      // some of the menupopups and move "open in tabs" and "manage engines" randomly
+      SEOrganizer.RemoveObserver(organizeSE.popupset.builder.datasource);
+
+      if(type == "application/x-moz-search-engine-to-add") {
+        var source = session.sourceNode;
+
+        // let the service move the new engine to the correct position
+        SEOrganizer.wrappedJSObject._engineFolders[source.getAttribute("title")] = parent.ValueUTF8;
+        SEOrganizer.wrappedJSObject._engineIndexes[source.getAttribute("title")] = index;
+        // the handler for this event will add the engine
+        var evt = document.createEvent("XULCommandEvent");
+        evt.initCommandEvent("command", true, true, window, 1, false, false,
+                             false, false, event);
+        evt.__defineGetter__("originalTarget", function() source); // xxx
+        organizeSE.searchbar.dispatchEvent(evt);
+
+        item = SEOrganizer.getItemByName(source.label);
+      } else {
+        var containerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
+                               .getService(Ci.nsIRDFContainerUtils);
+        var oldContainer = containerUtils.MakeSeq(SEOrganizer, SEOrganizer.getParent(item));
+        var newContainer = containerUtils.MakeSeq(SEOrganizer, parent);
+        if(oldContainer.Resource.ValueUTF8 == parent.ValueUTF8 &&
+           oldContainer.IndexOf(item) < index)
+          index = index - 1;
+
+        oldContainer.RemoveElement(item, true);
+        if(index < 0 || index > newContainer.GetCount() + 1)
+          newContainer.AppendElement(item, true);
+        else
+          newContainer.InsertElementAt(item, index, true);
+      }
+
+      // do the moving manually:
+      index = index - 1; // here we have zero-based indizes
+      var parentNode = document.getElementById(parent.ValueUTF8).lastChild;
+      var node = document.getElementById(item.ValueUTF8);
+      node.parentNode.removeChild(node);
+      var lastEngineNode = this.getDropTarget(parentNode.lastChild);
+      var lastEngineIndex = [].lastIndexOf.call(parentNode.childNodes, lastEngineNode);
+      if(index < 0) index = Number.POSITIVE_INFINITY;
+      parentNode.insertBefore(node, parentNode.childNodes[Math.min(index, lastEngineIndex + 1)]);
+
+      // re-register the observer
+      SEOrganizer.AddObserver(organizeSE.popupset.builder.datasource);
+
+      organizeSE.popup.addEventListener("popuphidden", this.onClose, false);
+    } else {
+      organizeSE.popup.hidePopup();
+
+      if(dropData.type == "application/x-moz-file")
+        dropData = { data: dropData.leafName };
+      else if(type != "text/unicode" && type != "text/x-moz-url")
+        return;
+      if(this.overButton(target)) {
+        var searchbar = organizeSE.searchbar;
+        searchbar.value = dropData.data;
+        var evt = document.createEvent("Event");
+        evt.initEvent("textentered", true, true);
+        searchbar._textbox.dispatchEvent(evt);
+      } else {
+        var engine;
+        if(hasClass(target, "openintabs-item"))
+          target = target.parentNode.parentNode;
+        if(target.nodeName == "menuitem" && hasClass(target, "searchbar-engine-menuitem")) {
+          engine = target.engine;
+        } else if(target.nodeName == "menu") {
+          var folder = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService)
+                         .GetResource(target.id);
+          engine = organizeSE.SEOrganizer.folderToEngine(folder);
+        }
+        var where = whereToOpenLink(event, true, true);
+        if(where == "current") where = "tab";
+        organizeSE.searchbar.doSearch(dropData.data, where, engine);
+      }
     }
+    function hasClass(elem, className) organizeSE.hasClass(elem, className);
   },
+
+  onClose: function(event) {
+    if(event.target != event.currentTarget)
+      return;
+
+    // popup closed after some kind of drag & drop action, save changes
+    organizeSE.SEOrganizer.saveChanges();
+    event.target.removeEventListener("popuphidden", arguments.callee, false);
+  },
+
   getSupportedFlavours: function() {
     var flavours = new FlavourSet();
+    flavours.appendFlavour("application/x-moz-search-engine-to-add");
+    flavours.appendFlavour("application/x-moz-search-engine", "nsIRDFResource");
     flavours.appendFlavour("text/unicode");
     flavours.appendFlavour("text/x-moz-url");
     flavours.appendFlavour("application/x-moz-file", "nsIFile");
@@ -159,58 +320,94 @@ var seOrganizer_dragObserver = {
             (target.nodeType == target.ELEMENT_NODE));
     return false;
   },
-
-
-  LOG: function(msg) {
-    msg = "Organize Search Engines:   " + msg;
-    var consoleService = Cc["@mozilla.org/consoleservice;1"]
-                           .getService(Ci.nsIConsoleService);
-    consoleService.logStringMessage(msg);
-    return msg;
+  getDropTarget: function(elem) {
+    if(elem.nodeName == "menupopup")
+      elem = elem.lastChild;
+    while(elem) {
+      if(organizeSE.hasClass(elem, "searchbar-engine-" + elem.nodeName))
+        break;
+      elem = elem.previousSibling;
+    }
+    return elem;
   },
+  getDropDir: function(event) {
+    var target = this.getDropTarget(event.target);
+    if(!target) return 0;
+    var sbo = target.parentNode._scrollBox.scrollBoxObject;
+
+    if(!organizeSE.hasClass(target, "searchbar-engine-" + target.nodeName))
+      return -1;
+
+    var eventY = event.layerY;
+    var nodeY = target.boxObject.y - sbo.y;
+    var nodeHeight = target.boxObject.height;
+
+    if(target.tagName == "menu") {
+      if(eventY - nodeY < nodeHeight * 0.25)
+        return -1; // drop above
+      else if (eventY - nodeY < nodeHeight * 0.75)
+        return 0; // drop in
+      return 1; // drop below
+    }
+
+    if(eventY - nodeY < nodeHeight / 2)
+      return -1; // drop above
+    return 1; // drop below
+  },
+  isEngineType: function(type) {
+    return type == "application/x-moz-search-engine-to-add" ||
+           type == "application/x-moz-search-engine";
+  },
+
+
   closePopups: function(target) {
     var now = (new Date()).getTime();
-    var targets = [], currentTarget = target;
+
+    // collect all menus the mouse is hovering
+    var mouseOver = [], currentTarget = target;
     do {
       if(currentTarget.nodeName == "menu")
-        targets.push(currentTarget);
+        mouseOver.push(currentTarget);
     } while((currentTarget = currentTarget.parentNode) &&
             (currentTarget.nodeType == currentTarget.ELEMENT_NODE));
+
+    // don't close any of the menus the mouse is hovering
     this.hoveredItems = this.hoveredItems.filter(function(elem, index, array) {
       var item = elem.item;
       if(!item)
         return false;
       do {
-        if(targets.indexOf(item) != -1)
+        if(mouseOver.indexOf(item) != -1)
           return false;
       } while((item = item.parentNode) && (item.nodeType == item.ElEMENT_NODE));
       return true;
     });
+
+    // close those menus that haven't been hovered in the last x millisecons
     for(var i = this.hoveredItems.length; --i > -1;) {
       if(this.hoveredItems[i].time > now - this.springLoadedMenuDelay)
         break;
       if(this.hoveredItems[i].item) {
         this.closePopup(this.hoveredItems[i].item);
-        this.hoveredItems = this.hoveredItems.slice(0, i);
+        this.hoveredItems.splice(i, 1);
       }
     }
-    if(!this.hoveredItems.length || this.hoveredItems[0].item != target) {
-      this.hoveredItems = [{item: target, time: now}].concat(this.hoveredItems);
-    } else {
-      this.hoveredItems[0].time = now;
-    }
+
+    // update list with current menu
+    this.hoveredItems = this.hoveredItems.concat(mouseOver.map(function(menu) ({item: menu, time: now}) ));
   },
   closePopup: function (aTarget) {
     if(aTarget.nodeName == "menupopup")
       aTarget = aTarget.parentNode;
-    if(aTarget.nodeName != "menu" && aTarget.nodeName != "popupset")
+    if(!aTarget || (aTarget.nodeName != "menu" && aTarget.nodeName != "popupset"))
       return;
     var children = organizeSE.evalXPath("descendant::xul:menu[@open='true']",
                                         aTarget);
     children.push(aTarget);
     for(var i = 0; i < children.length; ++i) {
       if(children[i] && children[i].getAttribute("open") == "true") {
-        children[i].lastChild.hidePopup();
+        if(children[i].lastChild.hidePopup)
+          children[i].lastChild.hidePopup();
         children[i].removeAttribute("open");
       }
     }
