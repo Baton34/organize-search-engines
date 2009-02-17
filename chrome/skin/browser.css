@@ -1,5 +1,3 @@
-@import url("chrome://global/skin/");
-
 /* hide manage engines item templates */
 #searchpopup-bottom-container {
   display: none;
