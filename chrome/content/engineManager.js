@@ -639,11 +639,14 @@ function Structure__Container(parent, node, children, open) {
     children = gSEOrganizer.ArcLabelsOut(node);
     var instanceOf = rdfService.GetResource(NS_RDF + "instanceOf");
     var seq = rdfService.GetResource(NS_RDF + "Seq");
-    var property, items, item;
+    var property, items, item, index;
+    var childrenArr = [];
+
     while(children.hasMoreElements()) {
       property = children.getNext();
       if(!rdfContainerUtils.IsOrdinalProperty(property))
          continue;
+      index = rdfContainerUtils.OrdinalResourceToIndex(property);
 
       items = gSEOrganizer.GetTargets(node, property, true);
       while(items.hasMoreElements()) {
@@ -651,17 +654,17 @@ function Structure__Container(parent, node, children, open) {
         if(!(item instanceof Ci.nsIRDFResource))
           continue;
 
-        if(gRemovedEngines.some(function(e) {
-                                  return item.EqualsString(e.ValueUTF8);
-                                }))
+        if(gRemovedEngines.some(function(e) item.EqualsString(e.ValueUTF8)))
           continue;
 
         if(gSEOrganizer.HasAssertion(item, instanceOf, seq, true))
-          this.push(new Structure__Container(this, item));
+          childrenArr.push({idx: index, child: new Structure__Container(this, item)});
         else
-          this.push(new Structure__Item(this, item));
+          childrenArr.push({idx: index, child: new Structure__Item(this, item)});
       }
     }
+    childrenArr.sort(function(a, b) a.idx - b.idx)
+               .forEach(function(e) this.push(e.child), this);
   }
   this.modified = 0;
 }
