@@ -70,18 +70,15 @@ var seOrganizer_dragObserver = {
       return;
     transferData.data = new TransferData();
     if(organizeSE.hasClass(target, "addengine-item")) {
-      transferData.data.addDataForFlavour("application/x-moz-search-engine-to-add", target);
-    } else {
-      if(organizeSE.hasClass(target, "openintabs-item"))
-        target = target.parentNode.parentNode;
-
-      var object = this.RDFService.GetResource(target.id);
-      transferData.data.addDataForFlavour("application/x-moz-search-engine", object);
+      transferData.data.addDataForFlavour("application/x-moz-search-engine-to-add", target.label);
+    } else if(organizeSE.hasClass(target, "searchbar-engine-"+target.nodeName)) {
+      transferData.data.addDataForFlavour("application/x-moz-search-engine", target.id);
     }
   },
   onDragOver: function(event, flavour, session) {
     var target = event.target;
     var type = flavour.contentType;
+    var dropNode = this.getDropTarget(target);
 
     if(this._closeTimer) {
       window.removeEventListener("dragover", this._closeTimer, false);
@@ -89,15 +86,7 @@ var seOrganizer_dragObserver = {
     }
 
     this.closePopups(target);
-
-    if(this.isEngineType(type)) {
-      session.canDrop = this.overPopup(target) && target != session.sourceNode;
-    } else {
-      var className = " " + target.className + " ";
-      session.canDrop = className.indexOf(" searchbar-engine-menuitem ") != -1 ||
-                        className.indexOf(" searchbar-engine-menu ") != -1 ||
-                        this.overButton(target);
-    }
+    var popup = target.parentNode, dropDir = 0;
 
     // from http://mxr.mozilla.org/mozilla-central/source/browser/components/places/content/menu.xml
     // Autoscroll the popup strip if we drag over the scroll buttons
@@ -107,68 +96,63 @@ var seOrganizer_dragObserver = {
     if(scrollDir != 0) {
       event.target.firstChild._scrollBox.scrollByIndex(scrollDir);
       session.canDrop = false;
-    }
 
-    var popup = target.parentNode, dropNode = this.getDropTarget(target), dropDir = 0;
-    // drag & drop feedback
-    if(this.isEngineType(type)) {
-      dropDir = this.getDropDir(event);
-      // again from menu.xml
-      // Check if we should hide the drop indicator for this target
-      if(session.canDrop && popup._indicatorBar) {
-        if(target.nodeName == "menu" && dropDir == 0) {
-          popup._indicatorBar.hidden = true;
-        } else {
-          // We should display the drop indicator relative to the arrowscrollbox
-          var sbo = popup._scrollBox.scrollBoxObject;
-          var newMarginTop = 0;
-          if(scrollDir == 0) {
-            if(dropDir == 1 && dropNode.nextSibling)
-              dropNode = dropNode.nextSibling;
-            newMarginTop = dropNode ? dropNode.boxObject.screenY - sbo.screenY :
-                                      sbo.height;
-          } else if(scrollDir == 1)
-            newMarginTop = sbo.height;
-
-          // set the new marginTop based on arrowscrollbox
-          newMarginTop += sbo.y - popup._scrollBox.boxObject.y;
-          popup._indicatorBar.firstChild.style.marginTop = newMarginTop + "px";
-          popup._indicatorBar.hidden = false;
-        }
-      } else if(popup._indicatorBar)
+      if(popup._indicatorBar) // hide any existing dnd feedback
         popup._indicatorBar.hidden = true;
-
-      session.dragAction = Ci.nsIDragService.DRAGDROP_ACTION_MOVE;
     } else {
-      session.dragAction = Ci.nsIDragService.DRAGDROP_ACTION_COPY; // is copy correct?
+      // drag & drop feedback
+      if(this.isEngineType(type)) {
+        session.canDrop = this.overPopup(target) && dropNode != session.sourceNode;
+
+        dropDir = this.getDropDir(event);
+        // again from menu.xml
+        // Check if we should hide the drop indicator for this target
+        if(session.canDrop && popup._indicatorBar) {
+          if(target.nodeName == "menu" && dropDir == 0) {
+            popup._indicatorBar.hidden = true;
+          } else {
+            // We should display the drop indicator relative to the arrowscrollbox
+            var sbo = popup._scrollBox.scrollBoxObject;
+            var newMarginTop = 0;
+            if(scrollDir == 0) {
+              if(dropDir == 1 && dropNode.nextSibling)
+                dropNode = dropNode.nextSibling;
+              newMarginTop = dropNode ? dropNode.boxObject.screenY - sbo.screenY :
+                                        sbo.height;
+            } else if(scrollDir == 1)
+              newMarginTop = sbo.height;
+
+            // set the new marginTop based on arrowscrollbox
+            newMarginTop += sbo.y - popup._scrollBox.boxObject.y;
+            popup._indicatorBar.firstChild.style.marginTop = newMarginTop + "px";
+            popup._indicatorBar.hidden = false;
+          }
+        }
+
+        session.dragAction = Ci.nsIDragService.DRAGDROP_ACTION_MOVE;
+
+        if(dropDir != 0)
+          target.removeAttribute("_moz-menuactive");
+      } else {
+        session.canDrop = organizeSE.hasClass("searchbar-engine-menuitem") ||
+                          this.overButton(target);
+        session.dragAction = Ci.nsIDragService.DRAGDROP_ACTION_COPY; // is copy correct?
+
+        if(target.nodeName == "menu" || target.nodeName == "menuitem")
+          target.setAttribute("_moz-menuactive", "true");
+      }
     }
 
-    switch(target.nodeName) {
-      case "menu":
-        if(dropDir != 0) {
-          target.removeAttribute("_moz-menuactive");
-          break;
-        }
-        if(target.getAttribute("open") != "true")
-          target.firstChild.showPopup();
-        //else
-          //target.setAttribute("_moz-menuactive", "true");
-        //break;
-      case "menuitem":
-        if(!this.isEngineType(type))
-          target.setAttribute("_moz-menuactive", "true");
-        break;
-    }
+    if(target.nodeName == "menu" && target.getAttribute("open") != "true")
+      target.firstChild.showPopup();
   },
   onDragExit: function(event, session) {
     var target = event.target;
-    if(target.nodeName == "menu" || target.nodeName == "menuitem") {
+    if(target.nodeName == "menu" || target.nodeName == "menuitem")
       target.removeAttribute("_moz-menuactive");
-    }
-    if(target.parentNode.nodeName == "menupopup")
+    if(target.parentNode._indicatorBar)
       target.parentNode._indicatorBar.hidden = true;
-    if(target.nodeName == "menu")
-        target.removeAttribute("dragover-into");
+
     if((!event.relatedTarget || !this.isOurElement(event.relatedTarget)) &&
        !this._closeTimer) {
       var closeTime = new Date().getTime() + this.springLoadedMenuDelay;
@@ -188,12 +172,11 @@ var seOrganizer_dragObserver = {
 
     var type = dropData.flavour.contentType;
     if(this.isEngineType(type)) {
-      var item = dropData.data;
       var SEOrganizer = organizeSE.SEOrganizer;
 
       var parent = null, index;
       var drop = this.RDFService.GetResource(target.id);
-      var dropDir = this.getDropDir(event);;
+      var dropDir = this.getDropDir(event);
       if(SEOrganizer.isFolder(drop) && dropDir == 0) {
         parent = drop;
         index = -1;
@@ -202,13 +185,8 @@ var seOrganizer_dragObserver = {
         index = SEOrganizer.indexOf(drop, false) + Math.max(0, dropDir);
       }
 
-      // don't let the template builder handle our changes - this would close
-      // some of the menupopups and move "open in tabs" and "manage engines" randomly
-      SEOrganizer.RemoveObserver(organizeSE.popupset.builder.datasource);
-
       if(type == "application/x-moz-search-engine-to-add") {
         var source = session.sourceNode;
-
         // let the service move the new engine to the correct position
         SEOrganizer.wrappedJSObject._engineFolders[source.getAttribute("title")] = parent.ValueUTF8;
         SEOrganizer.wrappedJSObject._engineIndexes[source.getAttribute("title")] = index;
@@ -218,9 +196,12 @@ var seOrganizer_dragObserver = {
                              false, false, event);
         evt.__defineGetter__("originalTarget", function() source); // xxx
         organizeSE.searchbar.dispatchEvent(evt);
-
-        item = SEOrganizer.getItemByName(source.label);
       } else {
+        // don't let the template builder handle our changes - this would close
+        // some of the menupopups and move "open in tabs" and "manage engines" randomly
+        SEOrganizer.RemoveObserver(organizeSE.popupset.builder.datasource);
+
+        var item = this.RDFService.GetResource(dropData.data);
         var containerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
                                .getService(Ci.nsIRDFContainerUtils);
         var oldContainer = containerUtils.MakeSeq(SEOrganizer, SEOrganizer.getParent(item));
@@ -234,20 +215,20 @@ var seOrganizer_dragObserver = {
           newContainer.AppendElement(item, true);
         else
           newContainer.InsertElementAt(item, index, true);
+
+        // do the moving manually:
+        var parentNode = document.getElementById(parent.ValueUTF8).lastChild;
+        var node = document.getElementById(item.ValueUTF8);
+        node.parentNode.removeChild(node);
+        index = index - 1; // here we have zero-based indizes
+        var lastEngineNode = this.getDropTarget(parentNode.lastChild);
+        var lastEngineIndex = [].lastIndexOf.call(parentNode.childNodes, lastEngineNode);
+        if(index < 0) index = Number.POSITIVE_INFINITY;
+        parentNode.insertBefore(node, parentNode.childNodes[Math.min(index, lastEngineIndex + 1)]);
+
+        // re-register the observer
+        SEOrganizer.AddObserver(organizeSE.popupset.builder.datasource);
       }
-
-      // do the moving manually:
-      index = index - 1; // here we have zero-based indizes
-      var parentNode = document.getElementById(parent.ValueUTF8).lastChild;
-      var node = document.getElementById(item.ValueUTF8);
-      node.parentNode.removeChild(node);
-      var lastEngineNode = this.getDropTarget(parentNode.lastChild);
-      var lastEngineIndex = [].lastIndexOf.call(parentNode.childNodes, lastEngineNode);
-      if(index < 0) index = Number.POSITIVE_INFINITY;
-      parentNode.insertBefore(node, parentNode.childNodes[Math.min(index, lastEngineIndex + 1)]);
-
-      // re-register the observer
-      SEOrganizer.AddObserver(organizeSE.popupset.builder.datasource);
 
       organizeSE.popup.addEventListener("popuphidden", this.onClose, false);
     } else {
@@ -294,7 +275,7 @@ var seOrganizer_dragObserver = {
   getSupportedFlavours: function() {
     var flavours = new FlavourSet();
     flavours.appendFlavour("application/x-moz-search-engine-to-add");
-    flavours.appendFlavour("application/x-moz-search-engine", "nsIRDFResource");
+    flavours.appendFlavour("application/x-moz-search-engine");
     flavours.appendFlavour("text/unicode");
     flavours.appendFlavour("text/x-moz-url");
     flavours.appendFlavour("application/x-moz-file", "nsIFile");
