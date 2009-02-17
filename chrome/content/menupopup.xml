@@ -70,20 +70,6 @@
                                                 "popup-internal-box");
       </field>
 
-
-      <method name="onDragExit">
-        <parameter name="aEvent"/>
-        <body><![CDATA[
-          this.removeAttribute("dragover");
-
-          // if we have not moved to a valid new target clear the drop indicator
-          // this happens when moving out of the popup
-          var target = aEvent.relatedTarget;
-          if (!target)
-            this._indicatorBar.hidden = true;
-        ]]></body>
-      </method>
-
     </implementation>
 
   </binding>
