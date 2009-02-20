@@ -19,7 +19,6 @@
 <!ENTITY editalias.accesskey      "K">
 <!ENTITY properties.label         "Properties…">
 <!ENTITY properties.accesskey     "P">
-<!ENTITY properties.key           "P">
 
 <!ENTITY context.new.label        "New">
 <!ENTITY context.new.accesskey    "e">
