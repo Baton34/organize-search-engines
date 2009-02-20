@@ -535,11 +535,12 @@ EngineManagerDialog.prototype = {
     for(var i = 0; i < indexes.length; i++) {
       index = gEngineView.getLocalIndex(indexes[i]);
       item = gEngineView._indexCache[indexes[i]];
+      engine = item.originalEngine ? item.originalEngine.wrappedJSObject : null;
       if(item.parent.children.length - 1 == index) lastSelected = true;
       if(!index) firstSelected = true;
       if(item.isSep) readOnly = true;
       if(item.isEngine && !readOnly)
-        readOnly = !item.originalEngine;
+        readOnly = !engine || (engine._readOnly && !("_serializeToJSON" in engine));
     }
     onlyOneEngine = !multipleSelected && !disableButtons && item.isEngine;
 
@@ -1306,7 +1307,8 @@ EngineView.prototype = {
   },
   isEditable: function EngineView__isEditable(row, col) {
     var item = this._indexCache[row];
-    var editableEngine = !!item.originalEngine;
+    var engine = item.originalEngine ? item.originalEngine.wrappedJSObject : null;
+    var editableEngine = engine && (!engine._readOnly || "_serializeToJSON" in engine);
     return (col.id == "engineName" && (item.isSeq || editableEngine)) ||
            (col.id == "engineAlias" && item.isEngine);
   },

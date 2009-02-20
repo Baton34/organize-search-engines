@@ -92,6 +92,15 @@ function init() {
       tree.startEditing(tree.view.selection.currentIndex, tree.columns.getFirstColumn());
   }, true);
   tree.view = new ParamTreeView(url.params);
+
+  if(origEngine._readOnly && !("_serializeToJSON" in origEngine)) {
+    [
+     "name-textbox","icon-button","icon-download-button","description-textbox",
+     "homepage-textbox","url-textbox","method-radio-get","method-radio-post",
+     "add-param","remove-param","params-tree","update-url-textbox",
+     "update-data-type-menulist","update-icon-url-textbox","update-interval-row0"
+    ].forEach(function(id) document.getElementById(id).disabled = true);
+  }
 }
 
 
@@ -125,6 +134,9 @@ function cloneEngine(engine, dataType) {
 function storeChanges() {
   gEngine.alias = document.getElementById("keyword-textbox").value;
   var origEngine = gEngine.originalEngine.wrappedJSObject;
+  if(origEngine._readOnly && !("_serializeToJSON" in origEngine))
+    return;
+
   var newEngine = cloneEngine(origEngine, document.getElementById("update-data-type-menulist").value);
 
   gEngine.name = document.getElementById("name-textbox").value;
