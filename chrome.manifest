@@ -2,17 +2,22 @@ override  chrome://browser/content/search/engineManager.xul   chrome://seorganiz
 overlay   chrome://browser/content/browser.xul                chrome://seorganizer/content/browser.xul
 overlay   chrome://addtosearchbox/content/engineInfos.xul     chrome://seorganizer/content/addToSearchbarCompat.xul
 
-content   seorganizer               chrome/content/
-skin      seorganizer  classic/1.0  chrome/skin/
+content   seorganizer               content/
+skin      seorganizer  classic/1.0  skin/
 
-locale    seorganizer  en-US        chrome/locale/en-US/
-locale    seorganizer  de-DE        chrome/locale/de-DE/
-locale    seorganizer  it-IT        chrome/locale/it-IT/
-locale    seorganizer  hu-HU        chrome/locale/hu-HU/
-locale    seorganizer  fr-FR        chrome/locale/fr-FR/
-locale    seorganizer  he-IL        chrome/locale/he-IL/
-locale    seorganizer  nl-NL        chrome/locale/nl-NL/
-locale    seorganizer  pl-PL        chrome/locale/pl-PL/
-locale    seorganizer  pt-BR        chrome/locale/pt-BR/
-locale    seorganizer  ca-AD        chrome/locale/ca-AD/
-locale    seorganizer  ja-JP        chrome/locale/ja-JP/
+locale    seorganizer  en-US        locale/en-US/
+locale    seorganizer  de-DE        locale/de-DE/
+locale    seorganizer  it-IT        locale/it-IT/
+locale    seorganizer  hu-HU        locale/hu-HU/
+locale    seorganizer  fr-FR        locale/fr-FR/
+locale    seorganizer  he-IL        locale/he-IL/
+locale    seorganizer  nl-NL        locale/nl-NL/
+locale    seorganizer  pl-PL        locale/pl-PL/
+locale    seorganizer  pt-BR        locale/pt-BR/
+locale    seorganizer  ca-AD        locale/ca-AD/
+locale    seorganizer  ja-JP        locale/ja-JP/
+locale    seorganizer  en-GB        locale/en-GB/
+locale    seorganizer  sr-RS        locale/sr-RS/
+locale    seorganizer  tr-TR        locale/tr-TR/
+locale    seorganizer  uk-UA        locale/uk-UA/
+locale    seorganizer  zh-CN        locale/zh-CN/
