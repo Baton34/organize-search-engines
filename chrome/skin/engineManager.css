@@ -94,21 +94,20 @@ toolbarbutton#moveengine:not([disabled="true"]):hover:active {
 
 /* properties */
 
-toolbarbutton#editalias {
+toolbarbutton#properties {
   -moz-image-region: rect(0px 120px 24px 96px);
 }
-toolbarbutton#editalias:not([disabled="true"]):hover {
+toolbarbutton#properties:not([disabled="true"]):hover {
   -moz-image-region: rect(24px 120px 48px 96px);
 }
-toolbarbutton#editalias[disabled="true"] {
+toolbarbutton#properties[disabled="true"] {
   -moz-image-region: rect(72px 120px 96px 96px);
 }
-toolbarbutton#editalias:not([disabled="true"]):hover:active {
+toolbarbutton#properties:not([disabled="true"]):hover:active {
   -moz-image-region: rect(48px 120px 72px 96px);
 }
 
 /* rename */
-
 toolbarbutton#rename {
   -moz-image-region: rect(0px 144px 24px 120px);
 }
@@ -120,6 +119,21 @@ toolbarbutton#rename[disabled="true"] {
 }
 toolbarbutton#rename:not([disabled="true"]):hover:active {
   -moz-image-region: rect(48px 144px 72px 120px);
+}
+
+/* keyword */
+toolbarbutton#editalias {
+  list-style-image: url(keyword-toolbar.png);
+  -moz-image-region: rect(0px 24px 24px 0px);
+}
+toolbarbutton#editalias:not([disabled="true"]):hover {
+  -moz-image-region: rect(24px 24px 48px 0px);
+}
+toolbarbutton#editalias[disabled="true"] {
+  -moz-image-region: rect(72px 24px 96px 0px);
+}
+toolbarbutton#editalias:not([disabled="true"]):hover:active {
+  -moz-image-region: rect(48px 24px 72px 0px);
 }
 
 /* delete */
