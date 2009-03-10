@@ -49,7 +49,7 @@ Contributor(s):
         var popup = document.getAnonymousElementByAttribute(this, "anonid",
                                                             "searchbar-popup");
         // searchOnTab needs it, so let the popup stay around when it's there
-        if(!(("searchOnTab" in window)) && popup.parentNode)
+        if(!("searchOnTab" in window) && popup.parentNode)
           popup.parentNode.removeChild(popup);
 
         this.rebuildPopup();
@@ -68,16 +68,9 @@ Contributor(s):
 
       <!-- opens the manager in a *resizable* window -->
       <method name="openManager"><body><![CDATA[
-        var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
-        var window = wm.getMostRecentWindow("Browser:SearchManager");
-        if(window) {
-          window.focus()
-        } else {
-          setTimeout(function () {
-            openDialog("chrome://browser/content/search/engineManager.xul",
-                       "_blank", "chrome,dialog,modal,centerscreen,resizable,all");
-          }, 0);
-        }
+        var url = "chrome://browser/content/search/engineManager.xul";
+        var features = "chrome,modal,centerscreen,resizable,all,dialog,toolbar";
+        toOpenWindowByType("Browser:SearchManager", url, features);
       ]]></body></method>
 
       <field name="_rebuildTimer" />
