@@ -1,0 +1,37 @@
+<!ENTITY namecol.label "Name">
+<!ENTITY aliascol.label "Keyword">
+<!ENTITY addEngine.accesskey "G">
+<!ENTITY restoreDefault.label "Restore Default Engine">
+<!ENTITY restoreDefault.accesskey "e">
+<!ENTITY new-folder.label "New Folder…">
+<!ENTITY new-folder.accesskey "F">
+<!ENTITY new-separator.label "New Separator">
+<!ENTITY new-separator.accesskey "S">
+<!ENTITY move-engine.label "Move…">
+<!ENTITY move-engine.accesskey "M">
+<!ENTITY rename.label "Rename…">
+<!ENTITY rename.accesskey "n">
+<!ENTITY editalias.label "Edit Keyword…">
+<!ENTITY editalias.accesskey "K">
+<!ENTITY context.new.label "New">
+<!ENTITY context.new.accesskey "e">
+<!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">
+<!ENTITY noconflict.remove.accesskey "&remove.accesskey;">
+<!ENTITY noconflict.up.accesskey "&up.accesskey;">
+<!ENTITY noconflict.dn.accesskey "&dn.accesskey;">
+<!ENTITY fileMenu.label "File">
+<!ENTITY fileMenu.accesskey "F">
+<!ENTITY closeCmd.label "Close">
+<!ENTITY closeCmd.accesskey "C">
+<!ENTITY viewMenu.label "View">
+<!ENTITY viewMenu.accesskey "V">
+<!ENTITY menuitem.view.command.toolbar.label "Toolbar">
+<!ENTITY menuitem.view.command.toolbar.accesskey "T">
+<!ENTITY menuitem.view.show_columns.label "Show Columns">
+<!ENTITY menuitem.view.show_columns.accesskey "S">
+<!ENTITY menuitem.view.unsorted.label "Unsorted">
+<!ENTITY menuitem.view.unsorted.accesskey "U">
+<!ENTITY sortAscending.label "Ascending">
+<!ENTITY sortAscending.accesskey "A">
+<!ENTITY sortDescending.label "Descending">
+<!ENTITY sortDescending.accesskey "D">

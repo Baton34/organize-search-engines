@@ -1,0 +1,37 @@
+<!ENTITY namecol.label "AD">
+<!ENTITY aliascol.label "Anahtar kelimeler">
+<!ENTITY addEngine.accesskey "G">
+<!ENTITY restoreDefault.label "Varsayılan Arama Motoruna dön">
+<!ENTITY restoreDefault.accesskey "e">
+<!ENTITY new-folder.label "Yeni Klasör">
+<!ENTITY new-folder.accesskey "F">
+<!ENTITY new-separator.label "Yeni boşluk">
+<!ENTITY new-separator.accesskey "S">
+<!ENTITY move-engine.label "Taşı...">
+<!ENTITY move-engine.accesskey "M">
+<!ENTITY rename.label "Yeni isim...">
+<!ENTITY rename.accesskey "N">
+<!ENTITY editalias.label "Anahtar kelimeleri düzenle...">
+<!ENTITY editalias.accesskey "K">
+<!ENTITY context.new.label "Yeni">
+<!ENTITY context.new.accesskey "e">
+<!ENTITY noconflict.enableSuggest.accesskey "Öneriler etkin">
+<!ENTITY noconflict.remove.accesskey "Sil">
+<!ENTITY noconflict.up.accesskey "Yukarı">
+<!ENTITY noconflict.dn.accesskey "Aşağı">
+<!ENTITY fileMenu.label "Dosya">
+<!ENTITY fileMenu.accesskey "F">
+<!ENTITY closeCmd.label "Kapat">
+<!ENTITY closeCmd.accesskey "C">
+<!ENTITY viewMenu.label "Görüntüle">
+<!ENTITY viewMenu.accesskey "V">
+<!ENTITY menuitem.view.command.toolbar.label "Araç çubuğu">
+<!ENTITY menuitem.view.command.toolbar.accesskey "T">
+<!ENTITY menuitem.view.show_columns.label "Sütunları göster">
+<!ENTITY menuitem.view.show_columns.accesskey "S">
+<!ENTITY menuitem.view.unsorted.label "Sıralanmamış">
+<!ENTITY menuitem.view.unsorted.accesskey "U">
+<!ENTITY sortAscending.label "Artan">
+<!ENTITY sortAscending.accesskey "A">
+<!ENTITY sortDescending.label "Azalan">
+<!ENTITY sortDescending.accesskey "D">

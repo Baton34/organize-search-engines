@@ -1,0 +1,18 @@
+<!ENTITY namecol.label "Назва">
+<!ENTITY aliascol.label "Ключове слово">
+<!ENTITY new-folder.label "Нова папка...">
+<!ENTITY new-folder.accesskey "п">
+<!ENTITY new-separator.label "Новий розділювач">
+<!ENTITY new-separator.accesskey "р">
+<!ENTITY move-engine.label "Перемістити">
+<!ENTITY move-engine.accesskey "м">
+<!ENTITY rename.label "Перейменувати...">
+<!ENTITY rename.accesskey "н">
+<!ENTITY editalias.label "Редагувати ключове слово...">
+<!ENTITY editalias.accesskey "к">
+<!ENTITY fileMenu.label "Файл">
+<!ENTITY fileMenu.accesskey "ф">
+<!ENTITY closeCmd.label "Закрити">
+<!ENTITY closeCmd.accesskey "З">
+<!ENTITY menuitem.view.command.toolbar.label "Панель інструментів">
+<!ENTITY menuitem.view.command.toolbar.accesskey "і">
