@@ -102,14 +102,5 @@ Contributor(s):
         datasources="rdf:organized-internet-search-engines"
         template="searchbar-template" sortDirection="natural"
         sortResource="urn:organize-search-engines#Name" />
-  <!-- Second Search -->
-  <menu id="secondsearch_popup_all" ref="urn:organize-search-engines:root"
-        datasources="rdf:null" template="searchbar-template"
-        sortResource="urn:organize-search-engines#Name"
-        sortDirection="natural" />
-  <toolbaritem id="search-container" ref="urn:organize-search-engines:root"
-             datasources="rdf:null" template="searchbar-template"
-             sortResource="urn:organize-search-engines#Name"
-             sortDirection="natural" /> <!-- this sucks! -->
 
 </overlay>

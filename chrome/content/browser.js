@@ -94,7 +94,11 @@ SEOrganizer.prototype = {
   customizeToolbarListener: function() {
     var listeners = organizeSE._customizeToolbarListeners;
     for(var i = 0; i < listeners.length; i++) {
-      listeners[i].call(organizeSE);
+      try {
+        listeners[i].call(organizeSE);
+      } catch(e) {
+        Components.reportError(e);
+      }
     }
   },
 
@@ -335,7 +339,11 @@ SEOrganizer.prototype = {
     subject.QueryInterface(Ci.nsIPrefBranch);
     var val = subject.getComplexValue("", Ci.nsISupportsString).data;
     for(var i = 0; i < this._sortDirectionHandlers.length; ++i) {
-      this._sortDirectionHandlers[i].call(this, val);
+      try {
+        this._sortDirectionHandlers[i].call(this, val);
+      } catch(e) {
+        Components.reportError(e);
+      }
     }
   }
 };

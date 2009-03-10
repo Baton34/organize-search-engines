@@ -48,23 +48,27 @@ organizeSE__Extensions.prototype = {
     var sortDirection = organizeSE.popupset.getAttribute("sortDirection");
     for each(var i in this) {
       if(typeof i == "object" && i.check) {
-        if("wait" in i)
-          setTimeout(applyWrapper, i.wait, i.init, i, []);
-        else
-          i.init();
+        try {
+          if("wait" in i)
+            setTimeout(applyWrapper, i.wait, i.init, i, []);
+          else
+            i.init();
 
-        if("sortDirectionHandler" in i) {
-          i.sortDirectionHandler(sortDirection);
-          organizeSE._sortDirectionHandlers.push(i.sortDirectionHandler);
-        }
-        if("insertItemsHandler" in i) {
-          i.insertItemsHandler.mod = i;
-          if(!("subFolders" in i.insertItemsHandler))
-            i.insertItemsHandler.subFolders = false;
-          organizeSE._insertItemsHandlers.push(i.insertItemsHandler);
-        }
-        if("customizeToolbarHandler" in i)
-          organizeSE._customizeToolbarListeners.push(i.customizeToolbarHandler);
+          if("sortDirectionHandler" in i) {
+            i.sortDirectionHandler(sortDirection);
+            organizeSE._sortDirectionHandlers.push(i.sortDirectionHandler);
+          }
+          if("insertItemsHandler" in i) {
+            i.insertItemsHandler.mod = i;
+            if(!("subFolders" in i.insertItemsHandler))
+              i.insertItemsHandler.subFolders = false;
+            organizeSE._insertItemsHandlers.push(i.insertItemsHandler);
+          }
+          if("customizeToolbarHandler" in i)
+            organizeSE._customizeToolbarListeners.push(i.customizeToolbarHandler);
+         } catch(e) {
+           Components.reportError(e);
+         }
       }
     }
   },
@@ -202,93 +206,6 @@ organizeSE__Extensions.prototype = {
       popup.parentNode.removeChild(popup);
 
       window.setTimeout(function() { organizeSE.popupset.builder.rebuild(); }, 1);
-    }
-  },
-
-  /*** Second Search ***/
-  secondSearch: {
-    get check() { return ("SecondSearch" in window); },
-    init: function() {
-      SecondSearch.__defineGetter__("source", function() { return organizeSE.popup; });
-      this.filterPopupEvents();
-      SecondSearch.initAllEngines = this.initAllEngines;
-    },
-    /* update sortDirection attributes as neccesary */
-    sortDirectionHandler: function sortDirectionHandler(newVal) {
-      document.getElementById("secondsearch_popup_all")
-                             .setAttribute("sortDirection", newVal);
-      document.getElementById("secondsearch_popup").parentNode
-                             .setAttribute("sortDirection", newVal);
-    },
-    filterPopupEvents: function() {
-      SecondSearch.popup.addEventListener("popupshowing", function onPopupShowing(e) {
-        var parent = e.target.parentNode;
-        if(parent.datasources == "rdf:organized-internet-search-engines")
-          parent.builder.rebuild();
-      }, false);
-      SecondSearch.popup.addEventListener("popuphiding", function onPopupHiding(e) {
-        const XPATH = "descendant::xul:menupopup";
-        organizeSE.evalXPath(XPATH, e.target).forEach(function(elem) {
-          elem.hidePopup();
-        });
-      }, false);
-    },
-    initAllEngines: function(aPopup, aParent, aReverse) {
-      var popup  = aPopup || this.popup, parent = aParent || null;
-
-      var allMenuItem = this.allMenuItem;
-      if(parent) { // we're in the child menu
-        this.popup.parentNode.datasources = "rdf:null";
-        allMenuItem.datasources = "rdf:organized-internet-search-engines";
-      } else { // we're top level
-        for(var i = popup.childNodes.length; i--;) {
-          if(popup.childNodes[i].hasAttribute("engineName") ||
-             popup.childNodes[i].id == "secondsearch-ose-sep") {
-            popup.removeChild(popup.childNodes[i]);
-          }
-        }
-
-        var popupParent = popup.parentNode;
-        allMenuItem.datasources = "rdf:null";
-        popupParent.datasources = "rdf:organized-internet-search-engines";
-        popup = popupParent.lastChild;
-        popup.id = "secondsearch_popup";
-        popup.insertBefore(allMenuItem, popup.firstChild);
-      }
-
-      if(this.keywords.length) {
-        var range = document.createRange();
-        range.selectNodeContents(popup);
-        if (popup.hasChildNodes()) {
-          if (popup.firstChild == allMenuitem) {
-            range.setStartAfter(popup.firstChild);
-          }
-          else if (popup.lastChild == allMenuitem) {
-            range.setEndBefore(popup.lastChild);
-          }
-        }
-        range.deleteContents();
-        range.detach();
-
-        if (popup.hasChildNodes())
-          organizeSE.createMenuseparator(popup, "secondsearch-ose-sep");
-
-        for (var i = 0, maxi = this.keywords.length; i < maxi; i++)
-        {
-          var keyword = this.keywords[i];
-          if (keyword.uri && parent &&
-              parent.getElementsByAttribute('engineName', keyword.name+'\n'+keyword.keyword).length)
-          continue;
-
-          var attrs = { src: keyword.icon, keyword: keyword.keyword,
-                        engineName: keyword.name+'\n'+keyword.keyword };
-          organizeSE.createMenuitem(popup, keyword.name, 'menuitem-iconic',
-                                    'secondsearch-keyword-'+encodeURIComponent(keyword.name),
-                                    attrs);
-        }
-      }
-
-      popup.style.MozBoxDirection = (aReverse) ? "reverse" : "";
     }
   },
 
