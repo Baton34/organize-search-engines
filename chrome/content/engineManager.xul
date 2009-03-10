@@ -182,6 +182,9 @@ Contributor(s):
                     accesskey="&editalias.accesskey;" />
           <menuitem id="menu_delete" command="cmd_remove" key="key_remove"
                     label="&remove.label;" accesskey="&noconflict.remove.accesskey;" />
+          <menuseparator/>
+          <menuitem id="menu_properties" command="cmd_properties"
+                    label="&properties.label;" accesskey="&properties.accesskey;" />
         </menupopup>
       </menu>
       <menu label="&viewMenu.label;" accesskey="&viewMenu.accesskey;">
@@ -225,6 +228,8 @@ Contributor(s):
                      label="&rename.label;" accesskey="&rename.accesskey;" />
       <toolbarbutton id="editalias" command="cmd_editalias"
                      label="&editalias.label;" accesskey="&editalias.accesskey;" />
+      <toolbarbutton id="properties" command="cmd_properties"
+                     label="&properties.label;" accesskey="&properties.accesskey;" />
       <toolbarbutton id="delete" command="cmd_remove"
                      label="&remove.label;" accesskey="&noconflict.remove.accesskey;" />
       <toolbarspacer flex="1" />
