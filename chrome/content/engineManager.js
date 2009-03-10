@@ -324,6 +324,13 @@ EngineManagerDialog.prototype = {
     var indexes = gEngineView.selectedIndexes;
     gEngineView.selection.clearSelection();
 
+    function RemovedItem(node) {
+      this.node = node;
+      var name = gSEOrganizer.getNameByItem(node);
+      if(name) this.engine = gSEOrganizer.getEngineByName(name);
+      gRemovedEngines.push(this);
+    }
+
     var index, item, parent, localIndex;
     for(var k = 0; k < indexes.length; k++) {
       index = indexes[k];
@@ -331,13 +338,13 @@ EngineManagerDialog.prototype = {
       parent = item.parent;
       localIndex = parent.children.indexOf(item);
 
-      gRemovedEngines.push(item.node);
+      new RemovedItem(item.node);
       var removedCount = 1;
       if(item.isSeq) { // count removed children and add them to gRemovedEngines
         var items = [item];
         for(var i = 0; i < items.length; ++i) {
           for(var j = 0; j < items[i].children.length; ++j) {
-            gRemovedEngines.push(items[i].children[j].node);
+            new RemovedItem(items[i].children[j].node);
             if(items[i].open)
               removedCount++;
             if(items[i].children[j].isSeq) {
@@ -473,11 +480,9 @@ EngineManagerDialog.prototype = {
         var engine = defaults[selection.value];
       }
       node = gSEOrganizer.getItemByName(engine.name);
-      var idx = gRemovedEngines.indexOf(node);
-      if(node && idx != -1) {
-        gRemovedEngines = gRemovedEngines.slice(0, idx)
-                                      .concat(gRemovedEngines.slice(idx + 1));
-      }
+      var idx = gRemovedEngines.map(function(obj) obj.node).indexOf(node);
+      if(node && idx != -1)
+        gRemovedEngines = gRemovedEngines.splice(idx, 0);
       if(!node) {
         node = gSEOrganizer._getAnonymousResource();
       }
@@ -655,7 +660,7 @@ function Structure__Container(parent, node, children, open) {
         if(!(item instanceof Ci.nsIRDFResource))
           continue;
 
-        if(gRemovedEngines.some(function(e) item.EqualsString(e.ValueUTF8)))
+        if(gRemovedEngines.some(function(e) item.EqualsString(e.node.ValueUTF8)))
           continue;
 
         if(gSEOrganizer.HasAssertion(item, instanceOf, seq, true))
@@ -1022,18 +1027,13 @@ EngineView.prototype = {
       gSEOrganizer._datasource.RemoveObserver(gSEOrganizer._observers[i]);
     }
     this._structure.commit();
-    for(var i = 0; i < gRemovedEngines.length; ++i) {
-      if(gRemovedEngines[i] && gRemovedEngines[i] instanceof Ci.nsIRDFResource) {
-        // remove the search engine, the rest is done by our observers
-        var name = gSEOrganizer.getNameByItem(gRemovedEngines[i]);
-        var engine = gSEOrganizer.getEngineByName(name);
-        if(engine && engine instanceof Ci.nsISearchEngine) {
-          gSEOrganizer.removeEngine(engine);
-        } else {
-          gSEOrganizer.removeItem(gRemovedEngines[i], false);
-        }
-      }
-    }
+    gRemovedEngines.forEach(function(removedItem) {
+      // remove the search engine, the rest is done by our observers
+      if(removedItem.engine && removedItem.engine instanceof Ci.nsISearchEngine)
+        gSEOrganizer.removeEngine(removedItem.engine);
+      else if(removedItem.node && removedItem.node instanceof Ci.nsIRDFResource)
+        gSEOrganizer.removeItem(removedItem.node, false);
+    });
     for(var i = 0; i < gSEOrganizer._observers.length; ++i) {
       gSEOrganizer._datasource.AddObserver(gSEOrganizer._observers[i]);
     }
