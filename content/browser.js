@@ -243,7 +243,7 @@ SEOrganizer.prototype = {
       // code taken from Firefox' bookmarksMenu.js::showEmptyItem
       // not reusing that method to remain compatible to places
       if(!target.childNodes.length) {
-        var EmptyMsg = PlacesUtils.getString("bookmarksMenuEmptyFolder");
+        var EmptyMsg = (PlacesUIUtils || PlacesUtils).getString("bookmarksMenuEmptyFolder");
         organizeSE.createMenuitem(EmptyMsg, target, null, "empty-menuitem",
                                   { disabled: "true" });
       } else {
