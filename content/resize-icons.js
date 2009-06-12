@@ -15,7 +15,7 @@ The Original Code is Organize Search Engines.
 
 The Initial Developer of the Original Code is
 Malte Kraus.
-Portions created by the Initial Developer are Copyright (C) 2007-2008
+Portions created by the Initial Developer are Copyright (C) 2007-2009
 the Initial Developer. All Rights Reserved.
 
 Contributor(s):
@@ -161,7 +161,7 @@ Resizer.prototype = {
     }
   },
   addIconByImage: function(img) {
-    if(!img.naturalWidth && !img.naturalHeight) { // not loaded yet
+    if(!img.naturalWidth && !img.getContext) { // not loaded yet
       this._addLoadingIcon(img);
     } else {
       this.icons.push(img);
