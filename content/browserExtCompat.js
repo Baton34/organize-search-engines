@@ -274,29 +274,5 @@ $1");
           node.parentNode.removeChild(node);
       }
     }
-  },
-
-  /* TabMix Plus 0.3.7.4pre.090107 */
-  tabmix: {
-    get check() {
-      return ("TMP_SearchLoadURL" in window);
-    },
-    init: function() {
-      TMP_SearchLoadURL = this.TMP_SearchLoadURL;
-    },
-    // rewriting that tmp method is easier than modifiying it with eval
-    TMP_SearchLoadURL: function(aData, aEvent, aWhere) {
-      if(TMP_getBoolPref(tabxBranch, "loadSearchInBackground", false)) {
-        if(aWhere == "tab")
-          aWhere = "tabshifted";
-        else if(aWhere == "tabshifted")
-          aWhere = "tab";
-      }
-      if((aWhere == "tab" || aWhere == "tabshifted") &&
-         !TMP_whereToOpen(true, false).inNew) {
-        aWhere = "current";
-      }
-      organizeSE.searchbar.doSearch(aData, aWhere);
-    }
   }
 };
