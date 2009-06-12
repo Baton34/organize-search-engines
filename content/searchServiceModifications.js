@@ -16,7 +16,7 @@ The Original Code is Organize Search Engines.
 
 The Initial Developer of the Original Code is
 Malte Kraus.
-Portions created by the Initial Developer are Copyright (C) 2007-2008
+Portions created by the Initial Developer are Copyright (C) 2007-2009
 the Initial Developer. All Rights Reserved.
 
 Contributor(s):
@@ -101,7 +101,8 @@ Contributor(s):
        (aEngine.name != oldEngine.name || aEngine.alias != oldEngine.alias)) {
       aEngine._name = oldEngine.name;
       aEngine._alias = oldEngine.alias;
-      aEngine._serializeToFile();
+      if(!aEngine._readOnly)
+        aEngine._serializeToFile();
     }
     orig.apply(this, arguments);
   };
@@ -143,16 +144,17 @@ var _filteredSortedEngines = null;
 SearchService.prototype._getSortedEngines = function getSorted(aWithHidden) {
   if(aWithHidden)
     return this._sortedEngines;
-  if(!_filteredSortedEngines) {
-    _filteredSortedEngines = this._sortedEngines.filter(function (engine) {
-      return !engine.hidden;
-    });
-  }
+  if(!_filteredSortedEngines)
+    _filteredSortedEngines = this._sortedEngines.filter(function(e)!e.hidden);
   return _filteredSortedEngines;
 };
 
+
 // cache engines' (internal database) ids:
 (function() {
+  if("__id" in Engine.prototype)
+    return; // Firefox 3.5 already has this optimization
+
   var orig = Engine.prototype.__lookupGetter__("_id");
   Engine.prototype.__defineGetter__("_id", function _id() {
     if(!this.__id)
