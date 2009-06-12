@@ -722,14 +722,12 @@ SEOrganizer.prototype = {
         engine.iconURL = engine.iconURI.spec;
         engine.__action = "icon";
         ss.__parent__.notifyAction(engine, "engine-changed");
-        resizer = null;
       };
       for(var i = 0; i < engine.innerEngines.length; i++) {
         if(engine.innerEngines[i].iconURI && engine.innerEngines[i].iconURI.spec)
           resizer.addIconByURL(engine.innerEngines[i].iconURI.spec);
-        else { // transparent gif
-          resizer.addIconByImage(resizer._canvas.canvas.cloneElement(false));
-        }
+        else // use transparent image
+          resizer.addIconByImage(resizer._canvas.canvas.cloneNode(false));
       }
       ss._addEngineToStore(engine);
     }
