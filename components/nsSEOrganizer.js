@@ -36,24 +36,14 @@ Contributor(s):
  the terms of any one of the MPL, the GPL or the LGPL.
 ***** END LICENSE BLOCK ***** */
 
-const Ci = Components.interfaces, Cc = Components.classes, Cr = Components.results;
-/***********************************************************
-constants
-***********************************************************/
+const Ci = Components.interfaces, Cc = Components.classes,
+      Cr = Components.results, Cu = Components.utils;
 
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-// UUID uniquely identifying our component
-// You can get from: http://kruithof.xs4all.nl/uuid/uuidgen here
-const CLASS_ID = Components.ID("{1a6b3e72-eb74-11db-9041-00ffd1e32fc4}");
-const CLASS_ID2 = Components.ID("{f2fa3794-eb73-11db-9d18-00ffd1e32fc4}");
-
-// description
-const CLASS_NAME = "For Organizing search engines in folders.";
 
 const NS_RDF_DATASOURCE_PRE = "@mozilla.org/rdf/datasource;1?name=";
-// textual unique identifier
-const CONTRACT_ID = NS_RDF_DATASOURCE_PRE + "organized-internet-search-engines";
-const CONTRACT_ID2 = NS_RDF_DATASOURCE_PRE + "organized-internet-search-folders";
+
 
 function LOG(msg) {
   msg = "Organize Search Engines:   " + msg;
@@ -107,9 +97,7 @@ const NS = "urn:organize-search-engines#";
 const NS_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 const ROOT = "urn:organize-search-engines:root";
 const FOLDERS_ROOT = "urn:organize-search-engines:folders-root";
-/***********************************************************
-class definition
-***********************************************************/
+
 //class constructor
 function SEOrganizer() {
   this._searchService = Cc["@mozilla.org/browser/search-service;1"]
@@ -119,10 +107,12 @@ function SEOrganizer() {
   this.wrappedJSObject = this;
   this._init();
 }
-
-// class definition
 SEOrganizer.prototype = {
   wrappedJSObject: null,
+  classDescription: "For Organizing search engines in folders.",
+  classID: Components.ID("{1a6b3e72-eb74-11db-9041-00ffd1e32fc4}"),
+  contractID: NS_RDF_DATASOURCE_PRE + "organized-internet-search-engines",
+
   indexOutOfDate: true,
   _init: function SEOrganizer___init() {
     this._datasource = this._rdfService.GetDataSourceBlocking(this._saveURI);
@@ -735,7 +725,11 @@ SEOrganizer.prototype = {
         resizer = null;
       };
       for(var i = 0; i < engine.innerEngines.length; i++) {
-        resizer.addIconByURL(engine.innerEngines[i].iconURI.spec);
+        if(engine.innerEngines[i].iconURI && engine.innerEngines[i].iconURI.spec)
+          resizer.addIconByURL(engine.innerEngines[i].iconURI.spec);
+        else { // transparent gif
+          resizer.addIconByImage(resizer._canvas.canvas.cloneElement(false));
+        }
       }
       ss._addEngineToStore(engine);
     }
@@ -992,6 +986,9 @@ function FoldersOnly() {
 }
 FoldersOnly.prototype = {
   _datasource: null,
+  classDescription: "For Organizing search engines in folders.",
+  classID: Components.ID("{f2fa3794-eb73-11db-9d18-00ffd1e32fc4}"),
+  contractID: NS_RDF_DATASOURCE_PRE + "organized-internet-search-folders",
 
   _update: function() {
     this.beginUpdateBatch();
@@ -1116,74 +1113,7 @@ FoldersOnly.prototype = {
   Components.reportError(e);
 }*/
 
-/***********************************************************
-class factory
 
-This object is a member of the global-scope Components.classes.
-It is keyed off of the contract ID. Eg:
-
-myHelloWorld = Cc["@dietrich.ganx4.com/helloworld;1"].
-                          createInstance(Ci.nsISEOrganizer);
-
-***********************************************************/
-var SEOrganizerFactory = {
-  createInstance: function (aOuter, aIID) {
-    if(aOuter !== null)
-      throw Cr.NS_ERROR_NO_AGGREGATION;
-
-    return (new SEOrganizer()).QueryInterface(aIID);
-  }
-};
-var FolderFactory = {
-  createInstance: function (aOuter, aIID) {
-    if(aOuter !== null)
-      throw Cr.NS_ERROR_NO_AGGREGATION;
-
-    return (new FoldersOnly()).QueryInterface(aIID);
-  }
-};
-
-/***********************************************************
-module definition (xpcom registration)
-***********************************************************/
-var SEOrganizerModule = {
-  registerSelf: function(aCompMgr, aFileSpec, aLocation, aType) {
-    aCompMgr = aCompMgr.QueryInterface(Ci.nsIComponentRegistrar);
-    aCompMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME, CONTRACT_ID,
-                                     aFileSpec, aLocation, aType);
-    aCompMgr.registerFactoryLocation(CLASS_ID2, CLASS_NAME, CONTRACT_ID2,
-                                     aFileSpec, aLocation, aType);
-    /*aCompMgr.RegisterComponent(CLASS_ID, CLASS_NAME, CONTRACT_ID,
-                               aFileSpec, true, true);*/
-  },
-
-  unregisterSelf: function(aCompMgr, aLocation, aType) {
-    aCompMgr = aCompMgr.QueryInterface(Ci.nsIComponentRegistrar);
-    aCompMgr.unregisterFactoryLocation(CLASS_ID, aLocation);
-    aCompMgr.unregisterFactoryLocation(CLASS_ID2, aLocation);
-  },
-
-  getClassObject: function(aCompMgr, aCID, aIID) {
-    if (!aIID.equals(Ci.nsIFactory))
-      throw Cr.NS_ERROR_NOT_IMPLEMENTED;
-
-    if (aCID.equals(CLASS_ID))
-      return SEOrganizerFactory;
-    if(aCID.equals(CLASS_ID2))
-      return FolderFactory;
-
-    throw Cr.NS_ERROR_NO_INTERFACE;
-  },
-
-  canUnload: function(aCompMgr) { return true; }
-};
-
-/***********************************************************
-module initialization
-
-When the application registers the component, this function
-is called.
-***********************************************************/
 function NSGetModule(aCompMgr, aFileSpec) {
-  return SEOrganizerModule;
+  return XPCOMUtils.generateModule([SEOrganizer, FoldersOnly]);
 }
