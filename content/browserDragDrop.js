@@ -250,10 +250,10 @@ var seOrganizer_dragObserver = {
         if(hasClass(target, "openintabs-item"))
           target = target.parentNode.parentNode;
         if(target.nodeName == "menuitem" && hasClass(target, "searchbar-engine-menuitem")) {
-          engine = target.engine;
+          engine = organizeSE.SEOrganizer.getEngineByName(target.label);
         } else if(target.nodeName == "menu") {
-          var folder = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService)
-                         .GetResource(target.id);
+          var folder = Cc["@mozilla.org/rdf/rdf-service;1"]
+                         .getService(Ci.nsIRDFService).GetResource(target.id);
           engine = organizeSE.SEOrganizer.folderToEngine(folder);
         }
         var where = whereToOpenLink(event, true, true);
