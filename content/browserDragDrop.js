@@ -52,6 +52,7 @@ var seOrganizer_dragObserver = {
   hoveredItems: [],
 
   onDragEnter: function(event) {
+    Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService).logStringMessage("onDragEnter");
     if(this.overButton(event.target)) {
       organizeSE.searchbar._textbox.openSearch();
     }
@@ -294,11 +295,11 @@ var seOrganizer_dragObserver = {
     return false;
   },
   overButton: function(target) {
-    do {
+    while(target && target.nodeType == target.ELEMENT_NODE) {
       if(target.getAttribute("anonid") == "searchbar-engine-button")
         return true;
-    } while((target = target.parentNode) &&
-            (target.nodeType == target.ELEMENT_NODE));
+      target = target.parentNode;
+    }
     return false;
   },
   getDropTarget: function(elem) {
