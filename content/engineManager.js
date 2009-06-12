@@ -562,8 +562,15 @@ EngineManagerDialog.prototype = {
 
   loadAddEngines: function EngineManager__loadAddEngines() {
     this.onOK();
-    window.opener.BrowserSearch.loadAddEngines();
+    var win = window.opener;
+    if(!win.BrowserSearch) {
+      win = Cc["@mozilla.org/appshell/window-mediator;1"]
+              .getService(Ci.nsIWindowMediator)
+              .getMostRecentWindow("navigator:browser");
+    }
+    win.BrowserSearch.loadAddEngines();
     window.close();
+    win.focus();
   },
 
   startDrag: function EngineManager__startDrag(event) {
