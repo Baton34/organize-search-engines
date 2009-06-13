@@ -51,6 +51,7 @@ organizeSE.__proto__ = {
       return; // in case the user uses an old version of add to search bar
     if(document.getElementById("enginePopup").lastChild.nodeName == "template") {
       document.getElementById("engineList").parentNode.hidden = true;
+      sizeToContent();
       return; // if there are no folders, a list is useless
     }
     this.observer.register();
