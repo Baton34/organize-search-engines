@@ -94,9 +94,13 @@ Contributor(s):
   <!-- - - - - - - - - - extensions - - - - - - - - - -->
   <!-- Auto Context -->
   <menu id="autocontext-searchmenu" ref="urn:organize-search-engines:root"
-        datasources="rdf:organized-internet-search-engines"
-        template="searchbar-template" sortDirection="natural"
-        sortResource="urn:organize-search-engines#Name" />
+         datasources="rdf:organized-internet-search-engines"
+         template="searchbar-template" sortDirection="natural"
+         sortResource="urn:organize-search-engines#Name" />
+  <menu id="autocontext1-searchmenu" ref="urn:organize-search-engines:root"
+         datasources="rdf:organized-internet-search-engines"
+         template="searchbar-template" sortDirection="natural"
+         sortResource="urn:organize-search-engines#Name" hidden="false" />
   <!-- Context Search -->
   <menu id="context-searchmenu" ref="urn:organize-search-engines:root"
         datasources="rdf:organized-internet-search-engines"
