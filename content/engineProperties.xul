@@ -64,7 +64,7 @@ Contributor(s):
         <textbox id="name-textbox" value="" />
       </row>
       <row>
-        <label control="icon-button" value="&prop.icon.label;" accesskey="&prop.icon.accesskey;" />
+        <label control="icon-button" value="&prop.icon.label;" />
         <hbox>
           <box align="center" id="icon-image-container">
             <html:canvas id="icon-image" width="16" height="16" style="background-image: url(moz-icon:///?size=menu);" />
@@ -88,6 +88,10 @@ Contributor(s):
       <row>
         <label control="url-textbox" value="&prop.searchurl.label;" accesskey="&prop.searchurl.accesskey;" />
         <textbox id="url-textbox" value="" />
+      </row>
+      <row>
+        <label control="encoding-textbox" value="&prop.encoding.label;" accesskey="&prop.encoding.accesskey;" />
+        <textbox id="encoding-textbox" value="" />
       </row>
       <row>
         <label control="method-radio" value="&prop.httpmethod.label;" accesskey="&prop.httpmethod.accesskey;" />

@@ -16,13 +16,16 @@
 <!ENTITY prop.keyword.accesskey "K">
 
 <!ENTITY prop.description.label     "Description:">
-<!ENTITY prop.description.accesskey "e">
+<!ENTITY prop.description.accesskey "c">
 
 <!ENTITY prop.homepage.label     "Homepage:">
 <!ENTITY prop.homepage.accesskey "H">
 
 <!ENTITY prop.searchurl.label     "Search URL:">
 <!ENTITY prop.searchurl.accesskey "S">
+
+<!ENTITY prop.encoding.label     "Encoding:">
+<!ENTITY prop.encoding.accesskey "E">
 
 <!ENTITY prop.httpmethod.label     "HTTP Method:">
 <!ENTITY prop.httpmethod.accesskey "M">

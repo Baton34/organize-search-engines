@@ -57,6 +57,7 @@ function init() {
     origEngine = origEngine.__updateToEngine;
   document.getElementById("description-textbox").value = origEngine.description;
   document.getElementById("homepage-textbox").value = origEngine.searchForm;
+  document.getElementById("encoding-textbox").value = origEngine._queryCharset;
   document.getElementById("update-interval-textbox").value = origEngine._updateInterval;
   document.getElementById("update-url-textbox").value = origEngine._updateURL;
   document.getElementById("update-icon-url-textbox").value = origEngine._iconUpdateURL;
@@ -96,9 +97,10 @@ function init() {
   if(origEngine._readOnly && !("_serializeToJSON" in origEngine)) {
     [
      "name-textbox","icon-button","icon-download-button","description-textbox",
-     "homepage-textbox","url-textbox","method-radio-get","method-radio-post",
-     "add-param","remove-param","params-tree","update-url-textbox",
-     "update-data-type-menulist","update-icon-url-textbox","update-interval-row0"
+     "homepage-textbox","url-textbox","encoding-textbox","method-radio-get",
+     "method-radio-post","add-param","remove-param","params-tree",
+     "update-url-textbox","update-data-type-menulist","update-icon-url-textbox",
+     "update-interval-row"
     ].forEach(function(id) document.getElementById(id).disabled = true);
   }
 }
@@ -143,11 +145,12 @@ function storeChanges() {
   gEngine.iconURI = document.getElementById("icon-image").src;
   newEngine._description = document.getElementById("description-textbox").value;
   newEngine._searchForm = document.getElementById("homepage-textbox").value;
+  newEngine._queryCharset = document.getElementById("encoding-textbox").value;
   var url = newEngine._getURLOfType("text/html");
   url.method = (document.getElementById("method-radio").selectedIndex == 0) ? "GET" : "POST";
   url.template = document.getElementById("url-textbox").value;
   var params = document.getElementById("params-tree").view.wrappedJSObject.params;
-  var newParams = new origEngine.__parent__.Array();
+  var newParams = new origEngine.__parent__.Array(); // don't leak this window
   var QueryParameter = origEngine.__parent__.QueryParameter;
   for(var i = 0; i < params.length; i++) {
     var value = params[i].split("=");
