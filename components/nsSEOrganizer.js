@@ -723,12 +723,12 @@ SEOrganizer.prototype = {
         engine.__action = "icon";
         ss.__parent__.notifyAction(engine, "engine-changed");
       };
-      for(var i = 0; i < engine.innerEngines.length; i++) {
-        if(engine.innerEngines[i].iconURI && engine.innerEngines[i].iconURI.spec)
-          resizer.addIconByURL(engine.innerEngines[i].iconURI.spec);
+      engine.innerEngines.forEach(function(e) {
+        if(e.iconURI && e.iconURI.spec)
+          resizer.addIconByURL(e.iconURI.spec);
         else // use transparent image
           resizer.addIconByImage(resizer._canvas.canvas.cloneNode(false));
-      }
+      });
       ss._addEngineToStore(engine);
     }
     return engine;
@@ -737,9 +737,8 @@ SEOrganizer.prototype = {
   // I know of at least one case, where an id was used twice, so we're making
   // sure here, this won't happen again in future
   _getAnonymousResource: function() {
-    var ano = "", rdf = this._rdfService;
     do {
-      ano = rdf.GetAnonymousResource();
+      var ano = this._rdfService.GetAnonymousResource();
     } while(this.ArcLabelsIn(ano).hasMoreElements() ||
             this.ArcLabelsOut(ano).hasMoreElements());
     return ano;
@@ -995,7 +994,7 @@ FoldersOnly.prototype = {
                          .getService(Ci.nsIRDFService);
     var rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
                               .getService(Ci.nsIRDFContainerUtils);
-    var seOrganizer = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer).wrappedJSObject;
+    var seOrganizer = Cc[SEOrganizer.prototype.contractID].getService(Ci.nsISEOrganizer).wrappedJSObject;
 
     var root = rdfService.GetResource(FOLDERS_ROOT);
     var rootContainer = rdfContainerUtils.MakeSeq(datasource, root);
@@ -1006,16 +1005,14 @@ FoldersOnly.prototype = {
       rootContainer.RemoveElement(elements.getNext(), !(hasMore = elements.hasMoreElements()));
 
     try {
-      var item = seOrganizer.getItemByIndex(0), i = 0;
-      while(item) {
-        if(seOrganizer.isFolder(item)) {
-          rootContainer.AppendElement(item);
-        }
-        if(++i < seOrganizer._indexCache.length) {
-          item = seOrganizer.getItemByIndex(i);
-        } else {
+      if(seOrganizer.indexOutOfDate)
+        seOrganizer._updateIndexCache();
+      for(var i = 0; i < seOrganizer._indexCache.length; i++) {
+        var item = seOrganizer.getItemByIndex(i);
+        if(!item)
           break;
-        }
+        if(seOrganizer.isFolder(item))
+          rootContainer.AppendElement(item);
       }
     } catch(e) {}
     this.endUpdateBatch();
