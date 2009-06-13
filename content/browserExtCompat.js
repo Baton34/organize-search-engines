@@ -102,18 +102,24 @@ organizeSE__Extensions.prototype = {
    **     were customized. You may also want to call this method from init.   **
    ****************************************************************************/
 
-  /*** Auto Context 1.4.5.3 ***/
+  /*** Auto Context 1.4.5.6 ***/
   autocontext: {
     get check() {
       return ("gOverlayAutoContext" in window);
     },
     sortDirectionHandler: function sortDirectionHandler(newVal) {
       document.getElementById("autocontext-searchmenu").setAttribute("sortDirection", newVal);
+      document.getElementById("autocontext1-searchmenu").setAttribute("sortDirection", newVal);
     },
     wait: 0,
     init: function() {
-      const menu = document.getElementById("autocontext-searchmenu");
+      var menu = document.getElementById("autocontext-searchmenu");
       menu.addEventListener("popupshowing", this.onPopupShowing, true);
+
+      var menu1 = document.getElementById("autocontext1-searchmenu");
+      menu1.addEventListener("popupshowing", this.onPopupShowing, true);
+      menu1.firstChild.addEventListener("command", organizeSE.extensions.contextSearch.search, false);
+
       gOverlayAutoContext.loadSearch = organizeSE.extensions.contextSearch.search;
     },
     onPopupShowing: function(event) {
@@ -135,13 +141,15 @@ organizeSE__Extensions.prototype = {
       contextsearch.search = this.search;
     },
     search: function(e) {
-      var text;
-      if(e.currentTarget.id == "autocontext-searchmenupopup")
+      var text, where;
+      if(e.currentTarget.id == "autocontext-searchmenupopup" ||
+         e.currentTarget.id == "autocontext1-searchmenupopup") {
         text = gOverlayAutoContext.getNewBrowserSelection();
-      else
+        where = gOverlayAutoContext.whereToOpenLink(e, false, true);
+      } else {
         text = contextsearch.getBrowserSelection(null, e);
-
-      var where = whereToOpenLink(e, false, true);
+        where = whereToOpenLink(e, false, true);
+      }
       if(where == "current") where = "tab";
 
       var target = e.target, engine;
@@ -156,8 +164,12 @@ organizeSE__Extensions.prototype = {
     },
     onPopupShowing: function(event) {
       if(event.target.parentNode == event.currentTarget) {
-        event.target.id = (event.currentTarget.id == "autocontext-searchmenu") ?
-                          "autocontext-searchmenupopup" : "context-searchpopup";
+        if(event.currentTarget.id == "autocontext1-searchmenu")
+          event.target.id = "autocontext1-searchmenupopup";
+        else if(event.currentTarget.id == "autocontext-searchmenu")
+          event.target.id = "autocontext-searchmenupopup";
+        else
+          event.target.id = "context-searchpopup";
         event.currentTarget.builder.rebuild();
       } else {
         organizeSE.removeOpenInTabsItems(event.target);
@@ -209,37 +221,6 @@ organizeSE__Extensions.prototype = {
     }
   },
 
-  /*** Thinger is not compatible with Firefox 3 ***/
-  /*thinger: {
-    init: function() {
-      var popupset = document.getElementById("search-popupset");
-      popupset.addEventListener("popupshowing", this, false);
-    },
-    wait: 0,
-    get check() {
-      return "thinger" in window;
-    },
-    handleEvent: function(event) {
-      if(event.type != "popupshowing")
-        return;
-      var searchbar = document.document.getBindingParent(document.popupNode);
-      var popup = event.target;
-
-      for(var i = 0; i < popup.childNodes.length; i++) {
-        if(popup.childNodes[i].hasAttribute("selected"))
-          popup.childNodes[i].removeAttribute("selected");
-      }
-      var SEOrganizer = organizeSE.SEOrganizer;
-      var name = searchbar.currentEngine.name;
-      var item = SEOrganizer.getItemByName(name), elem;
-      while(item && item.ValueUTF8 != "urn:organize-search-engines:root") {
-        if((elem = document.getElementById(item.ValueUTF8)))
-          elem.setAttribute("selected", "true");
-        item = SEOrganizer.getParent(item);
-      }
-    }
-  },*/
-
   /* SearchLoad Options 0.5.6 */
   searchLoad: {
     get check() { 
@@ -274,5 +255,18 @@ $1");
           node.parentNode.removeChild(node);
       }
     }
+  },
+  
+  /* MultiSearch 1.2.2 */
+  multiSearch: {
+    get check() {
+      return ("MultiSearch" in window);
+    },
+    init: function() {
+      var funcStr = organizeSE.searchbar.doSearch.toString();
+      funcStr = funcStr.replace(/(var\ssubmission)/, "this.normalDoSearch(part, 'tab', arguments[2], null);\ncontinue;\n$1");
+      eval("organizeSE.searchbar.doSearch = " + funcStr);
+    },
+    wait: 0
   }
 };
