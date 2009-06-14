@@ -52,7 +52,6 @@ var seOrganizer_dragObserver = {
   hoveredItems: [],
 
   onDragEnter: function(event) {
-    Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService).logStringMessage("onDragEnter");
     if(this.overButton(event.target)) {
       organizeSE.searchbar._textbox.openSearch();
     }
