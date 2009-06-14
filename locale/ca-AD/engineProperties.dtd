@@ -1,0 +1,38 @@
+<!ENTITY engineProperties.title "Propietats del motor">
+<!ENTITY prop.name.label "Nom:">
+<!ENTITY prop.name.accesskey "N">
+<!ENTITY prop.icon.label "Icona:">
+<!ENTITY prop.icon.accesskey "I">
+<!ENTITY prop.icon.browse.label "Explora...">
+<!ENTITY prop.icon.browse.accesskey "E">
+<!ENTITY prop.icon.download.label "Descarrega automàticament">
+<!ENTITY prop.icon.download.accesskey "D">
+<!ENTITY prop.keyword.label "Paraula clau:">
+<!ENTITY prop.keyword.accesskey "P">
+<!ENTITY prop.description.label "Descripció:">
+<!ENTITY prop.description.accesskey "e">
+<!ENTITY prop.homepage.label "Pàgina d&apos;inici:">
+<!ENTITY prop.homepage.accesskey "g">
+<!ENTITY prop.searchurl.label "Cerca l&apos;URL:">
+<!ENTITY prop.searchurl.accesskey "C">
+<!ENTITY prop.httpmethod.label "Mètode HTTP:">
+<!ENTITY prop.httpmethod.accesskey "M">
+<!ENTITY prop.parameter.label "Paràmetre:">
+<!ENTITY prop.parameter.accesskey "r">
+<!ENTITY prop.parameter.add.label "Afegeix:">
+<!ENTITY prop.parameter.add.accesskey "A">
+<!ENTITY prop.parameter.remove.label "Elimina:">
+<!ENTITY prop.parameter.remove.accesskey "l">
+<!ENTITY prop.update.url.label "Actualitza l&apos;URL:">
+<!ENTITY prop.update.url.accesskey "c">
+<!ENTITY prop.update.datatype.label "Actualitza el tipus de dada:">
+<!ENTITY prop.update.datatype.accesskey "t">
+<!ENTITY prop.update.datatype.openmozsearch.label "OpenSearch o MozSearch">
+<!ENTITY prop.update.datatype.openmozsearch.accesskey "Oh">
+<!ENTITY prop.update.datatype.sherlock.label "Apple Sherlock">
+<!ENTITY prop.update.datatype.sherlock.accesskey "h">
+<!ENTITY prop.update.icon.label "URL d&apos;actualització de la icona:">
+<!ENTITY prop.update.icon.accesskey "n">
+<!ENTITY prop.update.interval.label "Interval d&apos;actualització:">
+<!ENTITY prop.update.interval.accesskey "I">
+<!ENTITY prop.update.interval.days.label "dies">

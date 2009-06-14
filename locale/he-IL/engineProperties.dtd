@@ -1,0 +1,38 @@
+<!ENTITY engineProperties.title "מאפייני מנוע">
+<!ENTITY prop.name.label "שם:">
+<!ENTITY prop.name.accesskey "ש">
+<!ENTITY prop.icon.label "צלמית">
+<!ENTITY prop.icon.accesskey "צ">
+<!ENTITY prop.icon.browse.label "עיון">
+<!ENTITY prop.icon.browse.accesskey "ע">
+<!ENTITY prop.icon.download.label "הורד אוטומטית">
+<!ENTITY prop.icon.download.accesskey "ה">
+<!ENTITY prop.keyword.label "מילת מפתח:">
+<!ENTITY prop.keyword.accesskey "מ">
+<!ENTITY prop.description.label "תיאור:">
+<!ENTITY prop.description.accesskey "ת">
+<!ENTITY prop.homepage.label "דף הבית:">
+<!ENTITY prop.homepage.accesskey "ד">
+<!ENTITY prop.searchurl.label "כתובת חיפוש:">
+<!ENTITY prop.searchurl.accesskey "כ">
+<!ENTITY prop.httpmethod.label "שיטת HTTP:">
+<!ENTITY prop.httpmethod.accesskey "ש">
+<!ENTITY prop.parameter.label "פרמטר:">
+<!ENTITY prop.parameter.accesskey "פ">
+<!ENTITY prop.parameter.add.label "הוסף:">
+<!ENTITY prop.parameter.add.accesskey "ו">
+<!ENTITY prop.parameter.remove.label "הסר:">
+<!ENTITY prop.parameter.remove.accesskey "ס">
+<!ENTITY prop.update.url.label "כתובת לעידכון:">
+<!ENTITY prop.update.url.accesskey "ע">
+<!ENTITY prop.update.datatype.label "סוג מידע עידכון:">
+<!ENTITY prop.update.datatype.accesskey "ס">
+<!ENTITY prop.update.datatype.openmozsearch.label "OpenSearch או MozSearch">
+<!ENTITY prop.update.datatype.openmozsearch.accesskey "ז">
+<!ENTITY prop.update.datatype.sherlock.label "Apple Sherlock">
+<!ENTITY prop.update.datatype.sherlock.accesskey "ק">
+<!ENTITY prop.update.icon.label "כתובת צלמית לעדכון:">
+<!ENTITY prop.update.icon.accesskey "ת">
+<!ENTITY prop.update.interval.label "תדירות עידכון:">
+<!ENTITY prop.update.interval.accesskey "ד">
+<!ENTITY prop.update.interval.days.label "ימים">

@@ -1,0 +1,38 @@
+<!ENTITY engineProperties.title "Keresőszolgáltatás tulajdonságai">
+<!ENTITY prop.name.label "Név:">
+<!ENTITY prop.name.accesskey "N">
+<!ENTITY prop.icon.label "Ikon:">
+<!ENTITY prop.icon.accesskey "I">
+<!ENTITY prop.icon.browse.label "Tallózás...">
+<!ENTITY prop.icon.browse.accesskey "T">
+<!ENTITY prop.icon.download.label "Automatikus letöltés">
+<!ENTITY prop.icon.download.accesskey "A">
+<!ENTITY prop.keyword.label "Kulcsszó:">
+<!ENTITY prop.keyword.accesskey "K">
+<!ENTITY prop.description.label "Leírás:">
+<!ENTITY prop.description.accesskey "L">
+<!ENTITY prop.homepage.label "Honlap:">
+<!ENTITY prop.homepage.accesskey "o">
+<!ENTITY prop.searchurl.label "Webcím keresése:">
+<!ENTITY prop.searchurl.accesskey "W">
+<!ENTITY prop.httpmethod.label "HTTP módszer:">
+<!ENTITY prop.httpmethod.accesskey "m">
+<!ENTITY prop.parameter.label "Paraméter:">
+<!ENTITY prop.parameter.accesskey "P">
+<!ENTITY prop.parameter.add.label "Hozzáadás:">
+<!ENTITY prop.parameter.add.accesskey "H">
+<!ENTITY prop.parameter.remove.label "Eltávolítás:">
+<!ENTITY prop.parameter.remove.accesskey "E">
+<!ENTITY prop.update.url.label "Webcím frissítése:">
+<!ENTITY prop.update.url.accesskey "f">
+<!ENTITY prop.update.datatype.label "Adattípus frissítése:">
+<!ENTITY prop.update.datatype.accesskey "r">
+<!ENTITY prop.update.datatype.openmozsearch.label "OpenSearch vagy MozSearch">
+<!ENTITY prop.update.datatype.openmozsearch.accesskey "OM">
+<!ENTITY prop.update.datatype.sherlock.label "Apple Sherlock">
+<!ENTITY prop.update.datatype.sherlock.accesskey "p">
+<!ENTITY prop.update.icon.label "Az ikon frissítésének webcíme:">
+<!ENTITY prop.update.icon.accesskey "z">
+<!ENTITY prop.update.interval.label "Frissítés intervallum:">
+<!ENTITY prop.update.interval.accesskey "i">
+<!ENTITY prop.update.interval.days.label "Napok">

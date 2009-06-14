@@ -1,0 +1,38 @@
+<!ENTITY engineProperties.title "Engine Properties">
+<!ENTITY prop.name.label "Name:">
+<!ENTITY prop.name.accesskey "N">
+<!ENTITY prop.icon.label "Icon:">
+<!ENTITY prop.icon.accesskey "I">
+<!ENTITY prop.icon.browse.label "Browse…">
+<!ENTITY prop.icon.browse.accesskey "B">
+<!ENTITY prop.icon.download.label "Download Automatically">
+<!ENTITY prop.icon.download.accesskey "D">
+<!ENTITY prop.keyword.label "Keyword:">
+<!ENTITY prop.keyword.accesskey "K">
+<!ENTITY prop.description.label "Description:">
+<!ENTITY prop.description.accesskey "e">
+<!ENTITY prop.homepage.label "Homepage:">
+<!ENTITY prop.homepage.accesskey "H">
+<!ENTITY prop.searchurl.label "Search URL:">
+<!ENTITY prop.searchurl.accesskey "S">
+<!ENTITY prop.httpmethod.label "HTTP Method:">
+<!ENTITY prop.httpmethod.accesskey "M">
+<!ENTITY prop.parameter.label "Parameter:">
+<!ENTITY prop.parameter.accesskey "P">
+<!ENTITY prop.parameter.add.label "Add:">
+<!ENTITY prop.parameter.add.accesskey "A">
+<!ENTITY prop.parameter.remove.label "Remove:">
+<!ENTITY prop.parameter.remove.accesskey "R">
+<!ENTITY prop.update.url.label "Update URL:">
+<!ENTITY prop.update.url.accesskey "U">
+<!ENTITY prop.update.datatype.label "Update Data Type:">
+<!ENTITY prop.update.datatype.accesskey "T">
+<!ENTITY prop.update.datatype.openmozsearch.label "OpenSearch or MozSearch">
+<!ENTITY prop.update.datatype.openmozsearch.accesskey "Oh">
+<!ENTITY prop.update.datatype.sherlock.label "Apple Sherlock">
+<!ENTITY prop.update.datatype.sherlock.accesskey "A">
+<!ENTITY prop.update.icon.label "Icon Update URL:">
+<!ENTITY prop.update.icon.accesskey "n">
+<!ENTITY prop.update.interval.label "Update Interval:">
+<!ENTITY prop.update.interval.accesskey "U">
+<!ENTITY prop.update.interval.days.label "Days">
