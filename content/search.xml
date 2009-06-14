@@ -220,18 +220,4 @@ Contributor(s):
     </implementation>
   </binding>
 
-  <binding id="searchbar-textbox" extends="chrome://browser/content/search/search.xml#searchbar-textbox">
-    <implementation>
-      <method name="openSearch">
-        <body><![CDATA[
-          // Don't open search popup if history popup is open
-          if(this.popupOpen)
-            return true;
-          // click the button to open the *external* popup
-          document.getBindingParent(this).searchButton.click();
-          return false;
-        ]]></body>
-      </method>
-    </implementation>
-  </binding>
 </bindings>

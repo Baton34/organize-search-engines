@@ -89,7 +89,16 @@ SEOrganizer.prototype = {
     popupset.builder.rebuild();
   },
 
-  _customizeToolbarListeners: [ ],
+  _customizeToolbarListeners: [ function() {
+    this.searchbar._textbox.openSearch = function() {
+      // Don't open search popup if history popup is open
+      if(this.popupOpen)
+        return true;
+      // click the button to open the *external* popup
+      document.getBindingParent(this).searchButton.click();
+      return false;
+    };
+  }],
   // this is called from init() and from the searchbar binding
   customizeToolbarListener: function() {
     var listeners = organizeSE._customizeToolbarListeners;

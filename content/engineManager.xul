@@ -55,7 +55,7 @@ Contributor(s):
         onunload="gEngineManagerDialog.onCancel(event);"
         title="&engineManager.title;"
         persist="screenX screenY width height"
-        height="600"
+        height="400"
         width="750"
         windowtype="Browser:SearchManager">
 
@@ -243,7 +243,7 @@ Contributor(s):
   <description id="engineManager-intro">&engineManager.intro;</description>
 
   <hbox flex="1" id="engineList-container">
-    <tree id="engineList" flex="1" rows="15" editable="true"
+    <tree id="engineList" flex="1" rows="5" editable="true"
           enableColumnDrag="true" flags="dont-build-content"
           onselect="gEngineManagerDialog.onSelect();"
           ondraggesture="gEngineManagerDialog.startDrag(event);">
