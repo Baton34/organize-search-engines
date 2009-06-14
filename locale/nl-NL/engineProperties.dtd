@@ -1,0 +1,38 @@
+<!ENTITY engineProperties.title "Zoekmachine eigenschappen">
+<!ENTITY prop.name.label "Naam:">
+<!ENTITY prop.name.accesskey "N">
+<!ENTITY prop.icon.label "Pictogram:">
+<!ENTITY prop.icon.accesskey "P">
+<!ENTITY prop.icon.browse.label "Bladeren...">
+<!ENTITY prop.icon.browse.accesskey "B">
+<!ENTITY prop.icon.download.label "Automatisch downloaden">
+<!ENTITY prop.icon.download.accesskey "D">
+<!ENTITY prop.keyword.label "Sleutelwoord:">
+<!ENTITY prop.keyword.accesskey "S">
+<!ENTITY prop.description.label "Omschrijving:">
+<!ENTITY prop.description.accesskey "O">
+<!ENTITY prop.homepage.label "Startpagina:">
+<!ENTITY prop.homepage.accesskey "p">
+<!ENTITY prop.searchurl.label "Zoek webadres:">
+<!ENTITY prop.searchurl.accesskey "Z">
+<!ENTITY prop.httpmethod.label "HTTP-methode:">
+<!ENTITY prop.httpmethod.accesskey "H">
+<!ENTITY prop.parameter.label "Parameter:">
+<!ENTITY prop.parameter.accesskey "m">
+<!ENTITY prop.parameter.add.label "Toevoegen">
+<!ENTITY prop.parameter.add.accesskey "T">
+<!ENTITY prop.parameter.remove.label "Verwijderen">
+<!ENTITY prop.parameter.remove.accesskey "V">
+<!ENTITY prop.update.url.label "Webadres bijwerken:">
+<!ENTITY prop.update.url.accesskey "W">
+<!ENTITY prop.update.datatype.label "Gegevenstype bijwerken:">
+<!ENTITY prop.update.datatype.accesskey "G">
+<!ENTITY prop.update.datatype.openmozsearch.label "OpenSearch of MozSearch">
+<!ENTITY prop.update.datatype.openmozsearch.accesskey "OM">
+<!ENTITY prop.update.datatype.sherlock.label "Apple Sherlock">
+<!ENTITY prop.update.datatype.sherlock.accesskey "A">
+<!ENTITY prop.update.icon.label "Pictogram webadres bijwerken:">
+<!ENTITY prop.update.icon.accesskey "w">
+<!ENTITY prop.update.interval.label "Bijwerk interval:">
+<!ENTITY prop.update.interval.accesskey "i">
+<!ENTITY prop.update.interval.days.label "dagen">
