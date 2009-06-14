@@ -82,8 +82,6 @@ Contributor(s):
           if(aTopic != "browser-search-engine-modified")
             return;
 
-          this._popup.hidePopup();
-
           if(aEngine)
             aEngine = aEngine.wrappedJSObject;
           if(aVerb == "engine-changed" && (!aEngine ||
@@ -93,22 +91,27 @@ Contributor(s):
 
           if(aVerb == "engine-removed" || (aVerb == "engine-changed" &&
              aEngine.__action == "hidden" && aEngine.hidden)) {
+            this._popup.hidePopup();
             this.offerNewEngine(aEngine);
             this._engines = null; // empty cache
             this.updateDisplay(); // maybe the current engine was removed
           } else if(aVerb == "engine-added" || (aVerb == "engine-changed" &&
                     aEngine.__action == "hidden" && !aEngine.hidden)) {
+            if(!("innerEngines" in aEngine))
+              this._popup.hidePopup();
             this._engines = null; // empty cache
             this.hideNewEngine(aEngine);
           } else if(aVerb == "engine-current" ||
                     (aVerb == "engine-changed" && ["icon", "name"].indexOf(aEngine.__action) != -1)) {
+            this._popup.hidePopup();
             this.updateDisplay();
           } else if(aVerb == "-engines-organized") {
+            this._popup.hidePopup();
             this.updateDisplay();
             if("oDenDZones_Observer" in window)
               window.setTimeout(function() { oDenDZones_Observer.observe(); }, 0);
           } else if(aVerb == "engine-changed" && aEngine.__action == "move") {
-             this._engines = null; // empty cache
+            this._engines = null; // empty cache
           }
 
           // lazily rebuild the popup in case of many notifications at once
