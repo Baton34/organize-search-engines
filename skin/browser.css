@@ -16,9 +16,6 @@ menuseparator.searchbar-engine-menuseparator {
 searchbar {
   -moz-binding: url(chrome://seorganizer/content/search.xml#searchbar);
 }
-.searchbar-textbox {
-  -moz-binding: url(chrome://seorganizer/content/search.xml#searchbar-textbox);
-}
 
 #search-popup, menu.searchbar-engine-menu > menupopup {
   -moz-binding: url(chrome://seorganizer/content/menupopup.xml#places-popup-base);
