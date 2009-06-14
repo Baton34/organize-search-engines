@@ -13,6 +13,8 @@
 <!ENTITY rename.accesskey "n">
 <!ENTITY editalias.label "Sleutelwoord wijzigen...">
 <!ENTITY editalias.accesskey "t">
+<!ENTITY properties.label "Eigenschappen...">
+<!ENTITY properties.accesskey "E">
 <!ENTITY context.new.label "Nieuw">
 <!ENTITY context.new.accesskey "w">
 <!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">
