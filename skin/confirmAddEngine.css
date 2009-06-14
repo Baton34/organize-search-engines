@@ -6,10 +6,9 @@
 
 vbox[id="info.box"],
 description[id="info.body"] {
-  white-space: -moz-pre-wrap;
   white-space: pre-wrap;
 }
 
-#commonDialog > hbox[flex="1"] > vbox[flex="1" {
+#commonDialog > hbox > vbox {
   max-width: 45em;
 }
