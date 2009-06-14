@@ -13,6 +13,8 @@
 <!ENTITY rename.accesskey "n">
 <!ENTITY editalias.label "Edytuj słowo kluczowe...">
 <!ENTITY editalias.accesskey "k">
+<!ENTITY properties.label "">
+<!ENTITY properties.accesskey "">
 <!ENTITY context.new.label "Nowy">
 <!ENTITY context.new.accesskey "w">
 <!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">

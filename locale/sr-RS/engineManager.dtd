@@ -13,6 +13,8 @@
 <!ENTITY rename.accesskey "н">
 <!ENTITY editalias.label "Обради кључну реч...">
 <!ENTITY editalias.accesskey "К">
+<!ENTITY properties.label "Својства...">
+<!ENTITY properties.accesskey "С">
 <!ENTITY context.new.label "Ново">
 <!ENTITY context.new.accesskey "е">
 <!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">
@@ -20,18 +22,18 @@
 <!ENTITY noconflict.up.accesskey "&up.accesskey;">
 <!ENTITY noconflict.dn.accesskey "&dn.accesskey;">
 <!ENTITY fileMenu.label "Датотека">
-<!ENTITY fileMenu.accesskey "Ф">
+<!ENTITY fileMenu.accesskey "Д">
 <!ENTITY closeCmd.label "Затвори">
-<!ENTITY closeCmd.accesskey "Ц">
+<!ENTITY closeCmd.accesskey "З">
 <!ENTITY viewMenu.label "Преглед">
-<!ENTITY viewMenu.accesskey "В">
+<!ENTITY viewMenu.accesskey "Е">
 <!ENTITY menuitem.view.command.toolbar.label "Трака са алаткама">
 <!ENTITY menuitem.view.command.toolbar.accesskey "Т">
 <!ENTITY menuitem.view.show_columns.label "Прикажи колоне">
-<!ENTITY menuitem.view.show_columns.accesskey "С">
+<!ENTITY menuitem.view.show_columns.accesskey "П">
 <!ENTITY menuitem.view.unsorted.label "Непоређано">
-<!ENTITY menuitem.view.unsorted.accesskey "У">
+<!ENTITY menuitem.view.unsorted.accesskey "Н">
 <!ENTITY sortAscending.label "Растуће">
-<!ENTITY sortAscending.accesskey "А">
+<!ENTITY sortAscending.accesskey "Р">
 <!ENTITY sortDescending.label "Опадајуће">
-<!ENTITY sortDescending.accesskey "Д">
+<!ENTITY sortDescending.accesskey "О">

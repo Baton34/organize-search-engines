@@ -13,6 +13,8 @@
 <!ENTITY rename.accesskey "t">
 <!ENTITY editalias.label "Módosítás...">
 <!ENTITY editalias.accesskey "M">
+<!ENTITY properties.label "Tulajdonságok...">
+<!ENTITY properties.accesskey "u">
 <!ENTITY context.new.label "Új">
 <!ENTITY context.new.accesskey "j">
 <!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">

@@ -1,5 +1,8 @@
 <!ENTITY namecol.label "Назва">
 <!ENTITY aliascol.label "Ключове слово">
+<!ENTITY addEngine.accesskey "">
+<!ENTITY restoreDefault.label "">
+<!ENTITY restoreDefault.accesskey "">
 <!ENTITY new-folder.label "Нова папка...">
 <!ENTITY new-folder.accesskey "п">
 <!ENTITY new-separator.label "Новий розділювач">
@@ -10,9 +13,27 @@
 <!ENTITY rename.accesskey "н">
 <!ENTITY editalias.label "Редагувати ключове слово...">
 <!ENTITY editalias.accesskey "к">
+<!ENTITY properties.label "">
+<!ENTITY properties.accesskey "">
+<!ENTITY context.new.label "">
+<!ENTITY context.new.accesskey "">
+<!ENTITY noconflict.enableSuggest.accesskey "">
+<!ENTITY noconflict.remove.accesskey "">
+<!ENTITY noconflict.up.accesskey "">
+<!ENTITY noconflict.dn.accesskey "">
 <!ENTITY fileMenu.label "Файл">
 <!ENTITY fileMenu.accesskey "ф">
 <!ENTITY closeCmd.label "Закрити">
 <!ENTITY closeCmd.accesskey "З">
+<!ENTITY viewMenu.label "">
+<!ENTITY viewMenu.accesskey "">
 <!ENTITY menuitem.view.command.toolbar.label "Панель інструментів">
 <!ENTITY menuitem.view.command.toolbar.accesskey "і">
+<!ENTITY menuitem.view.show_columns.label "">
+<!ENTITY menuitem.view.show_columns.accesskey "">
+<!ENTITY menuitem.view.unsorted.label "">
+<!ENTITY menuitem.view.unsorted.accesskey "">
+<!ENTITY sortAscending.label "">
+<!ENTITY sortAscending.accesskey "">
+<!ENTITY sortDescending.label "">
+<!ENTITY sortDescending.accesskey "">

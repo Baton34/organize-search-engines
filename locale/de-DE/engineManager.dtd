@@ -1,45 +1,39 @@
-<!ENTITY namecol.label                           "Name">
-<!ENTITY aliascol.label                          "Schlüsselwort">
-
-<!ENTITY addEngine.accesskey                     "M">
-<!ENTITY restoreDefault.label                    "Vorgabe wiederherstellen">
-<!ENTITY restoreDefault.accesskey                "V">
-
-<!ENTITY new-folder.label                        "Neuer Ordner…">
-<!ENTITY new-folder.accesskey                    "N">
-<!ENTITY new-separator.label                     "Neue Trennlinie">
-<!ENTITY new-separator.accesskey                 "T">
-
-<!ENTITY move-engine.label                       "Verschieben…">
-<!ENTITY move-engine.accesskey                   "V">
-
-<!ENTITY rename.label                            "Umbenennen…">
-<!ENTITY rename.accesskey                        "n">
-<!ENTITY editalias.label                         "Schlüsselwort…">
-<!ENTITY editalias.accesskey                     "S">
-
-<!ENTITY context.new.label        "Neu">
-<!ENTITY context.new.accesskey    "e">
-
-<!ENTITY noconflict.enableSuggest.accesskey      "&enableSuggest.accesskey;">
-<!ENTITY noconflict.remove.accesskey             "&remove.accesskey;">
-<!ENTITY noconflict.up.accesskey                 "&up.accesskey;">
-<!ENTITY noconflict.dn.accesskey                 "&dn.accesskey;">
-
-
-<!ENTITY fileMenu.label                          "Datei">
-<!ENTITY fileMenu.accesskey                      "D">
-<!ENTITY closeCmd.label                          "Beenden">
-<!ENTITY closeCmd.accesskey                      "B">
-<!ENTITY viewMenu.label                          "Ansicht">
-<!ENTITY viewMenu.accesskey                      "A">
-<!ENTITY menuitem.view.command.toolbar.label     "Symbolleiste">
+<!ENTITY namecol.label "Name">
+<!ENTITY aliascol.label "Schlüsselwort">
+<!ENTITY addEngine.accesskey "M">
+<!ENTITY restoreDefault.label "Vorgabe wiederherstellen">
+<!ENTITY restoreDefault.accesskey "V">
+<!ENTITY new-folder.label "Neuer Ordner…">
+<!ENTITY new-folder.accesskey "N">
+<!ENTITY new-separator.label "Neue Trennlinie">
+<!ENTITY new-separator.accesskey "T">
+<!ENTITY move-engine.label "Verschieben…">
+<!ENTITY move-engine.accesskey "V">
+<!ENTITY rename.label "Umbenennen…">
+<!ENTITY rename.accesskey "n">
+<!ENTITY editalias.label "Schlüsselwort…">
+<!ENTITY editalias.accesskey "S">
+<!ENTITY properties.label "Eigenschaften…">
+<!ENTITY properties.accesskey "i">
+<!ENTITY context.new.label "Neu">
+<!ENTITY context.new.accesskey "e">
+<!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">
+<!ENTITY noconflict.remove.accesskey "&remove.accesskey;">
+<!ENTITY noconflict.up.accesskey "&up.accesskey;">
+<!ENTITY noconflict.dn.accesskey "&dn.accesskey;">
+<!ENTITY fileMenu.label "Datei">
+<!ENTITY fileMenu.accesskey "D">
+<!ENTITY closeCmd.label "Beenden">
+<!ENTITY closeCmd.accesskey "B">
+<!ENTITY viewMenu.label "Ansicht">
+<!ENTITY viewMenu.accesskey "A">
+<!ENTITY menuitem.view.command.toolbar.label "Symbolleiste">
 <!ENTITY menuitem.view.command.toolbar.accesskey "S">
-<!ENTITY menuitem.view.show_columns.label        "Spalten Anzeigen">
-<!ENTITY menuitem.view.show_columns.accesskey    "A">
-<!ENTITY menuitem.view.unsorted.label            "Unsortiert">
-<!ENTITY menuitem.view.unsorted.accesskey        "U">
-<!ENTITY sortAscending.label                     "Aufsteigend">
-<!ENTITY sortAscending.accesskey                 "f">
-<!ENTITY sortDescending.label                    "Absteigend">
-<!ENTITY sortDescending.accesskey                "b">
+<!ENTITY menuitem.view.show_columns.label "Spalten Anzeigen">
+<!ENTITY menuitem.view.show_columns.accesskey "A">
+<!ENTITY menuitem.view.unsorted.label "Unsortiert">
+<!ENTITY menuitem.view.unsorted.accesskey "U">
+<!ENTITY sortAscending.label "Aufsteigend">
+<!ENTITY sortAscending.accesskey "f">
+<!ENTITY sortDescending.label "Absteigend">
+<!ENTITY sortDescending.accesskey "b">

@@ -13,6 +13,8 @@
 <!ENTITY rename.accesskey "N">
 <!ENTITY editalias.label "Anahtar kelimeleri düzenle...">
 <!ENTITY editalias.accesskey "K">
+<!ENTITY properties.label "Tercihler">
+<!ENTITY properties.accesskey "P">
 <!ENTITY context.new.label "Yeni">
 <!ENTITY context.new.accesskey "e">
 <!ENTITY noconflict.enableSuggest.accesskey "Öneriler etkin">

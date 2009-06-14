@@ -13,6 +13,8 @@
 <!ENTITY rename.accesskey "ש">
 <!ENTITY editalias.label "ערוך מילת מפתח...">
 <!ENTITY editalias.accesskey "מ">
+<!ENTITY properties.label "מאפיינים...">
+<!ENTITY properties.accesskey "א">
 <!ENTITY context.new.label "חדש">
 <!ENTITY context.new.accesskey "ח">
 <!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">
