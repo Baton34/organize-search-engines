@@ -49,14 +49,14 @@ Contributor(s):
   %editmenu;
 ]>
 
-<window id="engineManager"
+<window id="engineManager2"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         onload="gEngineManagerDialog.init();"
         onunload="gEngineManagerDialog.onCancel(event);"
         title="&engineManager.title;"
         persist="screenX screenY width height"
         height="600"
-        width="650"
+        width="750"
         windowtype="Browser:SearchManager">
 
   <stringbundleset>
