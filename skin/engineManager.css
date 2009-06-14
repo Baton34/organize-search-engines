@@ -10,18 +10,16 @@ treechildren::-moz-tree-image(separator) {
 
 
 
-/* copied from the default theme's bookmarksManager.css (Firefox 2) */
 toolbarbutton {
-  list-style-image: url("chrome://seorganizer/skin/Bookmarks-toolbar.png");
+  list-style-image: url("chrome://seorganizer/skin/tango-icons/sprites.png");
   -moz-box-orient: vertical;
-  min-width: 57px;
+  min-width: 34px;
   padding: 5px;
 }
 toolbaritem#moveupdown {
   padding: 0 5px;
 }
 toolbarbutton#moveup, toolbarbutton#movedown {
-  list-style-image: url("chrome://seorganizer/skin/find.png");
   min-width: 16px;
   padding: 0;
 }
@@ -32,108 +30,76 @@ toolbarbutton:not([orient="horizontal"]) > .toolbarbutton-icon {
   -moz-margin-end: 0px;
 }
 
-/* new bookmark */
-
-toolbarbutton#newbookmark {
-  -moz-image-region: rect(0px 24px 24px 0px);
-}
-toolbarbutton#newbookmark:not([disabled="true"]):hover {
-  -moz-image-region: rect(24px 24px 48px 0px);
-}
-toolbarbutton#newbookmark[disabled="true"] {
-  -moz-image-region: rect(72px 24px 96px 0px);
-}
-toolbarbutton#newbookmark:not([disabled="true"]):hover:active {
-  -moz-image-region: rect(48px 24px 72px 0px);
-}
-
 /* new folder */
 
 toolbarbutton#newfolder {
-  -moz-image-region: rect(0px 48px 24px 24px);
+  -moz-image-region: rect(0px 24px 24px 0px);
 }
 toolbarbutton#newfolder:not([disabled="true"]):hover {
-  -moz-image-region: rect(24px 48px 48px 24px);
+  -moz-image-region: rect(24px 24px 48px 0px);
 }
 toolbarbutton#newfolder[disabled="true"] {
-   -moz-image-region: rect(72px 48px 96px 24px);
-}
-toolbarbutton#newfolder:not([disabled="true"]):hover:active {
-  -moz-image-region: rect(48px 48px 72px 24px);
+  -moz-image-region: rect(48px 24px 72px 0px);
 }
 
 /* new separator */
 
 toolbarbutton#newseparator {
-  -moz-image-region: rect(0px 72px 24px 48px);
+  -moz-image-region: rect(0px 48px 24px 24px);
 }
 toolbarbutton#newseparator:not([disabled="true"]):hover {
-  -moz-image-region: rect(24px 72px 48px 48px);
+   -moz-image-region: rect(24px 48px 48px 24px);
 }
 toolbarbutton#newseparator[disabled="true"] {
-  -moz-image-region: rect(72px 72px 96px 48px);
+  -moz-image-region: rect(48px 48px 72px 24px);
 }
-toolbarbutton#newseparator:not([disabled="true"]):hover:active {
+
+/* move */
+
+toolbarbutton#moveengine {
+  -moz-image-region: rect(0px 72px 24px 48px);
+}
+toolbarbutton#moveengine:not([disabled="true"]):hover {
+  -moz-image-region: rect(24px 72px 48px 48px);
+}
+toolbarbutton#moveengine[disabled="true"] {
   -moz-image-region: rect(48px 72px 72px 48px);
 }
 
-/* move bookmark */
+/* rename */
 
-toolbarbutton#moveengine {
+toolbarbutton#rename {
   -moz-image-region: rect(0px 96px 24px 72px);
 }
-toolbarbutton#moveengine:not([disabled="true"]):hover {
+toolbarbutton#rename:not([disabled="true"]):hover {
   -moz-image-region: rect(24px 96px 48px 72px);
 }
-toolbarbutton#moveengine[disabled="true"] {
-  -moz-image-region: rect(72px 96px 96px 72px);
-}
-toolbarbutton#moveengine:not([disabled="true"]):hover:active {
+toolbarbutton#rename[disabled="true"] {
   -moz-image-region: rect(48px 96px 72px 72px);
 }
 
-/* properties */
+/* edit alias */
 
-toolbarbutton#properties {
+toolbarbutton#editalias {
   -moz-image-region: rect(0px 120px 24px 96px);
 }
-toolbarbutton#properties:not([disabled="true"]):hover {
+toolbarbutton#editalias:not([disabled="true"]):hover {
   -moz-image-region: rect(24px 120px 48px 96px);
 }
-toolbarbutton#properties[disabled="true"] {
-  -moz-image-region: rect(72px 120px 96px 96px);
-}
-toolbarbutton#properties:not([disabled="true"]):hover:active {
+toolbarbutton#editalias[disabled="true"] {
   -moz-image-region: rect(48px 120px 72px 96px);
 }
 
-/* rename */
-toolbarbutton#rename {
+
+/* properties */
+toolbarbutton#properties {
   -moz-image-region: rect(0px 144px 24px 120px);
 }
-toolbarbutton#rename:not([disabled="true"]):hover {
+toolbarbutton#properties:not([disabled="true"]):hover {
   -moz-image-region: rect(24px 144px 48px 120px);
 }
-toolbarbutton#rename[disabled="true"] {
-  -moz-image-region: rect(72px 144px 96px 120px);
-}
-toolbarbutton#rename:not([disabled="true"]):hover:active {
+toolbarbutton#properties[disabled="true"] {
   -moz-image-region: rect(48px 144px 72px 120px);
-}
-
-/* keyword */
-toolbarbutton#editalias {
-  list-style-image: url(keyword-toolbar.png);
-  -moz-image-region: rect(0px 24px 24px 0px);
-}
-toolbarbutton#editalias:not([disabled="true"]):hover {
-  -moz-image-region: rect(24px 24px 48px 0px);
-}
-toolbarbutton#editalias[disabled="true"] {
-  -moz-image-region: rect(72px 24px 96px 0px);
-}
-toolbarbutton#editalias:not([disabled="true"]):hover:active {
-  -moz-image-region: rect(48px 24px 72px 0px);
 }
 
 /* delete */
@@ -145,32 +111,29 @@ toolbarbutton#delete:not([disabled="true"]):hover {
   -moz-image-region: rect(24px 168px 48px 144px);
 }
 toolbarbutton#delete[disabled="true"] {
-  -moz-image-region: rect(72px 168px 96px 144px);
-}
-toolbarbutton#delete:not([disabled="true"]):hover:active {
   -moz-image-region: rect(48px 168px 72px 144px);
 }
 
 /* move up */
 toolbarbutton#moveup {
-  -moz-image-region: rect(0px 32px 16px 16px);
+  -moz-image-region: rect(0px 184px 16px 168px);
 }
 toolbarbutton#moveup:hover {
-  -moz-image-region: rect(16px 32px 32px 16px);
+  -moz-image-region: rect(16px 184px 32px 168px);
 }
 toolbarbutton#moveup[disabled="true"] {
-  -moz-image-region: rect(32px 32px 48px 16px);
+  -moz-image-region: rect(32px 184px 48px 168px);
 }
 
 /* move down */
 toolbarbutton#movedown {
-  -moz-image-region: rect(0px 16px 16px 0px);
+  -moz-image-region: rect(0px 200px 16px 184px);
 }
 toolbarbutton#movedown:hover {
-  -moz-image-region: rect(16px 16px 32px 0px);
+  -moz-image-region: rect(16px 200px 32px 184px);
 }
 toolbarbutton#movedown[disabled="true"] {
-  -moz-image-region: rect(32px 16px 48px 0px);
+  -moz-image-region: rect(32px 200px 48px 184px);
 }
 
 
