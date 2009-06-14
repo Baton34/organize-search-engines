@@ -449,7 +449,7 @@ EngineManagerDialog.prototype = {
       insertLoc = -1;
     } else {
       parent = gEngineView._indexCache[treeInsertLoc].parent;
-      insertLoc = gEngineView.getLocalIndex(treeInsertLoc) + 1;
+      insertLoc = gEngineView.getLocalIndex(treeInsertLoc);
     }
 
     var node, item;
