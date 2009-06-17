@@ -505,7 +505,7 @@ EngineManagerDialog.prototype = {
   },
   properties: function EngineManager__properties() {
     var item = gEngineView.selectedItem;
-    openDialog("chrome://seorganizer/content/engineProperties.xul", "engineProps", "modal,dialog", item);
+    openDialog("chrome://seorganizer/content/engineProperties.xul", "engineProps", "modal,dialog,centerscreen", item);
     if(!item.modified)
       item.modified = 1;
     gEngineView.invalidateRow(gEngineView.selectedIndex);
@@ -563,7 +563,7 @@ EngineManagerDialog.prototype = {
   loadAddEngines: function EngineManager__loadAddEngines() {
     this.onOK();
     var win = window.opener;
-    if(!win.BrowserSearch) {
+    if(!("BrowserSearch" in win)) {
       win = Cc["@mozilla.org/appshell/window-mediator;1"]
               .getService(Ci.nsIWindowMediator)
               .getMostRecentWindow("navigator:browser");
