@@ -58,7 +58,7 @@ TMP_DIR=build
 #set -x
 
 # remove any left-over files from previous build
-rm -f $APP_NAME.jar $APP_NAME\_$VERSION.xpi files
+rm -f $APP_NAME.jar ${APP_NAME}_${VERSION}.xpi ${APP_NAME}_${VERSION}_source.7z files
 rm -rf $TMP_DIR
 
 $BEFORE_BUILD
@@ -115,9 +115,10 @@ if [ -f "install.rdf" ]; then
 fi
 
 # generate the XPI file
-echo "Generating $APP_NAME\_$VERSION.xpi..."
-#zip -9 -r ../$APP_NAME\_$VERSION.xpi *
-7z a -mx=9 -tzip -r ../$APP_NAME\_$VERSION.xpi *
+echo "Generating ${APP_NAME}_${VERSION}.xpi..."
+#zip -9 -r ../${APP_NAME}_${VERSION}.xpi *
+# 7z has a higher compression:
+7z a -mx=9 -tzip -r ../${APP_NAME}_${VERSION}.xpi *
 
 cd "$ROOT_DIR"
 
@@ -132,5 +133,9 @@ fi
 # remove the working files
 rm -rf $TMP_DIR
 echo "Done!"
+
+# generate source package
+echo "Generating ${APP_NAME}_${VERSION}_source.7z"
+7z a -mx=9 -r ${APP_NAME}_${VERSION}_source.7z '-x!*.xpi' '-x!*.7z' '-x!*~' '-x!*.gz' '-x!*.xpt' '-x!experimental' '-x!xpis' '-x!.svn' *
 
 $AFTER_BUILD
