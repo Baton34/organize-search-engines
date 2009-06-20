@@ -4,7 +4,6 @@
 <!ENTITY prop.name.accesskey "N">
 
 <!ENTITY prop.icon.label     "Icon:">
-<!ENTITY prop.icon.accesskey "I">
 
 <!ENTITY prop.icon.browse.label     "Browse…">
 <!ENTITY prop.icon.browse.accesskey "B">
