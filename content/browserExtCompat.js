@@ -114,10 +114,14 @@ organizeSE__Extensions.prototype = {
     wait: 0,
     init: function() {
       var menu = document.getElementById("autocontext-searchmenu");
+      if("onOSEcommand" in gOverlayAutoContext)
+        menu.addEventListener("command", gOverlayAutoContext.onOSEcommand, true);
       menu.addEventListener("popupshowing", this.onPopupShowing, true);
 
       var menu1 = document.getElementById("autocontext1-searchmenu");
       menu1.addEventListener("popupshowing", this.onPopupShowing, true);
+      if("onOSEcommand" in gOverlayAutoContext)
+        menu1.addEventListener("command", gOverlayAutoContext.onOSEcommand, true);
       menu1.firstChild.addEventListener("command", organizeSE.extensions.contextSearch.search, false);
 
       gOverlayAutoContext.loadSearch = organizeSE.extensions.contextSearch.search;
