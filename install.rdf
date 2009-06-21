@@ -11,7 +11,7 @@
 
     <em:optionsURL>chrome://browser/content/search/engineManager.xul</em:optionsURL>
     <em:iconURL>chrome://seorganizer/skin/ose.png</em:iconURL>
-    <em:homepageURL>http://maltekraus.de/Firefox/search-tools/</em:homepageURL>
+    <em:homepageURL>http://firefox.maltekraus.de/extensions/organize-search-engines</em:homepageURL>
 
     <em:creator>Malte Kraus</em:creator>
     <em:contributor>ReVox: help sorting out the crash on cancel</em:contributor>
