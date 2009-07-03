@@ -231,7 +231,7 @@ EngineManagerDialog.prototype = {
     }
   },
   onClose: function EngineManager__onClose(event) {
-    var Components = window.Components || this._c;
+    var Components = this._c;
     var Cc = Components.classes, Ci = Components.interfaces;
     var body = function(This) {
       // Remove the observers

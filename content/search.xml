@@ -68,6 +68,8 @@ Contributor(s):
 
       <!-- opens the manager in a *resizable* window -->
       <method name="openManager"><body><![CDATA[
+        organizeSE.popup.hidePopup();
+
         var url = "chrome://browser/content/search/engineManager.xul";
         var features = "chrome,modal,centerscreen,resizable,all,dialog,toolbar";
         toOpenWindowByType("Browser:SearchManager", url, features);
