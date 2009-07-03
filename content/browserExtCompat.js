@@ -122,7 +122,9 @@ organizeSE__Extensions.prototype = {
       menu1.addEventListener("popupshowing", this.onPopupShowing, true);
       if("onOSEcommand" in gOverlayAutoContext)
         menu1.addEventListener("command", gOverlayAutoContext.onOSEcommand, true);
-      menu1.firstChild.addEventListener("command", organizeSE.extensions.contextSearch.search, false);
+      var comp = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
+      if(comp.compare(acext.getExtVersion(acutils.AutoContext_ID_GUID), "1.5") < 0)
+        menu1.firstChild.addEventListener("command", organizeSE.extensions.contextSearch.search, false);
 
       gOverlayAutoContext.loadSearch = organizeSE.extensions.contextSearch.search;
     },
