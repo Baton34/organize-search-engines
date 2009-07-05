@@ -2,7 +2,6 @@
 <!ENTITY prop.name.label "Név:">
 <!ENTITY prop.name.accesskey "N">
 <!ENTITY prop.icon.label "Ikon:">
-<!ENTITY prop.icon.accesskey "I">
 <!ENTITY prop.icon.browse.label "Tallózás...">
 <!ENTITY prop.icon.browse.accesskey "T">
 <!ENTITY prop.icon.download.label "Automatikus letöltés">
@@ -15,6 +14,8 @@
 <!ENTITY prop.homepage.accesskey "o">
 <!ENTITY prop.searchurl.label "Webcím keresése:">
 <!ENTITY prop.searchurl.accesskey "W">
+<!ENTITY prop.encoding.label "Encoding:">
+<!ENTITY prop.encoding.accesskey "E">
 <!ENTITY prop.httpmethod.label "HTTP módszer:">
 <!ENTITY prop.httpmethod.accesskey "m">
 <!ENTITY prop.parameter.label "Paraméter:">

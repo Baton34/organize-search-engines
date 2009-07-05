@@ -1,8 +1,8 @@
 <!ENTITY namecol.label "Назва">
 <!ENTITY aliascol.label "Ключове слово">
-<!ENTITY addEngine.accesskey "">
-<!ENTITY restoreDefault.label "">
-<!ENTITY restoreDefault.accesskey "">
+<!ENTITY addEngine.accesskey "G">
+<!ENTITY restoreDefault.label "Restore Default Engine">
+<!ENTITY restoreDefault.accesskey "e">
 <!ENTITY new-folder.label "Нова папка...">
 <!ENTITY new-folder.accesskey "п">
 <!ENTITY new-separator.label "Новий розділювач">
@@ -13,27 +13,27 @@
 <!ENTITY rename.accesskey "н">
 <!ENTITY editalias.label "Редагувати ключове слово...">
 <!ENTITY editalias.accesskey "к">
-<!ENTITY properties.label "">
-<!ENTITY properties.accesskey "">
-<!ENTITY context.new.label "">
-<!ENTITY context.new.accesskey "">
-<!ENTITY noconflict.enableSuggest.accesskey "">
-<!ENTITY noconflict.remove.accesskey "">
-<!ENTITY noconflict.up.accesskey "">
-<!ENTITY noconflict.dn.accesskey "">
+<!ENTITY properties.label "Properties…">
+<!ENTITY properties.accesskey "P">
+<!ENTITY context.new.label "New">
+<!ENTITY context.new.accesskey "e">
+<!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">
+<!ENTITY noconflict.remove.accesskey "&remove.accesskey;">
+<!ENTITY noconflict.up.accesskey "&up.accesskey;">
+<!ENTITY noconflict.dn.accesskey "&dn.accesskey;">
 <!ENTITY fileMenu.label "Файл">
 <!ENTITY fileMenu.accesskey "ф">
 <!ENTITY closeCmd.label "Закрити">
 <!ENTITY closeCmd.accesskey "З">
-<!ENTITY viewMenu.label "">
-<!ENTITY viewMenu.accesskey "">
+<!ENTITY viewMenu.label "View">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY menuitem.view.command.toolbar.label "Панель інструментів">
 <!ENTITY menuitem.view.command.toolbar.accesskey "і">
-<!ENTITY menuitem.view.show_columns.label "">
-<!ENTITY menuitem.view.show_columns.accesskey "">
-<!ENTITY menuitem.view.unsorted.label "">
-<!ENTITY menuitem.view.unsorted.accesskey "">
-<!ENTITY sortAscending.label "">
-<!ENTITY sortAscending.accesskey "">
-<!ENTITY sortDescending.label "">
-<!ENTITY sortDescending.accesskey "">
+<!ENTITY menuitem.view.show_columns.label "Show Columns">
+<!ENTITY menuitem.view.show_columns.accesskey "S">
+<!ENTITY menuitem.view.unsorted.label "Unsorted">
+<!ENTITY menuitem.view.unsorted.accesskey "U">
+<!ENTITY sortAscending.label "Ascending">
+<!ENTITY sortAscending.accesskey "A">
+<!ENTITY sortDescending.label "Descending">
+<!ENTITY sortDescending.accesskey "D">

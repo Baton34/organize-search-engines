@@ -2,7 +2,6 @@
 <!ENTITY prop.name.label "İsim:">
 <!ENTITY prop.name.accesskey "N">
 <!ENTITY prop.icon.label "Simge:">
-<!ENTITY prop.icon.accesskey "I">
 <!ENTITY prop.icon.browse.label "Gözat...">
 <!ENTITY prop.icon.browse.accesskey "B">
 <!ENTITY prop.icon.download.label "Otomatik Download">
@@ -15,6 +14,8 @@
 <!ENTITY prop.homepage.accesskey "H">
 <!ENTITY prop.searchurl.label "Arama Adresi:">
 <!ENTITY prop.searchurl.accesskey "S">
+<!ENTITY prop.encoding.label "Encoding:">
+<!ENTITY prop.encoding.accesskey "E">
 <!ENTITY prop.httpmethod.label "Http: Metodu">
 <!ENTITY prop.httpmethod.accesskey "M">
 <!ENTITY prop.parameter.label "Parametreler">

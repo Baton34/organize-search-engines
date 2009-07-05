@@ -2,7 +2,6 @@
 <!ENTITY prop.name.label "שם:">
 <!ENTITY prop.name.accesskey "ש">
 <!ENTITY prop.icon.label "צלמית">
-<!ENTITY prop.icon.accesskey "צ">
 <!ENTITY prop.icon.browse.label "עיון">
 <!ENTITY prop.icon.browse.accesskey "ע">
 <!ENTITY prop.icon.download.label "הורד אוטומטית">
@@ -15,6 +14,8 @@
 <!ENTITY prop.homepage.accesskey "ד">
 <!ENTITY prop.searchurl.label "כתובת חיפוש:">
 <!ENTITY prop.searchurl.accesskey "כ">
+<!ENTITY prop.encoding.label "Encoding:">
+<!ENTITY prop.encoding.accesskey "E">
 <!ENTITY prop.httpmethod.label "שיטת HTTP:">
 <!ENTITY prop.httpmethod.accesskey "ש">
 <!ENTITY prop.parameter.label "פרמטר:">

@@ -2,7 +2,6 @@
 <!ENTITY prop.name.label "Назив:">
 <!ENTITY prop.name.accesskey "Н">
 <!ENTITY prop.icon.label "Икона">
-<!ENTITY prop.icon.accesskey "И">
 <!ENTITY prop.icon.browse.label "Прегледај...">
 <!ENTITY prop.icon.browse.accesskey "П">
 <!ENTITY prop.icon.download.label "Преузми аутоматски">
@@ -15,6 +14,8 @@
 <!ENTITY prop.homepage.accesskey "С">
 <!ENTITY prop.searchurl.label "Адреса претраге:">
 <!ENTITY prop.searchurl.accesskey "А">
+<!ENTITY prop.encoding.label "Encoding:">
+<!ENTITY prop.encoding.accesskey "E">
 <!ENTITY prop.httpmethod.label "HTTP метод:">
 <!ENTITY prop.httpmethod.accesskey "М">
 <!ENTITY prop.parameter.label "Параметар">

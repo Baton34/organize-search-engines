@@ -2,7 +2,6 @@
 <!ENTITY prop.name.label "Naam:">
 <!ENTITY prop.name.accesskey "N">
 <!ENTITY prop.icon.label "Pictogram:">
-<!ENTITY prop.icon.accesskey "P">
 <!ENTITY prop.icon.browse.label "Bladeren...">
 <!ENTITY prop.icon.browse.accesskey "B">
 <!ENTITY prop.icon.download.label "Automatisch downloaden">
@@ -15,6 +14,8 @@
 <!ENTITY prop.homepage.accesskey "p">
 <!ENTITY prop.searchurl.label "Zoek webadres:">
 <!ENTITY prop.searchurl.accesskey "Z">
+<!ENTITY prop.encoding.label "Encodering:">
+<!ENTITY prop.encoding.accesskey "E">
 <!ENTITY prop.httpmethod.label "HTTP-methode:">
 <!ENTITY prop.httpmethod.accesskey "H">
 <!ENTITY prop.parameter.label "Parameter:">

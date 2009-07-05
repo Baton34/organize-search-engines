@@ -2,7 +2,6 @@
 <!ENTITY prop.name.label "名称:">
 <!ENTITY prop.name.accesskey "N">
 <!ENTITY prop.icon.label "图标:">
-<!ENTITY prop.icon.accesskey "I">
 <!ENTITY prop.icon.browse.label "浏览...">
 <!ENTITY prop.icon.browse.accesskey "B">
 <!ENTITY prop.icon.download.label "自动下载">
@@ -15,6 +14,8 @@
 <!ENTITY prop.homepage.accesskey "H">
 <!ENTITY prop.searchurl.label "搜索 URL:">
 <!ENTITY prop.searchurl.accesskey "S">
+<!ENTITY prop.encoding.label "Encoding:">
+<!ENTITY prop.encoding.accesskey "E">
 <!ENTITY prop.httpmethod.label "HTTP Method:">
 <!ENTITY prop.httpmethod.accesskey "M">
 <!ENTITY prop.parameter.label "参数:">

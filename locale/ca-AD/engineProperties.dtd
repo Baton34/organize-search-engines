@@ -2,7 +2,6 @@
 <!ENTITY prop.name.label "Nom:">
 <!ENTITY prop.name.accesskey "N">
 <!ENTITY prop.icon.label "Icona:">
-<!ENTITY prop.icon.accesskey "I">
 <!ENTITY prop.icon.browse.label "Explora...">
 <!ENTITY prop.icon.browse.accesskey "E">
 <!ENTITY prop.icon.download.label "Descarrega automàticament">
@@ -15,6 +14,8 @@
 <!ENTITY prop.homepage.accesskey "g">
 <!ENTITY prop.searchurl.label "Cerca l&apos;URL:">
 <!ENTITY prop.searchurl.accesskey "C">
+<!ENTITY prop.encoding.label "Codificació:">
+<!ENTITY prop.encoding.accesskey "f">
 <!ENTITY prop.httpmethod.label "Mètode HTTP:">
 <!ENTITY prop.httpmethod.accesskey "M">
 <!ENTITY prop.parameter.label "Paràmetre:">
