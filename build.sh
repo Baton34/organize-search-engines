@@ -38,6 +38,7 @@ ROOT_DIRS=         # ...and these directories       (space separated list)
 BEFORE_BUILD=      # run this before building       (bash command)
 AFTER_BUILD=       # ...and this after the build    (bash command)
 VERSION=
+CHROME_URI=
 
 if [ -z $1 ]; then
   . ./config_build.sh
@@ -96,6 +97,16 @@ done
 cd $TMP_DIR
 
 if [ -f "chrome.manifest" ]; then
+  echo "adding locales to chrome.manifest..."
+  #locale    $CHROME_URI  en-US        locale/en-US/
+  LOCALES=`dir ../locale`
+  for LOCALE in $LOCALES; do
+    if [ "$LOCALE" != 'en-US' ]; then
+      echo "locale    $CHROME_URI  $LOCALE        locale/$LOCALE/" >> chrome.manifest
+    fi
+  done
+
+
   echo "Preprocessing chrome.manifest..."
   # You think this is scary?
   #s/^(content\s+\S*\s+)(\S*\/)$/\1jar:chrome\/$APP_NAME\.jar!\/\2/
