@@ -9,6 +9,14 @@
     <em:version>%VERSION%</em:version>
     <em:description>Organize your search engines with separators and folders.</em:description>
 
+    <em:localized>
+      <Description>
+        <em:locale>en-GB</em:locale>
+        <em:name>Organise Search Engines</em:name>
+        <em:description>Organise your search engines with separators and folders.</em:description>
+      </Description>
+    </em:localized>
+
     <em:optionsURL>chrome://browser/content/search/engineManager.xul</em:optionsURL>
     <em:iconURL>chrome://seorganizer/skin/ose.png</em:iconURL>
     <em:homepageURL>http://firefox.maltekraus.de/extensions/organize-search-engines</em:homepageURL>
