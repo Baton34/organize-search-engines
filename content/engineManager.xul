@@ -56,7 +56,7 @@ Contributor(s):
         title="&engineManager.title;"
         persist="screenX screenY width height"
         height="400"
-        width="750"
+        width="900"
         windowtype="Browser:SearchManager">
 
   <stringbundleset>
