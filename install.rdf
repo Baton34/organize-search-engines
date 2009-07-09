@@ -9,14 +9,6 @@
     <em:version>%VERSION%</em:version>
     <em:description>Organize your search engines with separators and folders.</em:description>
 
-    <em:localized>
-      <Description>
-        <em:locale>en-GB</em:locale>
-        <em:name>Organise Search Engines</em:name>
-        <em:description>Organise your search engines with separators and folders.</em:description>
-      </Description>
-    </em:localized>
-
     <em:optionsURL>chrome://browser/content/search/engineManager.xul</em:optionsURL>
     <em:iconURL>chrome://seorganizer/skin/ose.png</em:iconURL>
     <em:homepageURL>http://firefox.maltekraus.de/extensions/organize-search-engines</em:homepageURL>
@@ -31,9 +23,16 @@
     <em:translator>Alf</em:translator>
     <em:translator>catcat</em:translator>
     <em:translator>vatzec</em:translator>
-    <em:translator>raryelcsouza</em:translator>
+    <em:translator>Raryel Costa Souza</em:translator>
     <em:translator>oriolsbd</em:translator>
     <em:translator>drry</em:translator>
+    <em:translator>Ian Moody</em:translator>
+    <em:translator>Goofy</em:translator>
+    <em:translator>drry</em:translator>
+    <em:translator>Kacnepcku - PC</em:translator>
+    <em:translator>mrtcvk</em:translator>
+    <em:translator>Володимир Савчук Volodymyr Savchuk</em:translator>
+    <em:translator>smoke</em:translator>
 
     <em:targetApplication>
       <RDF:Description>
