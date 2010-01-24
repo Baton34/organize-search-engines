@@ -36,7 +36,9 @@ Contributor(s):
 ***** END LICENSE BLOCK ***** -->
 <bindings id="OrganizedSearchBindings" xmlns="http://www.mozilla.org/xbl">
 
-  <binding id="searchbar" extends="chrome://browser/content/search/search.xml#searchbar">
+  <binding id="searchbar-textbox" extends="chrome://browser/content/search/search.xml?orig#searchbar-textbox">
+  </binding>
+  <binding id="searchbar" extends="chrome://browser/content/search/search.xml?orig#searchbar">
 
     <implementation implements="nsIObserver">
 
