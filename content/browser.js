@@ -195,12 +195,12 @@ SEOrganizer.prototype = {
   insertOpenInTabsItems: function insertOpenInTabsItems(popup) {
     if(this.getChildItems(popup).length <= 1) return;
 
-    this.createSeparator(popup, "openintabs-separator");
+    
     var label = gNavigatorBundle.getString("menuOpenAllInTabs.label");
     var attrs = {
-      accesskey: gNavigatorBundle.getString("menuOpenAllInTabs.accesskey"),
       selected: (this.SEOrganizer.currentEngine.name == popup.parentNode.label)
     };
+    this.createSeparator(popup, "openintabs-separator");
     this.createMenuitem(label, popup, "openintabs-item", "", attrs);
   },
   removeOpenInTabsItems: function removeOpenInTabsItems(popup) {
