@@ -8,4 +8,3 @@ ROOT_FILES="LICENSE.txt SOURCE.txt"
 ROOT_DIRS="defaults components"
 BEFORE_BUILD="../components.sh $APP_NAME nsISEOrganizer"
 AFTER_BUILD=
-VERSION="1.5"

@@ -37,10 +37,10 @@ ROOT_FILES=        # put these files in root of xpi (space separated list of lea
 ROOT_DIRS=         # ...and these directories       (space separated list)
 BEFORE_BUILD=      # run this before building       (bash command)
 AFTER_BUILD=       # ...and this after the build    (bash command)
-VERSION=
+VERSION=$1
 CHROME_URI=
 
-if [ -z $1 ]; then
+if [ -z $2 ]; then
   . ./config_build.sh
 else
   . $1
@@ -51,6 +51,11 @@ if [ -z $APP_NAME ]; then
   echo "Read comments at the beginning of this script for more info."
   exit;
 fi
+
+if [ -z "$VERSION" ]; then
+  echo "You need to specify the version number on the command line!"
+fi
+
 
 ROOT_DIR=`pwd`
 TMP_DIR=build
