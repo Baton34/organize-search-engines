@@ -49,7 +49,7 @@ Contributor(s):
         var popup = document.getAnonymousElementByAttribute(this, "anonid",
                                                             "searchbar-popup");
         // searchOnTab needs it, so let the popup stay around when it's there
-        if(!("searchOnTab" in window) && popup.parentNode)
+        if(!("searchOnTab" in window) && popup && popup.parentNode)
           popup.parentNode.removeChild(popup);
 
         this.rebuildPopup();
