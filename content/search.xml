@@ -38,6 +38,7 @@ Contributor(s):
 
   <binding id="searchbar-textbox" extends="chrome://browser/content/search/search.xml?orig#searchbar-textbox">
   </binding>
+
   <binding id="searchbar" extends="chrome://browser/content/search/search.xml?orig#searchbar">
 
     <implementation implements="nsIObserver">
@@ -51,8 +52,23 @@ Contributor(s):
         var popup = document.getAnonymousElementByAttribute(this, "anonid",
                                                             "searchbar-popup");
         // searchOnTab needs it, so let the popup stay around when it's there
-        if(!("searchOnTab" in window) && popup && popup.parentNode)
-          popup.parentNode.removeChild(popup);
+        if(popup && popup.parentNode)
+        {
+          if("searchOnTab" in window)
+          {
+            let This = this;
+            this.searchButton.addEventListener("click", function(event) {
+              debugger;
+              event.preventDefault();
+              This._textbox.openSearch();
+              return false;
+            }, false);
+          }
+          else
+          {
+            popup.parentNode.removeChild(popup);
+          }
+        }
 
         this.rebuildPopup();
       ]]></constructor>
