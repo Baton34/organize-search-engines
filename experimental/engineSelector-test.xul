@@ -6,7 +6,7 @@
 
 <?xml-stylesheet href="chrome://global/skin/tree.css"?>
 <?xml-stylesheet href="chrome://browser/skin/bookmarks/bookmarksManager.css" ?>
-<?xml-stylesheet href="chrome://seorganizer/content/engineSelector-test.css" ?>
+<?xml-stylesheet href="chrome://seorganizer-unstable/content/engineSelector-test.css" ?>
 
 <!DOCTYPE dialog [
   <!ENTITY % browser SYSTEM "chrome://browser/locale/engineManager.dtd">
@@ -18,7 +18,7 @@
 <dialog id="engineManager"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-        buttons="accept,cancel,extra2"
+        buttons="accept,cancel"
         buttonlabelextra2="&restoreDefault.label;"
         buttonaccesskeyextra2="&restoreDefault.accesskey;"
         onload="gEngineManagerDialog.init();"
@@ -32,7 +32,7 @@
   <stringbundle src="chrome://seorganizer/locale/engineManager.properties" id="strings" />
 
   <script type="application/x-javascript"
-          src="chrome://seorganizer/content/engineSelector-test.js"/>
+          src="chrome://seorganizer-unstable/content/engineSelector-test.js"/>
   <script type="application/x-javascript"
           src="chrome://global/content/nsDragAndDrop.js"/>
   <script type="application/x-javascript"
@@ -98,7 +98,7 @@
           ondraggesture="gEngineManagerDialog.startDrag(event);"
           onkeydown="gEngineView.handleEvent(event);">
       <treecols>
-        <treecol id="engineSelected" label="Ausgewählt" type="checkbox"
+        <treecol id="engineSelected" label="Ausgewählt" type="checkbox" width="20"
                  editable="true" />
         <splitter class="tree-splitter"/>
         <treecol id="engineName" primary="true" flex="1" label="&namecol.label;" />
