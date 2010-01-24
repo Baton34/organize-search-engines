@@ -156,7 +156,8 @@ organizeSE__Extensions.prototype = {
         text = contextsearch.getBrowserSelection(null, e);
         where = whereToOpenLink(e, false, true);
       }
-      if(where == "current") where = "tab";
+      if(where == "tabshifted") where = "tab";
+      else if(where == "tab" || where == "current") where = "tabshifted";
 
       var target = e.target, engine;
       if(organizeSE.hasClass(target, "openintabs-item")) {
@@ -244,7 +245,7 @@ $1");
     },
     doSearch: function(aData, aSubmission) {
       if(aSubmission instanceof Ci.nsISimpleEnumerator) {
-        aSubmission = organizeSE.searchbar.currentEngine.getSubmission(aData, null);
+        //aSubmission = organizeSE.searchbar.currentEngine.getSubmission(aData, null);
         organizeSE.searchbar.doSearch(aData, "tabshifted", null, aSubmission);
       }
     },
