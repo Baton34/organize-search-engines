@@ -169,24 +169,17 @@ Contributor(s):
             // Check prefs to see whether to open over existing tabs.
             var prefs = Cc["@mozilla.org/preferences-service;1"]
                           .getService(Ci.nsIPrefService).getBranch("browser.tabs.");
-            var doReplace = prefs.getBoolPref("loadFolderAndReplace");
             var loadInBackground = prefs.getBoolPref("loadBookmarksInBackground");
             // Get the start index to open tabs at
             var browser = getBrowser();
             var tabPanels = browser.browsers;
             var tabCount = tabPanels.length;
             var firstIndex;
-            // If browser.tabs.loadFolderAndReplace pref is set, load over all the
-            // tabs starting with the first one.
-            if (doReplace)
-              firstIndex = 0;
             // If the pref is not set, only load over the blank tabs at the end, if any.
-            else {
-              for (firstIndex = tabCount - 1; firstIndex >= 0; --firstIndex)
-                if (browser.browsers[firstIndex].currentURI.spec != "about:blank")
-                  break;
-              ++firstIndex;
-            }
+            for (firstIndex = tabCount - 1; firstIndex >= 0; --firstIndex)
+              if (browser.browsers[firstIndex].currentURI.spec != "about:blank")
+                break;
+            ++firstIndex;
 
             // Open each uri in the folder in a tab.
             var index = firstIndex;
@@ -203,7 +196,7 @@ Contributor(s):
             }
 
             // focus the first tab if prefs say to
-            if (!loadInBackground || doReplace) {
+            if (!loadInBackground) {
               // Select the first tab in the group.
               // Set newly selected tab after quick timeout, otherwise hideous focus problems
               // can occur because new presshell is not ready to handle events
@@ -213,11 +206,6 @@ Contributor(s):
               var tabs = browser.mTabContainer.childNodes;
               setTimeout(selectNewForegroundTab, 0, browser, tabs[firstIndex]);
             }
-
-            // Close any remaining open tabs that are left over.
-            // (Always skipped when we append tabs)
-            for (var i = tabCount - 1; i >= index; --i)
-              browser.removeTab(tabs[i]);
 
             // and focus the content
             content.focus();
