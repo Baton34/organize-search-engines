@@ -243,7 +243,7 @@ Contributor(s):
   <description id="engineManager-intro">&engineManager.intro;</description>
 
   <hbox flex="1" id="engineList-container">
-    <tree id="engineList" flex="1" rows="5" editable="true"
+    <tree id="engineList" flex="1" editable="true"
           enableColumnDrag="true" flags="dont-build-content"
           onselect="gEngineManagerDialog.onSelect();"
           ondraggesture="gEngineManagerDialog.startDrag(event);">
