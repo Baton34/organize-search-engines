@@ -10,7 +10,6 @@
     <em:description>Organize your search engines with separators and folders.</em:description>
 
     <em:optionsURL>chrome://browser/content/search/engineManager.xul</em:optionsURL>
-    <em:iconURL>chrome://seorganizer/skin/ose.png</em:iconURL>
     <em:homepageURL>http://firefox.maltekraus.de/extensions/organize-search-engines</em:homepageURL>
 
     <em:creator>Malte Kraus</em:creator>
