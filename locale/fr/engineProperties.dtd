@@ -1,0 +1,39 @@
+<!ENTITY engineProperties.title "Propriétés du moteur de recherche">
+<!ENTITY prop.name.label "Nom :">
+<!ENTITY prop.name.accesskey "N">
+<!ENTITY prop.icon.label "Icône :">
+<!ENTITY prop.icon.browse.label "Parcourir…">
+<!ENTITY prop.icon.browse.accesskey "P">
+<!ENTITY prop.icon.download.label "Télécharger automatiquement">
+<!ENTITY prop.icon.download.accesskey "T">
+<!ENTITY prop.keyword.label "Mot-clé :">
+<!ENTITY prop.keyword.accesskey "M">
+<!ENTITY prop.description.label "Description :">
+<!ENTITY prop.description.accesskey "D">
+<!ENTITY prop.homepage.label "Page Web :">
+<!ENTITY prop.homepage.accesskey "W">
+<!ENTITY prop.searchurl.label "Rechercher une adresse URL :">
+<!ENTITY prop.searchurl.accesskey "R">
+<!ENTITY prop.encoding.label "Encodage :">
+<!ENTITY prop.encoding.accesskey "E">
+<!ENTITY prop.httpmethod.label "Méthode HTTP :">
+<!ENTITY prop.httpmethod.accesskey "M">
+<!ENTITY prop.parameter.label "Paramètre :">
+<!ENTITY prop.parameter.accesskey "a">
+<!ENTITY prop.parameter.add.label "Ajouter">
+<!ENTITY prop.parameter.add.accesskey "o">
+<!ENTITY prop.parameter.remove.label "Supprimer">
+<!ENTITY prop.parameter.remove.accesskey "S">
+<!ENTITY prop.update.url.label "Adresse URL de mise à jour :">
+<!ENTITY prop.update.url.accesskey "U">
+<!ENTITY prop.update.datatype.label "Type de données de la mise à jour :">
+<!ENTITY prop.update.datatype.accesskey "T">
+<!ENTITY prop.update.datatype.openmozsearch.label "Ouvrir la recherche avec MozSearch">
+<!ENTITY prop.update.datatype.openmozsearch.accesskey "Oh">
+<!ENTITY prop.update.datatype.sherlock.label "Apple Sherlock">
+<!ENTITY prop.update.datatype.sherlock.accesskey "A">
+<!ENTITY prop.update.icon.label "Adresse URL de mise à jour de l'icône :">
+<!ENTITY prop.update.icon.accesskey "i">
+<!ENTITY prop.update.interval.label "Intervalle entre mises à jour :">
+<!ENTITY prop.update.interval.accesskey "I">
+<!ENTITY prop.update.interval.days.label "jours">

@@ -1,0 +1,39 @@
+<!ENTITY engineProperties.title "搜尋引擎屬性">
+<!ENTITY prop.name.label "名稱:">
+<!ENTITY prop.name.accesskey "N">
+<!ENTITY prop.icon.label "圖示:">
+<!ENTITY prop.icon.browse.label "瀏覽…">
+<!ENTITY prop.icon.browse.accesskey "B">
+<!ENTITY prop.icon.download.label "自動下載">
+<!ENTITY prop.icon.download.accesskey "D">
+<!ENTITY prop.keyword.label "關鍵字:">
+<!ENTITY prop.keyword.accesskey "K">
+<!ENTITY prop.description.label "敘述:">
+<!ENTITY prop.description.accesskey "c">
+<!ENTITY prop.homepage.label "首頁:">
+<!ENTITY prop.homepage.accesskey "H">
+<!ENTITY prop.searchurl.label "搜尋 URL:">
+<!ENTITY prop.searchurl.accesskey "S">
+<!ENTITY prop.encoding.label "編碼:">
+<!ENTITY prop.encoding.accesskey "E">
+<!ENTITY prop.httpmethod.label "HTTP Method:">
+<!ENTITY prop.httpmethod.accesskey "M">
+<!ENTITY prop.parameter.label "參數:">
+<!ENTITY prop.parameter.accesskey "P">
+<!ENTITY prop.parameter.add.label "新增:">
+<!ENTITY prop.parameter.add.accesskey "A">
+<!ENTITY prop.parameter.remove.label "移除:">
+<!ENTITY prop.parameter.remove.accesskey "R">
+<!ENTITY prop.update.url.label "更新 URL:">
+<!ENTITY prop.update.url.accesskey "U">
+<!ENTITY prop.update.datatype.label "資料更新型態:">
+<!ENTITY prop.update.datatype.accesskey "T">
+<!ENTITY prop.update.datatype.openmozsearch.label "OpenSearch 或 MozSearch">
+<!ENTITY prop.update.datatype.openmozsearch.accesskey "Oh">
+<!ENTITY prop.update.datatype.sherlock.label "Apple Sherlock">
+<!ENTITY prop.update.datatype.sherlock.accesskey "A">
+<!ENTITY prop.update.icon.label "圖示更新 URL:">
+<!ENTITY prop.update.icon.accesskey "n">
+<!ENTITY prop.update.interval.label "更新間隔:">
+<!ENTITY prop.update.interval.accesskey "U">
+<!ENTITY prop.update.interval.days.label "日">

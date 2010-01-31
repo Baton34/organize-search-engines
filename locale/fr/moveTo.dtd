@@ -1,4 +1,4 @@
 <!ENTITY window.title "Déplacer le(s) moteur(s)">
 <!ENTITY move-to.label "Déplacer vers :">
-<!ENTITY move-to.accesskey "é">
+<!ENTITY move-to.accesskey "v">
 <!ENTITY search-engines.toplevel "Moteurs de recherche">

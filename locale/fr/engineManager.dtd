@@ -10,12 +10,12 @@
 <!ENTITY move-engine.label "Déplacer…">
 <!ENTITY move-engine.accesskey "D">
 <!ENTITY rename.label "Renommer…">
-<!ENTITY rename.accesskey "n">
+<!ENTITY rename.accesskey "R">
 <!ENTITY editalias.label "Éditer le mot-clé…">
 <!ENTITY editalias.accesskey "M">
-<!ENTITY properties.label "Properties…">
+<!ENTITY properties.label "Propriétés">
 <!ENTITY properties.accesskey "P">
-<!ENTITY context.new.label "New">
+<!ENTITY context.new.label "Nouveau">
 <!ENTITY context.new.accesskey "e">
 <!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">
 <!ENTITY noconflict.remove.accesskey "&remove.accesskey;">
@@ -27,7 +27,7 @@
 <!ENTITY closeCmd.accesskey "r">
 <!ENTITY viewMenu.label "Voir">
 <!ENTITY viewMenu.accesskey "V">
-<!ENTITY menuitem.view.command.toolbar.label "Barre d&apos;outils">
+<!ENTITY menuitem.view.command.toolbar.label "Barre d'outils">
 <!ENTITY menuitem.view.command.toolbar.accesskey "o">
 <!ENTITY menuitem.view.show_columns.label "Afficher les colonnes">
 <!ENTITY menuitem.view.show_columns.accesskey "c">

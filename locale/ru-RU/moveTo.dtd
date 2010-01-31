@@ -1,0 +1,4 @@
+<!ENTITY window.title "Переместить элемент(ы)">
+<!ENTITY move-to.label "Переместить в:">
+<!ENTITY move-to.accesskey "П">
+<!ENTITY search-engines.toplevel "Поисковые плагины">

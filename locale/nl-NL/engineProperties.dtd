@@ -14,7 +14,7 @@
 <!ENTITY prop.homepage.accesskey "p">
 <!ENTITY prop.searchurl.label "Zoek webadres:">
 <!ENTITY prop.searchurl.accesskey "Z">
-<!ENTITY prop.encoding.label "Encodering:">
+<!ENTITY prop.encoding.label "Encoding:">
 <!ENTITY prop.encoding.accesskey "E">
 <!ENTITY prop.httpmethod.label "HTTP-methode:">
 <!ENTITY prop.httpmethod.accesskey "H">

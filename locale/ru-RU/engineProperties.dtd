@@ -1,0 +1,39 @@
+<!ENTITY engineProperties.title "Свойства поискового плагина">
+<!ENTITY prop.name.label "Название:">
+<!ENTITY prop.name.accesskey "Н">
+<!ENTITY prop.icon.label "Иконка:">
+<!ENTITY prop.icon.browse.label "Обзор…">
+<!ENTITY prop.icon.browse.accesskey "б">
+<!ENTITY prop.icon.download.label "Загрузить автоматически">
+<!ENTITY prop.icon.download.accesskey "З">
+<!ENTITY prop.keyword.label "Короткое имя:">
+<!ENTITY prop.keyword.accesskey "К">
+<!ENTITY prop.description.label "Описание:">
+<!ENTITY prop.description.accesskey "О">
+<!ENTITY prop.homepage.label "Домашняя страница:">
+<!ENTITY prop.homepage.accesskey "с">
+<!ENTITY prop.searchurl.label "Адрес поиска:">
+<!ENTITY prop.searchurl.accesskey "А">
+<!ENTITY prop.encoding.label "Кодировка:">
+<!ENTITY prop.encoding.accesskey "К">
+<!ENTITY prop.httpmethod.label "Метод запроса HTTP:">
+<!ENTITY prop.httpmethod.accesskey "М">
+<!ENTITY prop.parameter.label "Параметр:">
+<!ENTITY prop.parameter.accesskey "П">
+<!ENTITY prop.parameter.add.label "Добавить">
+<!ENTITY prop.parameter.add.accesskey "Д">
+<!ENTITY prop.parameter.remove.label "Удалить">
+<!ENTITY prop.parameter.remove.accesskey "У">
+<!ENTITY prop.update.url.label "Обновить ссылку:">
+<!ENTITY prop.update.url.accesskey "с">
+<!ENTITY prop.update.datatype.label "Обновление типа данных:">
+<!ENTITY prop.update.datatype.accesskey "т">
+<!ENTITY prop.update.datatype.openmozsearch.label "OpenSearch или MozSearch">
+<!ENTITY prop.update.datatype.openmozsearch.accesskey "S">
+<!ENTITY prop.update.datatype.sherlock.label "Apple Sherlock">
+<!ENTITY prop.update.datatype.sherlock.accesskey "A">
+<!ENTITY prop.update.icon.label "Ссылка обновления иконки:">
+<!ENTITY prop.update.icon.accesskey "и">
+<!ENTITY prop.update.interval.label "Интервал обновления:">
+<!ENTITY prop.update.interval.accesskey "е">
+<!ENTITY prop.update.interval.days.label "День">

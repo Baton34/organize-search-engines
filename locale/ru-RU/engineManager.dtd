@@ -1,0 +1,39 @@
+<!ENTITY namecol.label "Название">
+<!ENTITY aliascol.label "Короткое имя">
+<!ENTITY addEngine.accesskey "и">
+<!ENTITY restoreDefault.label "Восстановить поисковой плагин по умолчанию">
+<!ENTITY restoreDefault.accesskey "В">
+<!ENTITY new-folder.label "Новая папка">
+<!ENTITY new-folder.accesskey "Н">
+<!ENTITY new-separator.label "Новый разделитель">
+<!ENTITY new-separator.accesskey "р">
+<!ENTITY move-engine.label "Переместить…">
+<!ENTITY move-engine.accesskey "м">
+<!ENTITY rename.label "Переименовать">
+<!ENTITY rename.accesskey "и">
+<!ENTITY editalias.label "Изменить короткое имя">
+<!ENTITY editalias.accesskey "к">
+<!ENTITY properties.label "Свойства…">
+<!ENTITY properties.accesskey "С">
+<!ENTITY context.new.label "Новый">
+<!ENTITY context.new.accesskey "о">
+<!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">
+<!ENTITY noconflict.remove.accesskey "&remove.accesskey;">
+<!ENTITY noconflict.up.accesskey "&up.accesskey;">
+<!ENTITY noconflict.dn.accesskey "&dn.accesskey;">
+<!ENTITY fileMenu.label "Файл">
+<!ENTITY fileMenu.accesskey "Ф">
+<!ENTITY closeCmd.label "Закрыть">
+<!ENTITY closeCmd.accesskey "З">
+<!ENTITY viewMenu.label "Вид">
+<!ENTITY viewMenu.accesskey "В">
+<!ENTITY menuitem.view.command.toolbar.label "Панель инструментов">
+<!ENTITY menuitem.view.command.toolbar.accesskey "П">
+<!ENTITY menuitem.view.show_columns.label "Показывать колонки">
+<!ENTITY menuitem.view.show_columns.accesskey "л">
+<!ENTITY menuitem.view.unsorted.label "Без сортировки">
+<!ENTITY menuitem.view.unsorted.accesskey "Б">
+<!ENTITY sortAscending.label "По возрастанию">
+<!ENTITY sortAscending.accesskey "з">
+<!ENTITY sortDescending.label "По убыванию">
+<!ENTITY sortDescending.accesskey "у">

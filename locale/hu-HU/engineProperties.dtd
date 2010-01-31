@@ -14,8 +14,8 @@
 <!ENTITY prop.homepage.accesskey "o">
 <!ENTITY prop.searchurl.label "Webcím keresése:">
 <!ENTITY prop.searchurl.accesskey "W">
-<!ENTITY prop.encoding.label "Encoding:">
-<!ENTITY prop.encoding.accesskey "E">
+<!ENTITY prop.encoding.label "Kódolás:">
+<!ENTITY prop.encoding.accesskey "d">
 <!ENTITY prop.httpmethod.label "HTTP módszer:">
 <!ENTITY prop.httpmethod.accesskey "m">
 <!ENTITY prop.parameter.label "Paraméter:">
