@@ -58,7 +58,6 @@ Contributor(s):
           {
             let This = this;
             this.searchButton.addEventListener("click", function(event) {
-              debugger;
               event.preventDefault();
               This._textbox.openSearch();
               return false;
