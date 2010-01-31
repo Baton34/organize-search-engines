@@ -390,16 +390,23 @@ EngineManagerDialog.prototype = {
   },
   move: function EngineManager__move() {
     var selected = gEngineView.selectedItems;
+    if(selected.length == 0) return;
     document.getElementById("engineList").focus();
     var canceled = {value: true}, returnVal = {};
     window.openDialog("chrome://seorganizer/content/moveTo.xul", "_blank",
                       "resizable,chrome,modal,dialog", canceled, returnVal);
     if(canceled.value) return;
+
     if(returnVal.value == ROOT || returnVal.value == FOLDERS_ROOT)
       var target = gEngineView._structure;
     else
       var target = gEngineView._structure.find("nodeID", returnVal.value);
     if(!target) return;
+
+    selected = selected.filter(function(sel) {
+      return sel != target && sel.isAncestorOf(target);
+    });
+    if(selected.length == 0) return;
 
     var selectedIndexes = gEngineView.selectedIndexes;
 
