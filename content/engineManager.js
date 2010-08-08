@@ -36,7 +36,7 @@ Contributor(s):
  the terms of any one of the MPL, the GPL or the LGPL.
 ***** END LICENSE BLOCK ***** */
 
-const Ci = Components.interfaces, Cc = Components.classes;
+const Ci = Components.interfaces, Cc = Components.classes, Cu = Components.utils;
 
 const ENGINE_FLAVOR = "text/x-moz-search-engine";
 const FLAVOR_SEPARATOR = ";";
@@ -128,7 +128,7 @@ EngineManagerDialog.prototype = {
   _c: Components,
   init: function EngineManager__init() {
     gStrings = document.getElementById("strings");
-    gSEOrganizer = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer).wrappedJSObject;
+    gSEOrganizer = Cc[CONTRACT_ID].getService().wrappedJSObject;
 
     var prefService = Cc["@mozilla.org/preferences-service;1"]
                         .getService(Ci.nsIPrefService).getBranch("");
@@ -782,7 +782,7 @@ Structure__Item.prototype = {
         if(this.iconURI != engine._iconURI.spec)
           engine._setIcon(this.iconURI, true);
 
-        var globalObject = engine.__parent__;
+        var globalObject = Cu.getGlobalForObject ? Cu.getGlobalForObject(engine) : engine.__parent__;
         globalObject.engineMetadataService.setAttr(engine, "updatedatatype", engine._dataType.toString());
         if(engine._hasUpdates && !globalObject.engineMetadataService.getAttr(engine, "updateexpir"))
           globalObject.engineUpdateService.scheduleNextUpdate(engine);
@@ -1431,7 +1431,7 @@ function fillColumnsMenu(aEvent) {
       element.colIndex = i;
     }
   }
-  
+
   aEvent.stopPropagation();
 }
 function onViewMenuColumnItemSelected(aEvent) {
