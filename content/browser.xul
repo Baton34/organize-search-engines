@@ -40,6 +40,8 @@ Contributor(s):
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
 
   <script type="application/x-javascript"
+          src="chrome://global/content/nsDragAndDrop.js" />
+  <script type="application/x-javascript"
           src="chrome://seorganizer/content/browser.js" />
   <script type="application/x-javascript"
           src="chrome://seorganizer/content/browserDragDrop.js" />
