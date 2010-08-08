@@ -6,5 +6,5 @@ CHROME_URI=seorganizer
 CLEAN_UP=1
 ROOT_FILES="LICENSE.txt SOURCE.txt icon.png"
 ROOT_DIRS="defaults components"
-BEFORE_BUILD="../components.sh $APP_NAME nsISEOrganizer"
+BEFORE_BUILD=""
 AFTER_BUILD=
