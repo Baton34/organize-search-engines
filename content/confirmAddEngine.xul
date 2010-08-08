@@ -47,7 +47,7 @@ Contributor(s):
 ]>
 
 <dialog id="commonDialog"
-        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" 
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         xmlns:xhtml2="http://www.w3.org/TR/xhtml2"
         xmlns:wairole="http://www.w3.org/2005/01/wai-rdf/GUIRoleTaxonomy#"
         xhtml2:role="wairole:alert"
@@ -58,10 +58,11 @@ Contributor(s):
         buttonpack="center">
 
   <script type="application/x-javascript" src="chrome://global/content/commonDialog.js"/>
-  <script type="application/x-javascript"><![CDATA[
-    const Cc = Components.classes, Ci = Components.interfaces;
-  ]]></script>
   <script type="application/x-javascript" src="chrome://seorganizer/content/confirmAddEngine.js"/>
+
+  <hbox id="filler" style="min-width: 0%;">
+    <spacer style="width: 29em;"/>
+  </hbox>
 
   <hbox flex="1">
     <hbox align="start">
@@ -91,7 +92,7 @@ Contributor(s):
       </vbox>
       <vbox id="password2Container" hidden="true">
 
-        <label id="password2Label" value="&editfield2.label;" control="password2Textbox"/>
+        <label id="password2Label" value="&editfield1.label;" control="password2Textbox"/>
         <textbox type="password" id="password2Textbox"/>
         <separator class="thin"/>
       </vbox>
@@ -129,9 +130,14 @@ Contributor(s):
   </hbox>
 
   <!-- This method is called inline because it may unset hidden="true" on the
-       above boxes, causing their frames to be build and bindings to load.  
-       So, by calling this inline, we guarantee the textboxes and checkboxes 
+       above boxes, causing their frames to be build and bindings to load.
+       So, by calling this inline, we guarantee the textboxes and checkboxes
        above will have their bindings before initButtons is called, and the
        dialog will be intrinsically sized correctly. -->
-  <script type="application/x-javascript">showControls();</script>
+  <script type="application/x-javascript"><![CDATA[
+  if("earlyInit" in window)
+    earlyInit();
+  else
+    showControls();
+  ]]></script>
 </dialog>
