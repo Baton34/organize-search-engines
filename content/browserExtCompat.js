@@ -138,7 +138,8 @@ organizeSE__Extensions.prototype = {
       return ("contextsearch" in window);
     },
     sortDirectionHandler: function sortDirectionHandler(newVal) {
-      contextsearch.contextitem.setAttribute("sortDirection", newVal);
+      if(contextsearch.contextitem)
+        contextsearch.contextitem.setAttribute("sortDirection", newVal);
     },
     wait: 0,
     init: function() {
@@ -230,7 +231,7 @@ organizeSE__Extensions.prototype = {
 
   /* SearchLoad Options 0.5.6 */
   searchLoad: {
-    get check() { 
+    get check() {
       return ("SearchLoad_Options" in window);
     },
     init: function() {
@@ -263,7 +264,7 @@ $1");
       }
     }
   },
-  
+
   /* MultiSearch 1.2.2 */
   multiSearch: {
     get check() {
