@@ -16,9 +16,7 @@ var gRemovedEngines = [], gAddedEngines = [], gSortDir = "natural";
 
 const CONTRACT_ID =
          "@mozilla.org/rdf/datasource;1?name=organized-internet-search-engines";
-var gSEOrganizer = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer);
-gSEOrganizer.QueryInterface(Ci.nsIRDFDataSource);
-gSEOrganizer.QueryInterface(Ci.nsIBrowserSearchService);
+var gSEOrganizer = Cc[CONTRACT_ID].getService().wrappedJSObject;
 
 function gResort(orig) {
   function sortCallback(item1, item2) {

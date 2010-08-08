@@ -195,7 +195,7 @@ SEOrganizer.prototype = {
   insertOpenInTabsItems: function insertOpenInTabsItems(popup) {
     if(this.getChildItems(popup).length <= 1) return;
 
-    
+
     var label = gNavigatorBundle.getString("menuOpenAllInTabs.label");
     var attrs = {
       selected: (this.SEOrganizer.currentEngine.name == popup.parentNode.label)
@@ -234,8 +234,7 @@ SEOrganizer.prototype = {
   get SEOrganizer() {
     if(!this._seo) {
       this._seo = Cc["@mozilla.org/rdf/datasource;1?name=organized-internet-search-engines"]
-                    .getService(Ci.nsISEOrganizer).QueryInterface(Ci.nsIRDFDataSource)
-                    .QueryInterface(Ci.nsIBrowserSearchService);
+                    .getService().wrappedJSObject;
     }
     return this._seo;
   },
