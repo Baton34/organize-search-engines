@@ -39,11 +39,7 @@ Contributor(s):
 const Ci = Components.interfaces, Cc = Components.classes,
       Cr = Components.results, Cu = Components.utils;
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-
-
 const NS_RDF_DATASOURCE_PRE = "@mozilla.org/rdf/datasource;1?name=";
-
 
 function LOG(msg) {
   msg = "Organize Search Engines:   " + msg;
@@ -285,7 +281,8 @@ SEOrganizer.prototype = {
 
 
   _modifySearchService: function() {
-    var topLevel = this.defaultEngine.wrappedJSObject.__parent__;
+    var topLevel = this.defaultEngine.wrappedJSObject;
+    topLevel = Cu.getGlobalForObject ? Cu.getGlobalForObject(topLevel) : topLevel.__parent__;
     var uri = "chrome://seorganizer/content/searchServiceModifications.js";
     Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader)
                                                .loadSubScript(uri, topLevel);
@@ -721,7 +718,7 @@ SEOrganizer.prototype = {
         engine.iconURI = makeURI(resizer.getDataURL());
         engine.iconURL = engine.iconURI.spec;
         engine.__action = "icon";
-        ss.__parent__.notifyAction(engine, "engine-changed");
+        (Cu.getGlobalForObject ? Cu.getGlobalForObject(ss) : ss.__parent__).notifyAction(engine, "engine-changed");
       };
       engine.innerEngines.forEach(function(e) {
         if(e.iconURI && e.iconURI.spec)
@@ -859,7 +856,7 @@ SEOrganizer.prototype = {
   },
   endUpdateBatch: function nsIRDFDataSouce__endUpdateBatch() {
     this._updateBatchRunning = false;
-    
+
     return this._datasource.endUpdateBatch();
   },
   GetAllCmds: function nsIRDFDataSource__GetAllCmds(source) {
@@ -960,8 +957,7 @@ SEOrganizer.prototype = {
 
   QueryInterface: function QueryInterface(aIID) {
     if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsIRDFDataSource) ||
-       aIID.equals(Ci.nsISEOrganizer) || aIID.equals(Ci.nsIBrowserSearchService) ||
-       aIID.equals(Ci.nsIObserver)) {
+       aIID.equals(Ci.nsIObserver) || aIID.equals(Ci.nsIBrowserSearchService)) {
       return this;
     } else {
       throw Cr.NS_ERROR_NO_INTERFACE;
@@ -994,7 +990,7 @@ FoldersOnly.prototype = {
                          .getService(Ci.nsIRDFService);
     var rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
                               .getService(Ci.nsIRDFContainerUtils);
-    var seOrganizer = Cc[SEOrganizer.prototype.contractID].getService(Ci.nsISEOrganizer).wrappedJSObject;
+    var seOrganizer = Cc[SEOrganizer.prototype.contractID].getService().wrappedJSObject;
 
     var root = rdfService.GetResource(FOLDERS_ROOT);
     var rootContainer = rdfContainerUtils.MakeSeq(datasource, root);
@@ -1108,7 +1104,12 @@ FoldersOnly.prototype = {
   Components.reportError(e);
 }*/
 
-
-function NSGetModule(aCompMgr, aFileSpec) {
-  return XPCOMUtils.generateModule([SEOrganizer, FoldersOnly]);
+// XPCOM registration
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+if(XPCOMUtils.generateModule) { // Firefox 3.*
+  var NSGetModule = function (aCompMgr, aFileSpec) {
+    return XPCOMUtils.generateModule([SEOrganizer, FoldersOnly]);
+  };
+} else { // Firefox 4.0 and above:
+  var NSGetFactory = XPCOMUtils.generateNSGetFactory([SEOrganizer, FoldersOnly]);
 }
