@@ -86,8 +86,9 @@ Resizer.prototype = {
   __document: null,
   get _document() {
     if(!this.__document) {
-      if(this.__parent__.document) {
-        this.__document = this.__parent__.document;
+      let globalObject = Components.utils.getGlobalForObject ? Components.utils.getGlobalForObject(this) : this.__parent__;
+      if(globalObject.document) {
+        this.__document = globalObject.document;
       } else {
         var mediator = Cc["@mozilla.org/appshell/window-mediator;1"]
                          .getService(Ci.nsIWindowMediator);
