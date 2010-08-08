@@ -39,10 +39,14 @@ Contributor(s):
 var organizeSE = {};
 organizeSE.__proto__ = {
   onEngineListChange: function organizeSE__onEngineListChange(item) {
-    if(this.inCommonDialog)
-      gCommonDialogParam.SetString(13, item.selectedItem.id);
-    else
+    if(this.inCommonDialog) {
+      if("setProperty" in gCommonDialogParam) // Firefox 4+
+        gCommonDialogParam.setProperty("ose-folder", item.selectedItem.id);
+      else
+        gCommonDialogParam.SetString(13, item.selectedItem.id);
+    } else {
       this.folderID = item.selectedItem.id;
+    }
   },
   inCommonDialog: null,
   folderID: "urn:organize-search-engines:folders-root",
@@ -59,7 +63,7 @@ organizeSE.__proto__ = {
       var origOnDialogAccept = onDialogAccept;
       onDialogAccept = function(e) {
         var seo = Cc["@mozilla.org/rdf/datasource;1?name=organized-internet-search-engines"]
-                    .getService(Ci.nsISEOrganizer).wrappedJSObject;
+                    .getService().wrappedJSObject;
         var name = document.getElementById("name").value.replace(/\s+$/g, "");
         seo._engineFolders[name] = organizeSE.folderID;
         origOnDialogAccept(e);
