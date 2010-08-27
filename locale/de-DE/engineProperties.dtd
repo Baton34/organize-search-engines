@@ -2,8 +2,8 @@
 <!ENTITY prop.name.label "Name:">
 <!ENTITY prop.name.accesskey "N">
 <!ENTITY prop.icon.label "Symbol:">
-<!ENTITY prop.icon.browse.label "Browse...">
-<!ENTITY prop.icon.browse.accesskey "B">
+<!ENTITY prop.icon.browse.label "Durchsuchen...">
+<!ENTITY prop.icon.browse.accesskey "D">
 <!ENTITY prop.icon.download.label "Automatisch herunterladen">
 <!ENTITY prop.icon.download.accesskey "A">
 <!ENTITY prop.keyword.label "Schlüsselwort:">
