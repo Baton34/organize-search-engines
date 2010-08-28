@@ -246,8 +246,11 @@ SEOrganizer.prototype = {
         organizeSE.searchbar.searchButton.removeAttribute("open");
       organizeSE._cleanUpPopupID("empty-menuitem");
     },
+    popupNode: null,
     popupShowing: function observe__popupshowing(event) {
       var target = event.target;
+      if(document.popupNode)
+        organizeSE.buildObserver.popupNode = document.popupNode;
       // code taken from Firefox' bookmarksMenu.js::showEmptyItem
       // not reusing that method to remain compatible to places
       if(!target.childNodes.length) {
@@ -263,7 +266,7 @@ SEOrganizer.prototype = {
       }
     },
     onCommand: function onCommand(event) {
-      var target = event.originalTarget, searchbar = document.popupNode;
+      var target = event.originalTarget, searchbar = organizeSE.buildObserver.popupNode;
       while(searchbar && searchbar.nodeName != "searchbar")
         searchbar = searchbar.parentNode;
       if(!searchbar) return;
