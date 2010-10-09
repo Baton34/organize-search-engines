@@ -161,7 +161,7 @@ organizeSE__Extensions.prototype = {
       else if(where == "tab" || where == "current") where = "tabshifted";
 
       var target = e.target, engine;
-      if(organizeSE.hasClass(target, "openintabs-item")) {
+      if(target.classList.contains("openintabs-item")) {
         var folder = target.parentNode.parentNode.id;
         folder = seOrganizer_dragObserver.RDFService.GetResource(folder);
         engine = organizeSE.SEOrganizer.folderToEngine(folder);

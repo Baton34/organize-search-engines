@@ -273,14 +273,14 @@ SEOrganizer.prototype = {
       if(target.getAttribute("anonid") == "open-engine-manager") {
         searchbar.openManager(event);
         return;
-      } else if(organizeSE.hasClass(target, "openintabs-item")) {
+      } else if(target.classList.contains("openintabs-item")) {
         var folder = target.parentNode.parentNode.id;
         folder = Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService)
                    .GetResource(folder);
         target.engine = organizeSE.SEOrganizer.folderToEngine(folder);
       } else if(target.engine) { // do nothing special
-      } else if(organizeSE.hasClass(target, "searchbar-engine-menuitem") ||
-                organizeSE.hasClass(target, "addengine-item")) {
+      } else if(target.classList.contains("searchbar-engine-menuitem") ||
+                target.classList.contains("addengine-item")) {
         target.engine = organizeSE.SEOrganizer.getEngineByName(target.label);
       } else { // huh? how did we get here?
         return;
@@ -332,9 +332,6 @@ SEOrganizer.prototype = {
     }
     if(parentNode) parentNode.appendChild(element);
     return element;
-  },
-  hasClass: function(elem, className) {
-    return (" "+elem.className+" ").indexOf(" "+className+" ") != -1;
   },
 
   _sortDirectionHandlers: [

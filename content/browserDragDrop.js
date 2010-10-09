@@ -69,9 +69,9 @@ var seOrganizer_dragObserver = {
     if(target.getAttribute("anonid") == "open-engine-manager")
       return;
     transferData.data = new TransferData();
-    if(organizeSE.hasClass(target, "addengine-item")) {
+    if(target.classList.contains("addengine-item")) {
       transferData.data.addDataForFlavour("application/x-moz-search-engine-to-add", target.label);
-    } else if(organizeSE.hasClass(target, "searchbar-engine-"+target.nodeName)) {
+    } else if(target.classList.contains("searchbar-engine-"+target.nodeName)) {
       transferData.data.addDataForFlavour("application/x-moz-search-engine", target.id);
     }
   },
@@ -134,7 +134,7 @@ var seOrganizer_dragObserver = {
         if(dropDir != 0)
           target.removeAttribute("_moz-menuactive");
       } else {
-        session.canDrop = organizeSE.hasClass("searchbar-engine-menuitem") ||
+        session.canDrop = target.classList.contains("searchbar-engine-menuitem") ||
                           this.overButton(target);
         session.dragAction = Ci.nsIDragService.DRAGDROP_ACTION_COPY; // is copy correct?
 
@@ -246,9 +246,9 @@ var seOrganizer_dragObserver = {
         searchbar._textbox.dispatchEvent(evt);
       } else {
         var engine;
-        if(hasClass(target, "openintabs-item"))
+        if(target.classList.contains("openintabs-item"))
           target = target.parentNode.parentNode;
-        if(target.nodeName == "menuitem" && hasClass(target, "searchbar-engine-menuitem")) {
+        if(target.nodeName == "menuitem" && target.classList.contains("searchbar-engine-menuitem")) {
           engine = organizeSE.SEOrganizer.getEngineByName(target.label);
         } else if(target.nodeName == "menu") {
           var folder = Cc["@mozilla.org/rdf/rdf-service;1"]
@@ -260,7 +260,6 @@ var seOrganizer_dragObserver = {
         organizeSE.searchbar.doSearch(dropData.data, where, engine);
       }
     }
-    function hasClass(elem, className) organizeSE.hasClass(elem, className);
   },
 
   onClose: function(event) {
@@ -305,7 +304,7 @@ var seOrganizer_dragObserver = {
     if(elem.nodeName == "menupopup")
       elem = elem.lastChild;
     while(elem) {
-      if(organizeSE.hasClass(elem, "searchbar-engine-" + elem.nodeName))
+      if(elem.classList.contains("searchbar-engine-" + elem.nodeName))
         break;
       elem = elem.previousSibling;
     }
@@ -316,7 +315,7 @@ var seOrganizer_dragObserver = {
     if(!target) return 0;
     var sbo = target.parentNode._scrollBox.scrollBoxObject;
 
-    if(!organizeSE.hasClass(target, "searchbar-engine-" + target.nodeName))
+    if(!target.classList.contains("searchbar-engine-" + target.nodeName))
       return -1;
 
     var eventY = event.layerY;
