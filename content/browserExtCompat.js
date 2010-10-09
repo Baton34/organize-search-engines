@@ -168,7 +168,7 @@ organizeSE__Extensions.prototype = {
       } else {
         engine = organizeSE.SEOrganizer.getEngineByName(target.label)
       }
-      organizeSE.searchbar.doSearch(text, where, engine);
+      organizeSE.doSearch(text, where, engine);
     },
     onPopupShowing: function(event) {
       if(event.target.parentNode == event.currentTarget) {
@@ -248,7 +248,7 @@ $1");
     },
     doSearch: function(aData, aSubmission) {
       if(aSubmission instanceof Ci.nsISimpleEnumerator) {
-        organizeSE.searchbar.doSearch(aData, "tabshifted", null, aSubmission);
+        organizeSE.doSearch(aData, "tabshifted", null, aSubmission);
       }
     },
     insertItemsHandler: {

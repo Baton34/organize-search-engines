@@ -259,7 +259,7 @@ var seOrganizer_dragObserver = {
         }
         var where = whereToOpenLink(event, true, true);
         if(where == "current") where = "tab";
-        organizeSE.searchbar.doSearch(dropData.data, where, engine);
+        organizeSE.doSearch(dropData.data, where, engine);
       }
     }
   },

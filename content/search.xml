@@ -146,85 +146,8 @@ Contributor(s):
 
       <!-- allow engine folders -->
       <method name="doSearch">
-        <parameter name="aData" />
-        <parameter name="aWhere" />
-        <parameter name="aEngine" />
-        <parameter name="aSubmission" />
         <body><![CDATA[
-          var allLinks = [], submission;
-          if(aSubmission) { // needed for extension support, the first tab is openend by another extension
-            submission = aSubmission;
-          } else {
-            // null parameter below specifies HTML response for search
-            submission = (aEngine || this.currentEngine).getSubmission(aData, null);
-            allLinks.push(submission);
-          }
-          if(submission instanceof Ci.nsISimpleEnumerator) {
-            while(submission.hasMoreElements()) {
-              allLinks.push(submission.getNext().QueryInterface(Ci.nsISearchSubmission));
-            }
-          }
-
-          if(allLinks.length == 1) {
-            openUILinkIn(allLinks[0].uri.spec, aWhere, null, allLinks[0].postData);
-          } else if(aWhere == "window") {
-            var win = openDialog(getBrowserURL(), "_blank", "chrome,all,dialog=no",
-                                 allLinks[0].uri.spec, null, null, allLinks[0].postData, false);
-            // we can't use any utility functions because we want to handle post data
-            win.addEventListener("load", function() {
-              win.setTimeout(function() {
-                for(var i = 1; i < allLinks.length; i++) {
-                  win.gBrowser.loadOneTab(allLinks[i].uri.spec, null, null, allLinks[i].postData,
-                                          true, false);
-                }
-              }, 0);
-            }, false);
-          } else {
-          // from http://mxr.mozilla.org/mozilla1.8/source/browser/components/places/content/controller.js#1333
-            // Check prefs to see whether to open over existing tabs.
-            var prefs = Cc["@mozilla.org/preferences-service;1"]
-                          .getService(Ci.nsIPrefService).getBranch("browser.tabs.");
-            var loadInBackground = prefs.getBoolPref("loadBookmarksInBackground");
-            // Get the start index to open tabs at
-            var browser = getBrowser();
-            var tabPanels = browser.browsers;
-            var tabCount = tabPanels.length;
-            var firstIndex;
-            // If the pref is not set, only load over the blank tabs at the end, if any.
-            for (firstIndex = tabCount - 1; firstIndex >= 0; --firstIndex)
-              if (browser.browsers[firstIndex].currentURI.spec != "about:blank")
-                break;
-            ++firstIndex;
-
-            // Open each uri in the folder in a tab.
-            var index = firstIndex;
-            for (var i = 0; i < allLinks.length; i++) {
-              // If there are tabs to load over, load the uri into the next tab.
-              if (index < tabCount)
-                tabPanels[index].loadURIWithFlags(allLinks[i].uri.spec,
-                                                  Ci.nsIWebNavigation.LOAD_FLAGS_NONE,
-                                                  null, null, allLinks[i].postData);
-              // Otherwise, create a new tab to load the uri into.
-              else
-                browser.addTab(allLinks[i].uri.spec, null, null, allLinks[i].postData);
-              ++index;
-            }
-
-            // focus the first tab if prefs say to
-            if (!loadInBackground) {
-              // Select the first tab in the group.
-              // Set newly selected tab after quick timeout, otherwise hideous focus problems
-              // can occur because new presshell is not ready to handle events
-              function selectNewForegroundTab(browser, tab) {
-                browser.selectedTab = tab;
-              }
-              var tabs = browser.mTabContainer.childNodes;
-              setTimeout(selectNewForegroundTab, 0, browser, tabs[firstIndex]);
-            }
-
-            // and focus the content
-            content.focus();
-          }
+          organizeSE.doSearch.apply(organizeSE, arguments)
         ]]></body>
       </method>
     </implementation>
