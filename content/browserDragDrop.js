@@ -42,10 +42,12 @@ var seOrganizer_dragObserver = {
   },
 
   onCustomizeToolbarFinished: function() {
-    var button = this.searchbar.searchButton;
-    button.setAttribute("ondragenter", "seOrganizer_dragObserver.onDragEnter(event);");
-    button.setAttribute("ondragover", "nsDragAndDrop.dragOver(event, seOrganizer_dragObserver);");
-    button.setAttribute("ondragexit", "nsDragAndDrop.dragExit(event, seOrganizer_dragObserver);");
+    if(this.searchbar) {
+      var button = this.searchbar.searchButton;
+      button.setAttribute("ondragenter", "seOrganizer_dragObserver.onDragEnter(event);");
+      button.setAttribute("ondragover", "nsDragAndDrop.dragOver(event, seOrganizer_dragObserver);");
+      button.setAttribute("ondragexit", "nsDragAndDrop.dragExit(event, seOrganizer_dragObserver);");
+    }
   },
 
   springLoadedMenuDelay: 350,

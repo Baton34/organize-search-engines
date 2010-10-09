@@ -90,14 +90,16 @@ SEOrganizer.prototype = {
   },
 
   _customizeToolbarListeners: [ function() {
-    this.searchbar._textbox.openSearch = function() {
-      // Don't open search popup if history popup is open
-      if(this.popupOpen)
-        return true;
-      // click the button to open the *external* popup
-      document.getBindingParent(this).searchButton.click();
-      return false;
-    };
+    if(this.searchbar) {
+      this.searchbar._textbox.openSearch = function() {
+        // Don't open search popup if history popup is open
+        if(this.popupOpen)
+          return true;
+        // click the button to open the *external* popup
+        document.getBindingParent(this).searchButton.click();
+        return false;
+      };
+    }
   }],
   // this is called from init() and from the searchbar binding
   customizeToolbarListener: function() {
@@ -178,8 +180,9 @@ SEOrganizer.prototype = {
     if(!addengines || !addengines.length) return;
 
     this.createSeparator(popup, "addengine-separator");
+    var stringBundle = document.getElementById("ose-searchbar-stringbundle");
     // Insert the "add this engine" items.
-    var stringBundle = this.searchbar._stringBundle, engineInfo, attrs, label;
+    var engineInfo, attrs, label;
     const CLASS_NAME = "menuitem-iconic addengine-item";
     for(var i = 0; i < addengines.length; i++) {
       engineInfo = addengines[i];
@@ -242,7 +245,7 @@ SEOrganizer.prototype = {
   buildObserver: { /* nsIXULBuilderListener */
     popupHidden: function observe__popuphidden(e) {
       organizeSE.removeDynamicItems((e.target == e.currentTarget), e.target);
-      if(e.target == e.currentTarget)
+      if(e.target == e.currentTarget && organizeSE.searchbar)
         organizeSE.searchbar.searchButton.removeAttribute("open");
       organizeSE._cleanUpPopupID("empty-menuitem");
     },
@@ -262,7 +265,8 @@ SEOrganizer.prototype = {
         // when the popup is hidden and shown back-to-back, popuphidden isn't
         organizeSE.removeDynamicItems(topLevel, target); // fired sometimes
         organizeSE.insertDynamicItems(topLevel, target);
-        if(topLevel) organizeSE.searchbar.searchButton.setAttribute("open", "true");
+        if(topLevel && organizeSE.searchbar)
+          organizeSE.searchbar.searchButton.setAttribute("open", "true");
       }
     },
     onCommand: function onCommand(event) {
@@ -292,8 +296,10 @@ SEOrganizer.prototype = {
       searchbar.dispatchEvent(evt);
     },
     mouseMove: function observe__mouseMove(event) { // hover effect for the button
-      var domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
-      domUtils.setContentState(organizeSE.searchbar.searchButton, 4);
+      if(organizeSE.searchbar) {
+        var domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
+        domUtils.setContentState(organizeSE.searchbar.searchButton, 4);
+      }
     },
     didRebuild: function observe__didRebuild() {
       var popup = organizeSE.popupset.lastChild;

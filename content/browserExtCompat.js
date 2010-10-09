@@ -221,9 +221,11 @@ organizeSE__Extensions.prototype = {
       container.insertBefore(sot_item, container.firstChild);
       container.insertBefore(sot_separator, container.firstChild);
 
-      var popup = document.getAnonymousElementByAttribute(organizeSE.searchbar,
-                                                   "anonid", "searchbar-popup");
-      popup.parentNode.removeChild(popup);
+      if(organizeSE.searchbar) {
+        var popup = document.getAnonymousElementByAttribute(organizeSE.searchbar,
+                                                     "anonid", "searchbar-popup");
+        popup.parentNode.removeChild(popup);
+      }
 
       window.setTimeout(function() { organizeSE.popupset.builder.rebuild(); }, 1);
     }
@@ -246,7 +248,6 @@ $1");
     },
     doSearch: function(aData, aSubmission) {
       if(aSubmission instanceof Ci.nsISimpleEnumerator) {
-        //aSubmission = organizeSE.searchbar.currentEngine.getSubmission(aData, null);
         organizeSE.searchbar.doSearch(aData, "tabshifted", null, aSubmission);
       }
     },
@@ -271,9 +272,14 @@ $1");
       return ("MultiSearch" in window);
     },
     init: function() {
-      var funcStr = organizeSE.searchbar.doSearch.toString();
-      funcStr = funcStr.replace(/(var\ssubmission)/, "this.normalDoSearch(part, 'tab', arguments[2], null);\ncontinue;\n$1");
-      eval("organizeSE.searchbar.doSearch = " + funcStr);
+      this.customizeToolbarHandler();
+    },
+    customizeToolbarHandler: function() {
+      if(organizeSE.searchbar) {
+        var funcStr = organizeSE.searchbar.doSearch.toString();
+        funcStr = funcStr.replace(/(var\ssubmission)/, "this.normalDoSearch(part, 'tab', arguments[2], null);\ncontinue;\n$1");
+        eval("organizeSE.searchbar.doSearch = " + funcStr);
+      }
     },
     wait: 0
   }

@@ -92,6 +92,11 @@ Contributor(s):
     </popupset>
   </window>
 
+  <stringbundleset id="stringbundleset">
+    <stringbundle src="chrome://browser/locale/search.properties"
+                  id="ose-searchbar-stringbundle"/>
+  </stringbundleset>
+
   <!-- - - - - - - - - - extensions - - - - - - - - - -->
   <!-- Auto Context -->
   <menu id="autocontext-searchmenu" ref="urn:organize-search-engines:root"
