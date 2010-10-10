@@ -313,11 +313,7 @@ SEOrganizer.prototype = {
       popup.addEventListener("mousemove", this.mouseMove, false);
     },
     willRebuild: function observe__willRebuild() { },
-    QueryInterface: function observe__QueryInterface(aIID) {
-      if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsIXULBuilderListener))
-        return this;
-      throw Cr.NS_ERROR_NO_INTERFACE;
-    }
+    QueryInterface: XPCOMUtils.generateQI(["nsIXULBuilderListener"])
   },
   createSeparator: function(parentNode, className, id) {
     const XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
@@ -371,9 +367,9 @@ SEOrganizer.prototype = {
       submission = aEngine.getSubmission(aData, null);
       allLinks.push(submission);
     }
-    if(submission instanceof Ci.nsISimpleEnumerator) {
-      while(submission.hasMoreElements()) {
-        allLinks.push(submission.getNext().QueryInterface(Ci.nsISearchSubmission));
+    if(submission.wrappedJSObject && "hasMoreElements" in submission.wrappedJSObject) {
+      while(submission.wrappedJSObject.hasMoreElements()) {
+        allLinks.push(submission.wrappedJSObject.getNext().QueryInterface(Ci.nsISearchSubmission));
       }
     }
 

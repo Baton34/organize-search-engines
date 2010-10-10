@@ -39,6 +39,8 @@ Contributor(s):
 const Ci = Components.interfaces, Cc = Components.classes,
       Cr = Components.results, Cu = Components.utils;
 
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+
 const NS_RDF_DATASOURCE_PRE = "@mozilla.org/rdf/datasource;1?name=";
 
 function LOG(msg) {
@@ -332,7 +334,7 @@ SEOrganizer.prototype = {
         case "engine-current": // The current engine was changed.
           var engines = this.getVisibleEngines({});
           for(var i = 0; i < engines.length; i++) {
-            if("innerEngines" in engines[i].wrappedJSObject &&
+            if(engines[i].wrappedJSObject._file.parent.path.indexOf("[fake]/") == 0 &&
                engines[i].name != aEngine.name)
               this.removeEngine(engines[i]);
           }
@@ -655,6 +657,7 @@ SEOrganizer.prototype = {
     var ss = this._searchService.wrappedJSObject;
     var name = this.getNameByItem(folder);
     var engine = ss.getEngineByName(name);
+    var innerEngines = [];
     if(!engine) {
       engine = {
         alias: "", searchForm: "",
@@ -670,17 +673,13 @@ SEOrganizer.prototype = {
           var submission = {
             getNext: function() {
               i++;
-              var submission = engine.innerEngines[i].getSubmission(data, type);
+              var submission = innerEngines[i].getSubmission(data, type);
               return submission;
             },
-            hasMoreElements: function() { return i + 1 < engine.innerEngines.length; },
-            QueryInterface: function(aIID) {
-              if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsISimpleEnumerator) ||
-                 aIID.equals(Ci.nsISearchSubmission))
-                return this;
-              throw Cr.NS_ERROR_NO_INTERFACE;
-            }
+            hasMoreElements: function() i + 1 < innerEngines.length,
+            QueryInterface: XPCOMUtils.generateQI(["nsISimpleEnumerator", "nsISearchSubmission"])
           };
+          submission.wrappedJSObject = submission;
 
           var first = submission.getNext();
           submission.postData = first.postData;
@@ -688,24 +687,19 @@ SEOrganizer.prototype = {
 
           return submission;
         },
-        innerEngines: [],
         supportsResponseType: function(type) {
           return (type == null || type == "text/html");
         },
-        QueryInterface: function(aIID) {
-          if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsISearchEngine))
-            return this;
-          throw Cr.NS_ERROR_NO_INTERFACE;
-        }
+        QueryInterface: XPCOMUtils.generateQI(["nsISearchEngine"])
       };
       engine.wrappedJSObject = engine;
       this._iterateAll(function(item) {
-        engine.innerEngines.push(this.getEngineByName(this.getNameByItem(item)));
+        innerEngines.push(this.getEngineByName(this.getNameByItem(item)));
       }, null, folder);
 
-      if(!engine.innerEngines.length)
+      if(!innerEngines.length)
         throw Cr.NS_ERROR_FAILURE;
-      if(engine.innerEngines.length == 1)
+      if(innerEngines.length == 1)
         return engine.innerEngines[0];
 
       if(typeof Resizer == "undefined") {
@@ -720,7 +714,7 @@ SEOrganizer.prototype = {
         engine.__action = "icon";
         (Cu.getGlobalForObject ? Cu.getGlobalForObject(ss) : ss.__parent__).notifyAction(engine, "engine-changed");
       };
-      engine.innerEngines.forEach(function(e) {
+      innerEngines.forEach(function(e) {
         if(e.iconURI && e.iconURI.spec)
           resizer.addIconByURL(e.iconURI.spec);
         else // use transparent image
@@ -955,14 +949,7 @@ SEOrganizer.prototype = {
     return ret;
   },
 
-  QueryInterface: function QueryInterface(aIID) {
-    if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsIRDFDataSource) ||
-       aIID.equals(Ci.nsIObserver) || aIID.equals(Ci.nsIBrowserSearchService)) {
-      return this;
-    } else {
-      throw Cr.NS_ERROR_NO_INTERFACE;
-    }
-  }
+  QueryInterface: XPCOMUtils.generateQI(["nsIRDFDataSource", "nsIObserver", "nsIBrowserSearchService"])
 };
 
 function FoldersOnly() {
@@ -1093,19 +1080,13 @@ FoldersOnly.prototype = {
     return this._datasource.Unassert(source, property, target);
   },
 
-  QueryInterface: function QueryInterface(aIID) {
-    if(aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsIRDFDataSource) ||
-       aIID.equals(Ci.nsIObserver))
-      return this;
-    throw Cr.NS_ERROR_NO_INTERFACE;
-  }
+  QueryInterface: XPCOMUtils.generateQI(["nsIRDFDataSource", "nsIObserver"])
 };
 /*} catch(e) {
   Components.reportError(e);
 }*/
 
 // XPCOM registration
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 if(XPCOMUtils.generateModule) { // Firefox 3.*
   var NSGetModule = function (aCompMgr, aFileSpec) {
     return XPCOMUtils.generateModule([SEOrganizer, FoldersOnly]);
