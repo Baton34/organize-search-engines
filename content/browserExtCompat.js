@@ -148,6 +148,7 @@ organizeSE__Extensions.prototype = {
       contextsearch.search = this.search;
     },
     search: function(e) {
+      contextsearch.contextitem.parentNode.hidePopup();
       var text, where;
       if(e.currentTarget.id == "autocontext-searchmenupopup" ||
          e.currentTarget.id == "autocontext1-searchmenupopup") {
