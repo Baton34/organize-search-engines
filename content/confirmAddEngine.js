@@ -36,21 +36,25 @@ Contributor(s):
  the terms of any one of the MPL, the GPL or the LGPL.
 ***** END LICENSE BLOCK ***** */
 
-var organizeSE = {};
-organizeSE.__proto__ = {
+var organizeSE = {
   onEngineListChange: function organizeSE__onEngineListChange(item) {
-    if(this.inCommonDialog) {
-      if("setProperty" in gCommonDialogParam) // Firefox 4+
-        gCommonDialogParam.setProperty("ose-folder", item.selectedItem.id);
-      else
-        gCommonDialogParam.SetString(13, item.selectedItem.id);
-    } else {
-      this.folderID = item.selectedItem.id;
-    }
+    var args = window.arguments[0];
+    args.folder = item.selectedItem.id;
   },
-  inCommonDialog: null,
-  folderID: "urn:organize-search-engines:folders-root",
+  onAccept: function organizeSE__onAccept() {
+    var args = window.arguments[0];
+    args.confirmed = true;
+    args.useNow = document.getElementById("checkbox").checked;
+  },
   onLoad: function organizeSE__onLoad() {
+    var args = window.arguments[0];
+    window.title = args.dialogMessage;
+    document.getElementById("info.body").textContent = args.dialogMessage;
+    document.getElementById("checkbox").label = args.checkboxMessage.replace(/&/, "");
+    document.getElementById("checkbox").accessKey = args.checkboxMessage.replace(/^.*&(.).*$/, "$1");  
+    document.documentElement.getButton("accept").label = args.addButtonLabel;
+    args.folder = "urn:organize-search-engines:folders-root";
+    
     if(!document.getElementById("engineList"))
       return; // in case the user uses an old version of add to search bar
     if(document.getElementById("enginePopup").lastChild.nodeName == "template") {
@@ -59,16 +63,6 @@ organizeSE.__proto__ = {
       return; // if there are no folders, a list is useless
     }
     this.observer.register();
-    if(!(this.inCommonDialog = "gCommonDialogParam" in window)) {
-      var origOnDialogAccept = onDialogAccept;
-      onDialogAccept = function(e) {
-        var seo = Cc["@mozilla.org/rdf/datasource;1?name=organized-internet-search-engines"]
-                    .getService().wrappedJSObject;
-        var name = document.getElementById("name").value.replace(/\s+$/g, "");
-        seo._engineFolders[name] = organizeSE.folderID;
-        origOnDialogAccept(e);
-      };
-    }
   },
   onClose: function organizeSE__onClose() {
     this.observer.unregister();

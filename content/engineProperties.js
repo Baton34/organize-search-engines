@@ -52,7 +52,7 @@ function init() {
   document.getElementById("name-textbox").value = gEngine.name;
   iconMethods.changeIcon(gEngine.iconURI, 0);
   var origEngine = gEngine.originalEngine.wrappedJSObject;
-  var ssGlobalObject = getGlobalForObject(origEngine);
+  var ssGlobalObject = Cu.getGlobalForObject(origEngine);
   if(origEngine.__updateToEngine)
     origEngine = origEngine.__updateToEngine;
   document.getElementById("description-textbox").value = origEngine.description;
@@ -119,7 +119,7 @@ function cloneEngine(engine, dataType) {
   engine = engine.wrappedJSObject;
   if(engine._engineToUpdate)
     return engine;
-  var toplevel = getGlobalForObject(engine);
+  var toplevel = Cu.getGlobalForObject(engine);
   var Engine = toplevel.Engine;
   dataType = Ci.nsISearchEngine[dataType];
   var newEngine = new Engine(engine._file, dataType, engine._readOnly);
@@ -150,8 +150,8 @@ function storeChanges() {
   url.method = (document.getElementById("method-radio").selectedIndex == 0) ? "GET" : "POST";
   url.template = document.getElementById("url-textbox").value;
   var params = document.getElementById("params-tree").view.wrappedJSObject.params;
-  var newParams = new getGlobalForObject(origEngine).Array(); // don't leak this window
-  var QueryParameter = getGlobalForObject(origEngine).QueryParameter;
+  var newParams = new Cu.getGlobalForObject(origEngine).Array(); // don't leak this window
+  var QueryParameter = Cu.getGlobalForObject(origEngine).QueryParameter;
   for(var i = 0; i < params.length; i++) {
     var value = params[i].split("=");
     newParams.push(new QueryParameter(value.shift(), value.join("=")));
@@ -163,11 +163,6 @@ function storeChanges() {
   newEngine._iconUpdateURL = document.getElementById("update-icon-url-textbox").value || null;
 }
 
-function getGlobalForObject(obj) {
-  if(Cu.getGlobalForObject)
-    return Cu.getGlobalForObject(obj);
-  return obj.__parent__;
-}
 
 /* the parameter tree view */
 function ParamTreeView(params) {

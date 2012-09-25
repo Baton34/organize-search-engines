@@ -56,75 +56,36 @@ Contributor(s):
     if(!parent)
       return {confirmed: false, useNow: false};
 
+
     var seOrganizer = Cc["@mozilla.org/rdf/datasource;1?name=organized-internet-search-engines"].getService().wrappedJSObject;
 
     var sbs = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService);
     var stringBundle = sbs.createBundle(SEARCH_BUNDLE);
+    
+    var args = {
 
-    var titleMessage = stringBundle.GetStringFromName("addEngineConfirmTitle");
+      titleMessage: stringBundle.GetStringFromName("addEngineConfirmTitle"),
 
-    // Display only the hostname portion of the URL.
-    var dialogMessage = stringBundle.formatStringFromName("addEngineConfirmation",
-                                               [this._name, this._uri.host], 2);
-    var checkboxMessage = stringBundle.GetStringFromName("addEngineUseNowText");
-    var addButtonLabel = stringBundle.GetStringFromName("addEngineAddButtonLabel");
+      // Display only the hostname portion of the URL.
+      dialogMessage: stringBundle.formatStringFromName("addEngineConfirmation",
+                                               [this._name, this._uri.host], 2),
 
-    if("{1c978d25-b37f-43a8-a2d6-0c7a239ead87}" in Components.classesByID) { // new JS-based nsIPromptService in Fx 4
-      let args = Cc["@mozilla.org/hash-property-bag;1"]
-                   .createInstance(Ci.nsIWritablePropertyBag2)
-                   .QueryInterface(Ci.nsIWritablePropertyBag);
+      checkboxMessage: stringBundle.GetStringFromName("addEngineUseNowText"),
 
-      args.setProperty("promptType", "confirmEx");
-      args.setProperty("title",      titleMessage);
-      args.setProperty("text",       dialogMessage);
-      args.setProperty("checkLabel", checkboxMessage);
-      args.setProperty("checked",    false);
-      args.setProperty("ok",         true);
-      args.setProperty("buttonNumClicked", 1);
+      addButtonLabel: stringBundle.GetStringFromName("addEngineAddButtonLabel"),
+      
+      folder: null,
+      
+      confirmed: false,
+      
+      useNow: false,
 
-      //let [label0, label1, label2, defaultButtonNum, isDelayEnabled] =
-      //    PromptUtils.confirmExHelper(flags, button0, button1, button2);
+    };
 
-      args.setProperty("defaultButtonNum", 0);
-      args.setProperty("enableDelay", false);
-      let bunService = Cc["@mozilla.org/intl/stringbundle;1"]
-                         .getService(Ci.nsIStringBundleService);
-      let bundle = bunService.createBundle("chrome://global/locale/commonDialogs.properties");
-      if (!bundle)
-        throw "String bundle for Prompter not present!";
-
-      args.setProperty("button0Label", bundle.GetStringFromName("OK"));
-      args.setProperty("button1Label", bundle.GetStringFromName("Cancel"));
-
-      args.setProperty("ose-folder", null);
-
-      parent.openDialog("chrome://seorganizer/content/confirmAddEngine.xul",
-                        "_blank", "centerscreen,chrome,modal,titlebar", args);
-
-      var folder = args.getProperty("ose-folder");
-      seOrganizer._engineFolders[this.name] = folder;
-
-      return {confirmed: !args.getProperty("buttonNumClicked"), useNow: args.getProperty("checked")};
-    } else {
-      var args =  Cc["@mozilla.org/embedcomp/dialogparam;1"]
-                    .createInstance(Ci.nsIDialogParamBlock);
-      args.SetString(12, titleMessage);
-      args.SetString(0, dialogMessage);
-      args.SetString(1, checkboxMessage);
-      args.SetInt(1, 0); // checkbox not checked by default
-      args.SetString(3, ""); // header
-      args.SetInt(2, 2); // number of buttons
-      args.SetInt(5, 0); // default button
-      args.SetString(8, addButtonLabel); // accept button label
-      args.SetString(9, ""); // cancel button label
-      args.SetInt(3, 0); // number of textboxes
-      args.SetInt(6, 0); // no delay
-      parent.openDialog("chrome://seorganizer/content/confirmAddEngine.xul",
-                        "_blank", "centerscreen,chrome,modal,titlebar", args);
-      var folder = args.GetString(13);
-      seOrganizer._engineFolders[this.name] = folder;
-      return {confirmed: !args.GetInt(0), useNow: args.GetInt(1)};
-    }
+    parent.openDialog("chrome://seorganizer/content/confirmAddEngine.xul",
+                      "_blank", "centerscreen,chrome,modal,titlebar", args);
+    seOrganizer._engineFolders[this.name] = args.folder;
+    return {confirmed: args.confirmed, useNow: args. useNow};
   };
 })();
 
@@ -185,17 +146,3 @@ SearchService.prototype._getSortedEngines = function getSorted(aWithHidden) {
     _filteredSortedEngines = this._sortedEngines.filter(function(e)!e.hidden);
   return _filteredSortedEngines;
 };
-
-
-// cache engines' (internal database) ids:
-(function() {
-  if("__id" in Engine.prototype)
-    return; // Firefox 3.5 already has this optimization
-
-  var orig = Engine.prototype.__lookupGetter__("_id");
-  Engine.prototype.__defineGetter__("_id", function _id() {
-    if(!this.__id)
-      this.__id = orig.apply(this, arguments);
-    return this.__id;
-  });
-})();

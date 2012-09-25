@@ -9,10 +9,8 @@ skin      seorganizer  classic/1.0  skin/
 
 locale    seorganizer  en-US        locale/en-US/
 
-
-# XPCOM component registration (Firefox 4.0 and above)
+interfaces components/nsISEOrganizer.xpt
 component {1a6b3e72-eb74-11db-9041-00ffd1e32fc4} components/nsSEOrganizer.js
 contract @mozilla.org/rdf/datasource;1?name=organized-internet-search-engines {1a6b3e72-eb74-11db-9041-00ffd1e32fc4}
-
 component {f2fa3794-eb73-11db-9d18-00ffd1e32fc4} components/nsSEOrganizer.js
 contract @mozilla.org/rdf/datasource;1?name=organized-internet-search-folders {f2fa3794-eb73-11db-9d18-00ffd1e32fc4}

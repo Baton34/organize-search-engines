@@ -283,8 +283,7 @@ SEOrganizer.prototype = {
 
 
   _modifySearchService: function() {
-    var topLevel = this.defaultEngine.wrappedJSObject;
-    topLevel = Cu.getGlobalForObject ? Cu.getGlobalForObject(topLevel) : topLevel.__parent__;
+    var topLevel = Cu.getGlobalForObject(this.defaultEngine.wrappedJSObject);
     var uri = "chrome://seorganizer/content/searchServiceModifications.js";
     Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader)
                                                .loadSubScript(uri, topLevel);
@@ -677,7 +676,7 @@ SEOrganizer.prototype = {
               return submission;
             },
             hasMoreElements: function() i + 1 < innerEngines.length,
-            QueryInterface: XPCOMUtils.generateQI(["nsISimpleEnumerator", "nsISearchSubmission"])
+            QueryInterface: XPCOMUtils.generateQI([Ci.nsISimpleEnumerator, Ci.nsISearchSubmission])
           };
           submission.wrappedJSObject = submission;
 
@@ -690,7 +689,7 @@ SEOrganizer.prototype = {
         supportsResponseType: function(type) {
           return (type == null || type == "text/html");
         },
-        QueryInterface: XPCOMUtils.generateQI(["nsISearchEngine"])
+        QueryInterface: XPCOMUtils.generateQI([Ci.nsISearchEngine])
       };
       engine.wrappedJSObject = engine;
       this._iterateAll(function(item) {
@@ -712,7 +711,7 @@ SEOrganizer.prototype = {
         engine.iconURI = makeURI(resizer.getDataURL());
         engine.iconURL = engine.iconURI.spec;
         engine.__action = "icon";
-        (Cu.getGlobalForObject ? Cu.getGlobalForObject(ss) : ss.__parent__).notifyAction(engine, "engine-changed");
+        Cu.getGlobalForObject(ss).notifyAction(engine, "engine-changed");
       };
       innerEngines.forEach(function(e) {
         if(e.iconURI && e.iconURI.spec)
@@ -949,7 +948,12 @@ SEOrganizer.prototype = {
     return ret;
   },
 
-  QueryInterface: XPCOMUtils.generateQI(["nsIRDFDataSource", "nsIObserver", "nsIBrowserSearchService"])
+  QueryInterface: XPCOMUtils.generateQI([
+                                          Ci.nsISEOrganizer,
+                                          Ci.nsIRDFDataSource,
+                                          Ci.nsIBrowserSearchService,
+                                          Ci.nsIObserver
+                                        ])
 };
 
 function FoldersOnly() {
@@ -1080,17 +1084,10 @@ FoldersOnly.prototype = {
     return this._datasource.Unassert(source, property, target);
   },
 
-  QueryInterface: XPCOMUtils.generateQI(["nsIRDFDataSource", "nsIObserver"])
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsIRDFDataSource, Ci.nsIObserver])
 };
 /*} catch(e) {
   Components.reportError(e);
 }*/
 
-// XPCOM registration
-if(XPCOMUtils.generateModule) { // Firefox 3.*
-  var NSGetModule = function (aCompMgr, aFileSpec) {
-    return XPCOMUtils.generateModule([SEOrganizer, FoldersOnly]);
-  };
-} else { // Firefox 4.0 and above:
-  var NSGetFactory = XPCOMUtils.generateNSGetFactory([SEOrganizer, FoldersOnly]);
-}
+var NSGetFactory = XPCOMUtils.generateNSGetFactory([SEOrganizer, FoldersOnly]);
