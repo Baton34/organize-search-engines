@@ -74,12 +74,6 @@ function clearTimeout(timeout) {
   timer.callback.wrappedJSObject.notify = null;
   delete timeout.t;
 }
-function setInterval(callback, interval) {
-  var args = [];
-  for(var i = 2; i < arguments.length; i++)
-    args.push(arguments[i]);
-  return _timer(callback, interval, Ci.nsITimer.TYPE_REPEATING_SLACK, args);
-}
 var clearInterval = clearTimeout;
 function makeURI(aURL, aOriginCharset, aBaseURI) {
   var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
@@ -89,7 +83,6 @@ function makeURI(aURL, aOriginCharset, aBaseURI) {
 /*try {*/
 
 const FILENAME = "organize-search-engines.rdf";
-const UUID = "organize-search-engines@maltekraus.de";
 
 const NS = "urn:organize-search-engines#";
 const NS_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
@@ -140,11 +133,11 @@ SEOrganizer.prototype = {
       var instance = this;
       var os = Cc["@mozilla.org/observer-service;1"]
                  .getService(Ci.nsIObserverService);
+      var addObserver = true;
       try {
         os.removeObserver(this, "browser-search-engine-modified");
-        var addObserver = true;
       } catch(e) {
-        var addObserver = false;
+        addObserver = false;
       }
       var hiddenInTemplate = false;
       var engines = [];
@@ -588,8 +581,8 @@ SEOrganizer.prototype = {
   /**
    * Iterates through all items and calls a callback function for each.
    *
-   * @param callback The function to call.
-   * @param filter   Optionally defines a function that is called before calling
+   * @param aCallback The function to call.
+   * @param aFilter   Optionally defines a function that is called before calling
    *                 callback. If filter returns false, the callback does not
    *                 get called. The default filters any folders and separators.
    *

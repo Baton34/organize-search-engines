@@ -58,13 +58,6 @@ const CONTRACT_ID =
          "@mozilla.org/rdf/datasource;1?name=organized-internet-search-engines";
 var gSEOrganizer;
 
-function LOG(msg) {
-  msg = "Organize Search Engines:   " + msg;
-  var consoleService = Cc["@mozilla.org/consoleservice;1"]
-                         .getService(Ci.nsIConsoleService);
-  consoleService.logStringMessage(msg);
-  return msg;
-}
 
 
 function gResort(orig) {
@@ -1236,15 +1229,29 @@ EngineView.prototype = {
     return item;
   },
   getCellProperties: function EngineView__getCellProperties(row, col, props) {
-    var aserv = Cc["@mozilla.org/atom-service;1"].getService(Ci.nsIAtomService);
-    if(this.isSeparator(row))
-      props.AppendElement(aserv.getAtom("separator"));
-    if(col.id == "engineName") {
-      props.AppendElement(aserv.getAtom("Name"));
-      props.AppendElement(aserv.getAtom("title"));
+    if (props) {
+      var aserv = Cc["@mozilla.org/atom-service;1"].getService(Ci.nsIAtomService);
+      if(this.isSeparator(row))
+        props.AppendElement(aserv.getAtom("separator"));
+      if(col.id == "engineName") {
+        props.AppendElement(aserv.getAtom("Name"));
+        props.AppendElement(aserv.getAtom("title"));
+      }
+      if(this.isContainer(row) && this.isContainerOpen(row))
+        props.AppendElement(aserv.getAtom("open"));
+    } else {
+      let props = [];
+      if (this.isSeparator(row))
+        props.push("separator");
+      if (col.id == "engineName") {
+        props.push("Name");
+        props.push("title");
+      }
+      if (this.isContainer(row) && this.isContainerOpen(row))
+        props.push("open");
+      return props.join(" ");
     }
-    if(this.isContainer(row) && this.isContainerOpen(row))
-      props.AppendElement(aserv.getAtom("open"));
+    return null;
   },
   getCellText: function EngineView__getCellText(row, col) {
     var rowItem = this._indexCache[row];
@@ -1259,11 +1266,22 @@ EngineView.prototype = {
   getCellValue: function EngineView__getCellValue(row, col) { },
   getColumnProperties: function EngineView__getColumnProperties(col, props) {
     var aserv = Cc["@mozilla.org/atom-service;1"].getService(Ci.nsIAtomService);
-    props.AppendElement(aserv.getAtom(col.id));
-    if(col.id == "engineName") {
-      props.AppendElement(aserv.getAtom("Name"));
-      props.AppendElement(aserv.getAtom("title"));
+
+    if (props) {
+      props.AppendElement(aserv.getAtom(col.id));
+      if(col.id == "engineName") {
+        props.AppendElement(aserv.getAtom("Name"));
+        props.AppendElement(aserv.getAtom("title"));
+      }
+    } else {
+      props = [ col.id ];
+      if (col.id == "engineName") {
+        props.push("Name");
+        props.push("title");
+      }
+      return props.join(" ");
     }
+    return null;
   },
   getImageSrc: function EngineView__getImageSrc(row, col) {
     if(col.id == "engineName")
@@ -1284,9 +1302,15 @@ EngineView.prototype = {
   },
   getProgressMode: function() { return 0; },
   getRowProperties: function EngineView__getRowProperties(index, properties) {
-    var aserv = Cc["@mozilla.org/atom-service;1"].getService(Ci.nsIAtomService);
-    if(this.isSeparator(index))
-      properties.AppendElement(aserv.getAtom("separator"));
+    if(this.isSeparator(index)) {
+      if (properties) {
+        var aserv = Cc["@mozilla.org/atom-service;1"].getService(Ci.nsIAtomService);
+        properties.AppendElement(aserv.getAtom("separator"));
+      } else {
+        return "separator";
+      }
+    }
+    return null;
   },
   hasNextSibling: function EngineView__hasNextSibling(rowIndex, afterIndex) {
     var row = this._indexCache[rowIndex];
