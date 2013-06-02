@@ -17,7 +17,7 @@ The Original Code is Organize Search Engines.
 
 The Initial Developer of the Original Code is
 Malte Kraus.
-Portions created by the Initial Developer are Copyright (C) 2006-2009
+Portions created by the Initial Developer are Copyright (C) 2006-2013
 the Initial Developer. All Rights Reserved.
 
 Contributor(s):
@@ -544,7 +544,7 @@ EngineManagerDialog.prototype = {
       if(!index) firstSelected = true;
       if(item.isSep) readOnly = true;
       if(item.isEngine && !readOnly)
-        readOnly = !engine || (engine._readOnly && !("_serializeToJSON" in engine));
+        readOnly = !engine || engine._readOnly;
     }
     onlyOneEngine = !multipleSelected && !disableButtons && item.isEngine;
 
@@ -1347,7 +1347,7 @@ EngineView.prototype = {
   isEditable: function EngineView__isEditable(row, col) {
     var item = this._indexCache[row];
     var engine = item.originalEngine ? item.originalEngine.wrappedJSObject : null;
-    var editableEngine = engine && (!engine._readOnly || "_serializeToJSON" in engine);
+    var editableEngine = engine && !engine._readOnly;
     return (col.id == "engineName" && (item.isSeq || editableEngine)) ||
            (col.id == "engineAlias" && item.isEngine);
   },

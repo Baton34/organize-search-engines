@@ -94,7 +94,7 @@ function init() {
   }, true);
   tree.view = new ParamTreeView(url.params);
 
-  if(origEngine._readOnly && !("_serializeToJSON" in origEngine)) {
+  if(origEngine._readOnly) {
     [
      "name-textbox","icon-button","icon-download-button","description-textbox",
      "homepage-textbox","url-textbox","encoding-textbox","method-radio-get",
@@ -136,7 +136,7 @@ function cloneEngine(engine, dataType) {
 function storeChanges() {
   gEngine.alias = document.getElementById("keyword-textbox").value;
   var origEngine = gEngine.originalEngine.wrappedJSObject;
-  if(origEngine._readOnly && !("_serializeToJSON" in origEngine))
+  if(origEngine._readOnly)
     return;
 
   var newEngine = cloneEngine(origEngine, document.getElementById("update-data-type-menulist").value);
