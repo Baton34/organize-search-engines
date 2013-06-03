@@ -104,8 +104,8 @@ cd $TMP_DIR
 if [ -f "chrome.manifest" ]; then
   echo "adding locales to chrome.manifest..."
   #locale    $CHROME_URI  en-US        locale/en-US/
-  LOCALES=`dir ../locale`
-  for LOCALE in $LOCALES; do
+  for LOCALE in ../locale/*; do
+    LOCALE=$(basename "$LOCALE")
     if [ "$LOCALE" != 'en-US' ]; then
       echo "locale    $CHROME_URI  $LOCALE        locale/$LOCALE/" >> chrome.manifest
     fi
