@@ -36,6 +36,8 @@ Contributor(s):
  the terms of any one of the MPL, the GPL or the LGPL.
 ***** END LICENSE BLOCK ***** */
 
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 var organizeSE = {
   onEngineListChange: function organizeSE__onEngineListChange(item) {
     var args = window.arguments[0];
@@ -48,16 +50,16 @@ var organizeSE = {
   },
   onLoad: function organizeSE__onLoad() {
     var args = window.arguments[0];
-    window.title = args.dialogMessage;
+    document.documentElement.setAttribute("title", args.titleMessage);
     document.getElementById("info.body").textContent = args.dialogMessage;
     document.getElementById("checkbox").label = args.checkboxMessage.replace(/&/, "");
     document.getElementById("checkbox").accessKey = args.checkboxMessage.replace(/^.*&(.).*$/, "$1");  
     document.documentElement.getButton("accept").label = args.addButtonLabel;
     args.folder = "urn:organize-search-engines:folders-root";
-    
-    if(!document.getElementById("engineList"))
-      return; // in case the user uses an old version of add to search bar
-    if(document.getElementById("enginePopup").lastChild.nodeName == "template") {
+
+    let enginePopup = document.getElementById("enginePopup");
+    enginePopup.builder.rebuild();
+    if(enginePopup.lastChild.nodeName == "template") {
       document.getElementById("engineList").parentNode.hidden = true;
       sizeToContent();
       return; // if there are no folders, a list is useless
@@ -70,7 +72,7 @@ var organizeSE = {
   observer: {
     PREFNAME: "extensions.seorganizer.sortDirection",
     observe: function organizeSE__observer__observe(subject, topic, data) {
-      if(topic != "nsPref:changed" || data != "")
+      if(topic != "nsPref:changed" || data !== "")
         return;
       subject.QueryInterface(Ci.nsIPrefBranch2);
       var direction = subject.getComplexValue("", Ci.nsISupportsString).data;
@@ -78,16 +80,12 @@ var organizeSE = {
       menupopup.setAttribute("sortDirection", direction);
     },
     register: function organizeSE__observer__observe() {
-      var prefService = Cc["@mozilla.org/preferences-service;1"]
-                          .getService(Ci.nsIPrefService);
-      var branch = prefService.getBranch(this.PREFNAME).QueryInterface(Ci.nsIPrefBranch2);
+      var branch = Services.prefs.getBranch(this.PREFNAME).QueryInterface(Ci.nsIPrefBranch2);
       branch.addObserver("", this, false);
       this.observe(branch, "nsPref:changed", "");
     },
     unregister: function organizeSE__observer__observe() {
-      var prefService = Cc["@mozilla.org/preferences-service;1"]
-                          .getService(Ci.nsIPrefService);
-      var branch = prefService.getBranch(this.PREFNAME).QueryInterface(Ci.nsIPrefBranch2);
+      var branch = Services.prefs.getBranch(this.PREFNAME).QueryInterface(Ci.nsIPrefBranch2);
       branch.removeObserver("", this);
     }
   }

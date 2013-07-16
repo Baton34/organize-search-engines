@@ -41,8 +41,7 @@ Contributor(s):
 (function _setUpWrappedJSObject() {
   var orig = SearchService.prototype.getEngines;
   SearchService.prototype.getEngines = function() { this.wrappedJSObject = this; };
-  Cc["@mozilla.org/browser/search-service;1"]
-                         .getService(Ci.nsIBrowserSearchService).getEngines({});
+  Services.search.getEngines({});
   SearchService.prototype.getEngines = orig; // restore the original function
 })();
 
@@ -50,9 +49,7 @@ Contributor(s):
 (function _replaceAddEngineConfirmation() {
 
   Engine.prototype._confirmAddEngine = function confirmAddEngine() {
-    var windowWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"]
-                          .getService(Ci.nsIWindowWatcher);
-    var parent = windowWatcher.activeWindow;
+    var parent = Services.ww.activeWindow;
     if(!parent)
       return {confirmed: false, useNow: false};
 
@@ -61,7 +58,7 @@ Contributor(s):
 
     var sbs = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService);
     var stringBundle = sbs.createBundle(SEARCH_BUNDLE);
-    
+
     var args = {
 
       titleMessage: stringBundle.GetStringFromName("addEngineConfirmTitle"),
@@ -70,7 +67,7 @@ Contributor(s):
       dialogMessage: stringBundle.formatStringFromName("addEngineConfirmation",
                                                [this._name, this._uri.host], 2),
 
-      checkboxMessage: stringBundle.GetStringFromName("addEngineUseNowText"),
+      checkboxMessage: stringBundle.GetStringFromName("addEngineAsCurrentText"),
 
       addButtonLabel: stringBundle.GetStringFromName("addEngineAddButtonLabel"),
       
@@ -85,7 +82,7 @@ Contributor(s):
     parent.openDialog("chrome://seorganizer/content/confirmAddEngine.xul",
                       "_blank", "centerscreen,chrome,modal,titlebar", args);
     seOrganizer._engineFolders[this.name] = args.folder;
-    return {confirmed: args.confirmed, useNow: args. useNow};
+    return {confirmed: args.confirmed, useNow: args.useNow};
   };
 })();
 

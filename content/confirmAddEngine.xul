@@ -73,7 +73,7 @@ Contributor(s):
 
       <!-- checkbox -->
       <vbox id="checkboxContainer" align="start" collapsed="false">
-        <checkbox id="checkbox" oncommand="onCheckboxClick(this);"/>
+        <checkbox id="checkbox" />
       </vbox>
 
       <!-- drop down -->
