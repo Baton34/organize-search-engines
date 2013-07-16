@@ -95,7 +95,9 @@ var seOrganizer_dragObserver = {
     var anonid = event.originalTarget.getAttribute("anonid");
     var scrollDir = anonid == "scrollbutton-up" ? -1 :
                     anonid == "scrollbutton-down" ? 1 : 0;
-    if(scrollDir != 0) {
+    if(this.isDroppingOnChildOrSelf(dropNode, session)) {
+      session.canDrop = false;
+    } else if(scrollDir !== 0) {
       event.target.firstChild._scrollBox.scrollByIndex(scrollDir);
       session.canDrop = false;
 
@@ -104,19 +106,19 @@ var seOrganizer_dragObserver = {
     } else {
       // drag & drop feedback
       if(this.isEngineType(type)) {
-        session.canDrop = this.overPopup(target) && dropNode != session.sourceNode;
+        session.canDrop = this.overPopup(target);
 
         dropDir = this.getDropDir(event);
         // again from menu.xml
         // Check if we should hide the drop indicator for this target
         if(session.canDrop && popup._indicatorBar) {
-          if(target.nodeName == "menu" && dropDir == 0) {
+          if(target.nodeName == "menu" && dropDir === 0) {
             popup._indicatorBar.hidden = true;
           } else {
             // We should display the drop indicator relative to the arrowscrollbox
             var sbo = popup._scrollBox.scrollBoxObject;
             var newMarginTop = 0;
-            if(scrollDir == 0) {
+            if(scrollDir === 0) {
               if(dropDir == 1 && dropNode.nextSibling)
                 dropNode = dropNode.nextSibling;
               newMarginTop = dropNode ? dropNode.boxObject.screenY - sbo.screenY :
@@ -133,7 +135,7 @@ var seOrganizer_dragObserver = {
 
         session.dragAction = Ci.nsIDragService.DRAGDROP_ACTION_MOVE;
 
-        if(dropDir != 0)
+        if(dropDir !== 0)
           target.removeAttribute("_moz-menuactive");
       } else {
         session.canDrop = target.classList.contains("searchbar-engine-menuitem") ||
@@ -172,6 +174,9 @@ var seOrganizer_dragObserver = {
     var target = this.getDropTarget(event.target);
     this.onDragExit(event, session);
 
+    if (!target || this.isDroppingOnChildOrSelf(target, session))
+      return;
+
     var type = dropData.flavour.contentType;
     if(this.isEngineType(type)) {
       var SEOrganizer = organizeSE.SEOrganizer;
@@ -179,7 +184,7 @@ var seOrganizer_dragObserver = {
       var parent = null, index;
       var drop = this.RDFService.GetResource(target.id);
       var dropDir = this.getDropDir(event);
-      if(SEOrganizer.isFolder(drop) && dropDir == 0) {
+      if(SEOrganizer.isFolder(drop) && dropDir === 0) {
         parent = drop;
         index = -1;
       } else {
@@ -243,9 +248,9 @@ var seOrganizer_dragObserver = {
       if(this.overButton(target)) {
         var searchbar = organizeSE.searchbar;
         searchbar.value = dropData.data;
-        var evt = document.createEvent("Event");
-        evt.initEvent("textentered", true, true);
-        searchbar._textbox.dispatchEvent(evt);
+        var ev = document.createEvent("Event");
+        ev.initEvent("textentered", true, true);
+        searchbar._textbox.dispatchEvent(ev);
       } else {
         var engine;
         if(target.classList.contains("openintabs-item"))
@@ -312,9 +317,19 @@ var seOrganizer_dragObserver = {
     }
     return elem;
   },
+  isDroppingOnChildOrSelf: function(dropNode, session) {
+    while (dropNode && dropNode.id != "search-popupset") {
+      if (dropNode.id == session.sourceNode.id)
+        return true;
+
+      dropNode = dropNode.parentNode.parentNode;
+    }
+    return false;
+  },
   getDropDir: function(event) {
     var target = this.getDropTarget(event.target);
-    if(!target) return 0;
+    if(!target)
+      return 0;
     var sbo = target.parentNode._scrollBox.scrollBoxObject;
 
     if(!target.classList.contains("searchbar-engine-" + target.nodeName))
