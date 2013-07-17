@@ -96,11 +96,11 @@ function init() {
 
   if(origEngine._readOnly) {
     [
-     "name-textbox","icon-button","icon-download-button","description-textbox",
-     "homepage-textbox","url-textbox","encoding-textbox","method-radio-get",
-     "method-radio-post","add-param","remove-param","params-tree",
-     "update-url-textbox","update-data-type-menulist","update-icon-url-textbox",
-     "update-interval-row"
+      "name-textbox","icon-button","icon-download-button","description-textbox",
+      "homepage-textbox","url-textbox","encoding-textbox","method-radio-get",
+      "method-radio-post","add-param","remove-param","params-tree",
+      "update-url-textbox","update-data-type-menulist","update-icon-url-textbox",
+      "update-interval-row"
     ].forEach(function(id) document.getElementById(id).disabled = true);
   }
 }
@@ -147,10 +147,11 @@ function storeChanges() {
   newEngine._searchForm = document.getElementById("homepage-textbox").value;
   newEngine._queryCharset = document.getElementById("encoding-textbox").value;
   var url = newEngine._getURLOfType("text/html");
-  url.method = (document.getElementById("method-radio").selectedIndex == 0) ? "GET" : "POST";
+  url.method = (document.getElementById("method-radio").selectedIndex === 0) ? "GET" : "POST";
   url.template = document.getElementById("url-textbox").value;
   var params = document.getElementById("params-tree").view.wrappedJSObject.params;
-  var newParams = new Cu.getGlobalForObject(origEngine).Array(); // don't leak this window
+
+  var newParams = Cu.getGlobalForObject(origEngine).Array(); // don't leak this window
   var QueryParameter = Cu.getGlobalForObject(origEngine).QueryParameter;
   for(var i = 0; i < params.length; i++) {
     var value = params[i].split("=");
@@ -197,19 +198,19 @@ ParamTreeView.prototype = {
   getCellProperties: function() {},
   performAction: function(action) {
     switch(action) {
-      case 'add':
-        var row = this.selection.currentIndex + 1;
-        var col = this._treebox.columns.getFirstColumn();
-        this.params.splice(row, 0, "");
-        this._treebox.rowCountChanged(row, 1);
-        var tree = this._treebox.treeBody.parentNode;
-        tree.focus();
-        tree.startEditing(row, col);
-        break;
-      case 'remove':
-        this.params.splice(this.selection.currentIndex, 1);
-        this._treebox.rowCountChanged(this.selection.currentIndex, -1);
-        break;
+    case 'add':
+      var row = this.selection.currentIndex + 1;
+      var col = this._treebox.columns.getFirstColumn();
+      this.params.splice(row, 0, "");
+      this._treebox.rowCountChanged(row, 1);
+      var tree = this._treebox.treeBody.parentNode;
+      tree.focus();
+      tree.startEditing(row, col);
+      break;
+    case 'remove':
+      this.params.splice(this.selection.currentIndex, 1);
+      this._treebox.rowCountChanged(this.selection.currentIndex, -1);
+      break;
     }
   }
 };
@@ -289,8 +290,9 @@ var iconMethods = {
       var size = atob(icon.toDataURL().substr(CANVAS_DATAURL_PREFIX.length)).length;
       if(size > MAX_ICON_SIZE) {
         dump("Organize Search Engines:changeIcon icon too large (" + url + ")\n");
-        icon.if(verbose)
-          iconMethods.showMessage("fileSizeTitle", "fileSizeMessage", null, [(MAX_ICON_SIZE / 1024).toFixed(2), (size / 1024).toFixed(2)]);
+        if(verbose)
+          iconMethods.showMessage("fileSizeTitle", "fileSizeMessage", null,
+            [(MAX_ICON_SIZE / 1024).toFixed(2), (size / 1024).toFixed(2)]);
         if(icon.src != url)
           changeIcon(icon.src, false);
       } else {
