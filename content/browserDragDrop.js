@@ -226,7 +226,8 @@ var seOrganizer_dragObserver = {
         // do the moving manually:
         var parentNode = document.getElementById(parent.ValueUTF8).lastChild;
         var node = document.getElementById(item.ValueUTF8);
-        node.parentNode.removeChild(node);
+        if (node)
+          node.parentNode.removeChild(node);
         index = index - 1; // here we have zero-based indizes
         var lastEngineNode = this.getDropTarget(parentNode.lastChild);
         var lastEngineIndex = [].lastIndexOf.call(parentNode.childNodes, lastEngineNode);
