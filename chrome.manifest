@@ -7,9 +7,10 @@ overlay   chrome://addtosearchbox/content/engineInfos.xul     chrome://seorganiz
 content   seorganizer               content/
 skin      seorganizer  classic/1.0  skin/
 
+resource  seorganizer               modules/
+
 locale    seorganizer  en-US        locale/en-US/
 
-interfaces components/nsISEOrganizer.xpt
 component {1a6b3e72-eb74-11db-9041-00ffd1e32fc4} components/nsSEOrganizer.js
 contract @mozilla.org/rdf/datasource;1?name=organized-internet-search-engines {1a6b3e72-eb74-11db-9041-00ffd1e32fc4}
 component {f2fa3794-eb73-11db-9d18-00ffd1e32fc4} components/nsSEOrganizer.js
