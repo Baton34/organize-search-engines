@@ -40,44 +40,24 @@ const Ci = Components.interfaces, Cc = Components.classes,
       Cr = Components.results, Cu = Components.utils;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "NetUtil",
+                                  "resource://gre/modules/NetUtil.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "setTimeout",
+                                  "resource://gre/modules/Timer.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "Services",
+                                  "resource://gre/modules/Services.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "Resizer",
+                                  "resource://seorganizer/resize-icons.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "FileUtils",
+                                  "resource://gre/modules/FileUtils.jsm");
 
 const NS_RDF_DATASOURCE_PRE = "@mozilla.org/rdf/datasource;1?name=";
 
 function LOG(msg) {
   msg = "Organize Search Engines:   " + msg;
-  var consoleService = Cc["@mozilla.org/consoleservice;1"]
-                         .getService(Ci.nsIConsoleService);
-  consoleService.logStringMessage(msg);
+  Services.console.logStringMessage(msg);
   //dump(msg + "\n");
   return msg;
-}
-
-function _timer(callback, timeout, type, args) {
-  var obj = { notify: function() {
-    return callback.apply(timer, args);
-  }};
-  obj.wrappedJSObject = obj;
-  var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-  timer.initWithCallback(obj, timeout, type);
-  return {t:timer};
-}
-function setTimeout(callback, timeout) {
-  var args = [];
-  for(var i = 2; i < arguments.length; i++)
-    args.push(arguments[i]);
-  return _timer(callback, timeout, Ci.nsITimer.TYPE_ONE_SHOT, args);
-}
-function clearTimeout(timeout) {
-  var timer = timeout.t;
-  timer.cancel();
-  // prevent cycle references:
-  timer.callback.wrappedJSObject.notify = null;
-  delete timeout.t;
-}
-var clearInterval = clearTimeout;
-function makeURI(aURL, aOriginCharset, aBaseURI) {
-  var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
-  return ioService.newURI(aURL, aOriginCharset, aBaseURI);
 }
 
 /*try {*/
@@ -91,11 +71,10 @@ const FOLDERS_ROOT = "urn:organize-search-engines:folders-root";
 
 //class constructor
 function SEOrganizer() {
-  this._searchService = Cc["@mozilla.org/browser/search-service;1"]
-                          .getService(Ci.nsIBrowserSearchService);
   this._rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                        .getService(Ci.nsIRDFService);
   this.wrappedJSObject = this;
+  
   this._init();
 }
 SEOrganizer.prototype = {
@@ -109,12 +88,29 @@ SEOrganizer.prototype = {
     this._datasource = this._rdfService.GetDataSourceBlocking(this._saveURI);
     this._datasource.QueryInterface(Ci.nsIRDFRemoteDataSource);
 
-    var os = Cc["@mozilla.org/observer-service;1"]
-               .getService(Ci.nsIObserverService);
-    os.addObserver(this, "browser-search-engine-modified", false);
+    [ "defaultEngine" ].forEach((k) => this.__defineGetter__(k, () => Services.search[k]));
+    [
+      "addEngine", "addEngineWithDetails", "restoreDefaultEngines",
+      "getDefaultEngines", "getEngineByAlias", "getEngineByName", "getEngines",
+      "getVisibleEngines", "moveEngine", "removeEngine"
+    ].forEach((k) => this[k] = Services.search[k].bind(Services.search));
+
+    [ "URI", "loaded" ].forEach((k) => this.__defineGetter__(k, () => this._datasource[k]));
+
+    [
+      "Flush", "FlushTo",
+
+      "ArcLabelsIn", "ArcLabelsOut", "Change", "DoCommand","GetAllCmds",
+      "GetAllResources", "GetSource", "GetSources", "GetTargets", "hasArcIn",
+      "hasArcOut", "HasAssertion", "IsCommandEnabled"
+    ].forEach((k) => this[k] = this._datasource[k].bind(this._datasource));
+
+    Services.obs.addObserver(this, "browser-search-engine-modified", false);
 
     // call *both* and save if at least one returned true
-    if(this._removeNonExisting() | this._addMissingEnginesToRDF())
+    let needSave = this._removeNonExisting();
+    needSave = this._addMissingEnginesToRDF() || needSave;
+    if(needSave)
       this.saveChanges();
 
     this._modifySearchService();
@@ -131,11 +127,9 @@ SEOrganizer.prototype = {
       if(this.indexOutOfDate)
         this._updateIndexCache();
       var instance = this;
-      var os = Cc["@mozilla.org/observer-service;1"]
-                 .getService(Ci.nsIObserverService);
       var addObserver = true;
       try {
-        os.removeObserver(this, "browser-search-engine-modified");
+        Services.obs.removeObserver(this, "browser-search-engine-modified");
       } catch(e) {
         addObserver = false;
       }
@@ -160,7 +154,7 @@ SEOrganizer.prototype = {
         this.saveChanges();
       }
       if(addObserver) {
-        os.addObserver(instance, "browser-search-engine-modified", false);
+        Services.obs.addObserver(instance, "browser-search-engine-modified", false);
       }
     }
   },
@@ -195,12 +189,11 @@ SEOrganizer.prototype = {
     var rdfService = this._rdfService;
     var rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
                               .getService(Ci.nsIRDFContainerUtils);
-    var searchService = this._searchService;
 
     var root = rdfService.GetResource(ROOT);
     var rootContainer = rdfContainerUtils.MakeSeq(this, root);
     var name = rdfService.GetResource(NS + "Name");
-    var engines = searchService.getVisibleEngines({});
+    var engines = Services.search.getVisibleEngines({});
 
     var modified = false;
     for(var i = 0; i < engines.length; ++i) {
@@ -278,15 +271,14 @@ SEOrganizer.prototype = {
   _modifySearchService: function() {
     var topLevel = Cu.getGlobalForObject(this.defaultEngine.wrappedJSObject);
     var uri = "chrome://seorganizer/content/searchServiceModifications.js";
-    Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader)
-                                               .loadSubScript(uri, topLevel);
+    Services.scriptloader.loadSubScript(uri, topLevel);
   },
 
   _createMultiEngine: function() {
-    var prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
+    var prefs = Services.prefs;
     const CUR_ENGINE_PREF = "browser.search.selectedEngine";
     if(prefs.getPrefType(CUR_ENGINE_PREF) == Ci.nsIPrefBranch.PREF_STRING) {
-      var curEngine = prefs.getComplexValue(CUR_ENGINE_PREF, Ci.nsISupportsString).data
+      var curEngine = prefs.getComplexValue(CUR_ENGINE_PREF, Ci.nsISupportsString).data;
       if(this.currentEngine.name != curEngine && !this.getEngineByName(curEngine)) {
         var item = this.getItemByName(curEngine);
         if(item && this.isFolder(item)) {
@@ -299,49 +291,45 @@ SEOrganizer.prototype = {
   observe: function observe(aEngine, aTopic, aVerb) {
     if(aTopic == "browser-search-engine-modified") {
       switch(aVerb) {
-        case "engine-removed":
-          this.beginUpdateBatch();
-          if(this._removeNonExisting(true)) {
-            this.notifyObservers();
-          }
-          this.endUpdateBatch();
-          break;
-        case "engine-added":
-          this.beginUpdateBatch();
-          if(this._addMissingEnginesToRDF(true)) {
-            this.notifyObservers();
-          }
-          this.endUpdateBatch();
-          break;
-        case "engine-changed":
-          // An engine was hidden, unhidden, moved, renamed, updated or an icon
-          // changed.  We have to remove or add it from/to the RDF when it was
-          // hidden/unhidden (this doesn't call removed/added).
-          if(aEngine.wrappedJSObject.__action == "hidden") {
-            if(aEngine.hidden)
-              this.observe(aEngine, aTopic, "engine-removed");
-            else
-              this.observe(aEngine, aTopic, "engine-added");
-          }
-        case "engine-current": // The current engine was changed.
-          var engines = this.getVisibleEngines({});
-          for(var i = 0; i < engines.length; i++) {
-            if(engines[i].wrappedJSObject._file.parent.path.indexOf("[fake]/") == 0 &&
-               engines[i].name != aEngine.name)
-              this.removeEngine(engines[i]);
-          }
-          break;
-        case "engine-loaded": // An engine's/icon's download was completed.
-          break;
+      case "engine-removed":
+        this.beginUpdateBatch();
+        if(this._removeNonExisting(true)) {
+          this.notifyObservers();
+        }
+        this.endUpdateBatch();
+        break;
+      case "engine-added":
+        this.beginUpdateBatch();
+        if(this._addMissingEnginesToRDF(true)) {
+          this.notifyObservers();
+        }
+        this.endUpdateBatch();
+        break;
+      case "engine-changed":
+        // An engine was hidden, unhidden, moved, renamed, updated or an icon
+        // changed.  We have to remove or add it from/to the RDF when it was
+        // hidden/unhidden (this doesn't call removed/added).
+        if(aEngine.wrappedJSObject.__action == "hidden") {
+          this.observe(aEngine, aTopic, aEngine.hidden ? "engine-removed" : "engine-added");
+        }
+        /* falls through */
+      case "engine-current": // The current engine was changed.
+        var engines = this.getVisibleEngines({});
+        for(var i = 0; i < engines.length; i++) {
+          if(engines[i].wrappedJSObject._file.parent.path.indexOf("[fake]/") === 0 &&
+             engines[i].name != aEngine.name)
+            this.removeEngine(engines[i]);
+        }
+        break;
+      case "engine-loaded": // An engine's/icon's download was completed.
+        break;
       }
       // xxx we should notify rdf observers
     }
   },
 
   notifyObservers: function() {
-    var os = Cc["@mozilla.org/observer-service;1"]
-               .getService(Ci.nsIObserverService);
-    os.notifyObservers(null, "browser-search-engine-modified", "-engines-organized");
+    Services.obs.notifyObservers(null, "browser-search-engine-modified", "-engines-organized");
   },
 
   isFolder: function SEOrganizer__isFolder(aResource) {
@@ -404,7 +392,7 @@ SEOrganizer.prototype = {
                         .createInstance(Ci.nsIRDFContainer);
       container.Init(this, aItem);
       var containers = [{node: aItem, count: container.GetCount()}];
-      for(var i = 0; i < containers.length; i++) {
+      for(let i = 0; i < containers.length; i++) {
         for(var j = 1; j <= containers[i].count; j++) {
           var item = this.GetTarget(containers[i].node,
                                     rdfService.GetResource(NS_RDF + "_" + j), true);
@@ -415,7 +403,7 @@ SEOrganizer.prototype = {
       }
     }
 
-    for(var i = 0; i < toRemove.length; ++i) {
+    for(let i = 0; i < toRemove.length; ++i) {
       // remove the underlying search engine file using the search service
       var name = this.getNameByItem(toRemove[i]);
       if(name) { // this may be a separator
@@ -439,7 +427,8 @@ SEOrganizer.prototype = {
       }
     }
     // remove all references to this item
-    var predicates = this.ArcLabelsOut(aItem), object;
+    predicates = this.ArcLabelsOut(aItem);
+    let object;
     while(predicates.hasMoreElements()) {
       pred = predicates.getNext();
       object = this.GetTargets(aItem, pred, true);
@@ -527,7 +516,8 @@ SEOrganizer.prototype = {
       this._iterateAll(callback, this._iterateAllCallback_FilterNothing);
     } catch(e) { }
     this.indexOutOfDate = false;
-    return this._indexCache = cache;
+    this._indexCache = cache;
+    return cache;
   },
   indexOf: function SEOrganizer__indexOf(aItem, aGlobal) {
     if(aGlobal) {
@@ -600,23 +590,20 @@ SEOrganizer.prototype = {
     var rootContainer = rdfContainerUtils.MakeSeq(this, root);
     var name = rdfService.GetResource(NS + "Name");
 
-    function Enumerator(nsISimpleEnumerator) {
-      var arr = [];
-      while(nsISimpleEnumerator.hasMoreElements()) {
-        arr.push(nsISimpleEnumerator.getNext());
-      }
-      arr.reverse();
-      return arr;
-    }
+    let getChildrenRev = function (container) {
+      var iter = XPCOMUtils.IterSimpleEnumerator(container.GetElements(),
+                                                 Ci.nsIRDFResource);
+      return [i for (i in iter) ].reverse();
+    };
 
     // recursion would be much simpler but it's better avoided
     var children = [], last;
-    children.push(new Enumerator(rootContainer.GetElements()));
+    children.push(getChildrenRev(rootContainer));
     while(children.length) {
       last = children.length - 1;
       while(children[last].length) {
         var l = children[last].length - 1;
-        var current = children[last][l].QueryInterface(Ci.nsIRDFResource);
+        var current = children[last][l];
 
         try {
           if(aFilter.call(this, current))
@@ -626,16 +613,19 @@ SEOrganizer.prototype = {
             throw e;
 
           switch(e.message) {
-            case "_iterateAll::succeeded": return true;
-            case "_iterateAll::abort": return false;
-            default: throw e;
+          case "_iterateAll::succeeded":
+            return true;
+          case "_iterateAll::abort":
+            return false;
+          default:
+            throw e;
           }
         }
         children[last] = children[last].slice(0, l);
 
         if(this.isFolder(current)) {
           var seq = rdfContainerUtils.MakeSeq(this, current);
-          children.push(new Enumerator(seq.GetElements()));
+          children.push(getChildrenRev(seq));
           ++last;
         }
       }
@@ -646,20 +636,23 @@ SEOrganizer.prototype = {
   },
 
   folderToEngine: function(folder) {
-    var ss = this._searchService.wrappedJSObject;
+    var ss = Services.search.wrappedJSObject;
     var name = this.getNameByItem(folder);
     var engine = ss.getEngineByName(name);
     var innerEngines = [];
     if(!engine) {
       engine = {
-        alias: "", searchForm: "",
-        hidden: false, _remove: function() {},
-        iconURI: null, iconURL: "",
+        alias: "",
+        searchForm: "",
+        hidden: false,
+        _remove: function() {},
+        iconURI: null,
+        iconURL: "",
         name: name,
         type: 4,
-        addParam: function() { throw Cr.NS_ERROR_FAILURE },
+        addParam: function() { throw Cr.NS_ERROR_FAILURE; },
         _file: { parent: {path: "[fake]/" + name + ".xml" }},
-        _serializeToJSON: function() {return ""},
+        _serializeToJSON: function() { return ""; },
         getSubmission: function(data, type) {
           var i = -1;
           var submission = {
@@ -680,7 +673,7 @@ SEOrganizer.prototype = {
           return submission;
         },
         supportsResponseType: function(type) {
-          return (type == null || type == "text/html");
+          return (type === null || type == "text/html");
         },
         QueryInterface: XPCOMUtils.generateQI([Ci.nsISearchEngine])
       };
@@ -694,14 +687,10 @@ SEOrganizer.prototype = {
       if(innerEngines.length == 1)
         return engine.innerEngines[0];
 
-      if(typeof Resizer == "undefined") {
-         Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader)
-           .loadSubScript("chrome://seorganizer/content/resize-icons.js");
-      }
       var resizer = new Resizer(16, 16);
       resizer.onload = function iconLoadCallback() {
         resizer.paintIcons();
-        engine.iconURI = makeURI(resizer.getDataURL());
+        engine.iconURI = NetUtil.newURI(resizer.getDataURL());
         engine.iconURL = engine.iconURI.spec;
         engine.__action = "icon";
         Cu.getGlobalForObject(ss).notifyAction(engine, "engine-changed");
@@ -720,18 +709,16 @@ SEOrganizer.prototype = {
   // I know of at least one case, where an id was used twice, so we're making
   // sure here, this won't happen again in future
   _getAnonymousResource: function() {
+    let ano;
     do {
-      var ano = this._rdfService.GetAnonymousResource();
+      ano = this._rdfService.GetAnonymousResource();
     } while(this.ArcLabelsIn(ano).hasMoreElements() ||
             this.ArcLabelsOut(ano).hasMoreElements());
     return ano;
   },
 
   get _saveFile() {
-    var file = Cc["@mozilla.org/file/directory_service;1"]
-                 .getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);
-    file.append(FILENAME);
-    return file;
+    return FileUtils.getFile("ProfD", [FILENAME]);
   },
   get _saveURI() {
     var fileProtocolHandler = Cc["@mozilla.org/network/protocol;1?name=file"]
@@ -740,69 +727,20 @@ SEOrganizer.prototype = {
   },
   _rdfService: null,
   _datasource: null,
-  _searchService: null,
 
   /* nsIBrowserSearchService */
-  addEngine: function nsIBrowserSearchService__addEngine(engineURL, type, iconURL) {
-    return this._searchService.addEngine(engineURL, type, iconURL);
-  },
-  addEngineWithDetails: function nsIBrowserSearchService__addEngineWithDetails(name, iconURL, alias, description, method, url) {
-    return this._searchService.addEngine(name, iconURL, alias, description, method, url);
-  },
-  restoreDefaultEngines: function nsIBrowserSearchService__restoreDefaultEngines() {
-    return this._searchService.restoreDefaultEngines();
-  },
-  getDefaultEngines: function nsIBrowserSearchService__getDefaultEngines(num) {
-    return this._searchService.getDefaultEngines(num);
-  },
-  getEngineByAlias: function nsIBrowserSearchService__getEngineByAlias(alias) {
-    return this._searchService.getEngineByAlias(alias);
-  },
-  getEngineByName: function nsIBrowserSearchService__getEngineByName(name) {
-    return this._searchService.getEngineByName(name);
-  },
-  getEngines: function nsIBrowserSearchService__getEngines(engineCount) {
-    return this._searchService.getEngines(engineCount);
-  },
-  getVisibleEngines: function nsIBrowserSearchService__getVisibleEngines(engineCount) {
-    return this._searchService.getVisibleEngines(engineCount);
-  },
-  moveEngine: function nsIBrowserSearchService__moveEngine(engine, newIndex) {
-    try {
-      return this._searchService.moveEngine(engine, newIndex);
-    } catch(e) {
-      throw e.code;
-    }
-  },
-  removeEngine: function nsIBrowserSearchService__removeEngine(engine) {
-    return this._searchService.removeEngine(engine);
-  },
-  _defaultEngine: null,
-  get defaultEngine() {
-    if(!this._defaultEngine)
-      this._defaultEngine = this._searchService.defaultEngine;
-    return this._defaultEngine;
-  },
   get currentEngine() {
-    return this._searchService.currentEngine;
+    return Services.search.currentEngine;
   },
   set currentEngine(aEngine) {
-    return this._searchService.currentEngine = aEngine;
+    Services.search.currentEngine = aEngine;
+    return aEngine;
   },
 
   /* nsIRDFRemoteDataSource */
-  get loaded() {
-    return this._datasource.loaded;
-  },
   Init: function nsIRDFRemoteDataSource__Init(URI) {
     throw Cr.NS_ERROR_NOT_IMPLEMENTED;
     //this._datasource.Init(URI);
-  },
-  Flush: function nsIRDFRemoteDataSource__Flush() {
-    this._datasource.Flush();
-  },
-  FlushTo: function nsIRDFRemoteDataSource__FlushTo(URI) {
-    this._datasource.FlushTo(URI);
   },
   Refresh: function nsIRDFRemoteDataSource__Refresh(blocking) {
     //this._datasource.Refresh(blocking);
@@ -810,19 +748,10 @@ SEOrganizer.prototype = {
   },
 
   /* nsIRDFDataSource */
-  get URI() {
-    return this._datasource.URI;
-  },
   _observers: [],
   AddObserver: function nsIRDFDataSource__AddObserver(observer) {
     this._observers.push(observer);
-    return this._datasource.AddObserver(observer)
-  },
-  ArcLabelsIn: function nsIRDFDataSource__ArcLabelsIn(node) {
-    return this._datasource.ArcLabelsIn(node);
-  },
-  ArcLabelsOut: function nsIRDFDataSource__ArcLabelsOut(node) {
-    return this._datasource.ArcLabelsOut(node);
+    return this._datasource.AddObserver(observer);
   },
   Assert: function nsIRDFDataSource__Assert(source, property, target, truthValue) {
     var ret = this._datasource.Assert(source, property, target, truthValue);
@@ -834,41 +763,24 @@ SEOrganizer.prototype = {
     this._updateBatchRunning = true;
     return this._datasource.beginUpdateBatch();
   },
-  Change: function nsIRDFDataSouce__Change(source, property, oldTarget, newTarget) {
-    return this._datasource.Change(source, property, oldTarget, newTarget);
-  },
-  DoCommand: function nsIRDFDataSouce__DoCommand(sources, command, arguments) {
-    return this._datasource.DoCommand(sources, command, arguments);
-  },
   endUpdateBatch: function nsIRDFDataSouce__endUpdateBatch() {
     this._updateBatchRunning = false;
 
     return this._datasource.endUpdateBatch();
   },
-  GetAllCmds: function nsIRDFDataSource__GetAllCmds(source) {
-    return this._datasource.GetAllCmds(source);
-  },
-  GetAllResources: function nsIRDFDataSource__GetAllResources() {
-    return this._datasource.GetAllResources();
-  },
-  GetSource: function nsIRDFDataSource__GetSource(property, target, truthValue) {
-    return this._datasource.GetSource(property, target, truthValue);
-  },
-  GetSources: function nsIRDFDataSource__GetSources(property, target, truthValue) {
-    return this._datasource.GetSources(property, target, truthValue);
-  },
   GetTarget: function nsIRDFDataSource__GetTarget(source, property, truthValue) {
     if(property.QueryInterface(Ci.nsIRDFResource).ValueUTF8 === NS + "Icon" &&
        !this.isFolder(source) && !this.isSeparator(source) && truthValue) {
-      var name = this.getNameByItem(source);
+      let name = this.getNameByItem(source);
       var engine = this.getEngineByName(name);
       if(engine && engine.iconURI)
         return this._rdfService.GetLiteral(engine.iconURI.spec);
     } else if(property.ValueUTF8 === NS + "Selected" &&
               !this.isSeparator(source) && truthValue) {
+      let found = false;
       try {
-        var name = this.currentEngine.name;
-        var found = (name == this.getNameByItem(source));
+        let name = this.currentEngine.name;
+        found = (name == this.getNameByItem(source));
         if(!found && this.isFolder(source)) {
           this._iterateAll(function find(item) {
             if(this.getNameByItem(item) == name) {
@@ -879,14 +791,14 @@ SEOrganizer.prototype = {
         }
       } catch(e) { }
       return this._rdfService.GetLiteral(found.toString());
-    } else if(property.Value == NS + "Name" && this.isSeparator(source)
-              && truthValue) {
+    } else if(property.Value == NS + "Name" && this.isSeparator(source) &&
+              truthValue) {
       try { // make the built-in sorting mechanism work
         var parent = Cc["@mozilla.org/rdf/container;1"]
                        .createInstance(Ci.nsIRDFContainer);
         parent.Init(this, this.getParent(source));
         var idx = parent.IndexOf(source);
-        if(idx == -1 || idx == 0) {
+        if(idx == -1 || idx === 0) {
           return this._rdfService.GetLiteral("");
         } else {
           var contUtils = Cc["@mozilla.org/rdf/container-utils;1"]
@@ -908,21 +820,6 @@ SEOrganizer.prototype = {
       throw Cr.NS_ERROR_INVALID_ARG;
     }
   },
-  GetTargets: function nsIRDFDataSource__GetTargets(source, property, truthValue) {
-    return this._datasource.GetTargets(source, property, truthValue);
-  },
-  hasArcIn: function nsIRDFDataSource__hasArcIn(node, arc) {
-    return this._datasource.hasArcIn(node, arc);
-  },
-  hasArcOut: function nsIRDFDataSource__hasArcOut(source, arc) {
-    return this._datasource.hasArcOut(source, arc);
-  },
-  HasAssertion: function nsIRDFDataSource__HasAssertion(source, property, target, truthValue) {
-    return this._datasource.HasAssertion(source, property, target, truthValue);
-  },
-  IsCommandEnabled: function nsIRDFDataSource__IsCommandEnabled(sources, command, arguments) {
-    return this._datasource.IsCommandEnabled(sources, command, arguments);
-  },
   Move: function nsIRDFDataSource__Move(oldSource, newSource, property, target) {
     var ret = this._datasource.Move(oldSource, newSource, property, target);
     this.indexOutOfDate = true;
@@ -942,42 +839,67 @@ SEOrganizer.prototype = {
   },
 
   QueryInterface: XPCOMUtils.generateQI([
-                                          Ci.nsISEOrganizer,
-                                          Ci.nsIRDFDataSource,
-                                          Ci.nsIBrowserSearchService,
-                                          Ci.nsIObserver
-                                        ])
+    Ci.nsISEOrganizer,
+    Ci.nsIRDFDataSource,
+    Ci.nsIBrowserSearchService,
+    Ci.nsIObserver
+  ])
 };
 
 function FoldersOnly() {
-  var datasource = Cc["@mozilla.org/rdf/datasource;1?name=in-memory-datasource"]
-                     .createInstance(Ci.nsIRDFInMemoryDataSource)
-                     .QueryInterface(Ci.nsIRDFDataSource);
-  this._datasource = datasource;
-
-  this._update();
-
-  var os = Cc["@mozilla.org/observer-service;1"]
-            .getService(Ci.nsIObserverService);
-  os.addObserver(this, "browser-search-engine-modified", false);
-}
-FoldersOnly.prototype = {
-  _datasource: null,
-  classDescription: "For Organizing search engines in folders.",
-  classID: Components.ID("{f2fa3794-eb73-11db-9d18-00ffd1e32fc4}"),
-  contractID: NS_RDF_DATASOURCE_PRE + "organized-internet-search-folders",
-
-  _update: function() {
-    this.beginUpdateBatch();
-    var datasource = this._datasource;
+  XPCOMUtils.defineLazyGetter(this, "_rootContainer", () => {
+    var datasource = Cc["@mozilla.org/rdf/datasource;1?name=in-memory-datasource"]
+                       .createInstance(Ci.nsIRDFInMemoryDataSource)
+                       .QueryInterface(Ci.nsIRDFDataSource);
     var rdfService = Cc["@mozilla.org/rdf/rdf-service;1"]
                          .getService(Ci.nsIRDFService);
     var rdfContainerUtils = Cc["@mozilla.org/rdf/container-utils;1"]
                               .getService(Ci.nsIRDFContainerUtils);
-    var seOrganizer = Cc[SEOrganizer.prototype.contractID].getService().wrappedJSObject;
 
     var root = rdfService.GetResource(FOLDERS_ROOT);
-    var rootContainer = rdfContainerUtils.MakeSeq(datasource, root);
+    return rdfContainerUtils.MakeSeq(datasource, root);
+  });
+
+  ["URI"].forEach((k) => {
+    this.__defineGetter__(k, () =>{
+      if (this._outOfDate)
+        this._update();
+
+      return this._rootContainer.DataSource[k];
+    });
+  });
+
+  [
+    "ArcLabelsIn", "ArcLabelsOut", "Assert", "beginUpdateBatch", "Change",
+    "DoCommand", "endUpdateBatch", "GetAllCmds", "GetAllResources", "GetSource",
+    "GetSources", "GetTarget", "GetTargets", "hasArcIn", "hasArcOut",
+    "HasAssertion", "IsCommandEnabled", "Move", "Unassert"
+  ].forEach((k) => {
+    this[k] = () => {
+      if (this._outOfDate)
+        this._update();
+
+      let ds = this._rootContainer.DataSource;
+      return ds[k].apply(ds, arguments);
+    };
+  });
+
+  Services.obs.addObserver(this, "browser-search-engine-modified", false);
+}
+FoldersOnly.prototype = {
+  classDescription: "For Organizing search engines in folders.",
+  classID: Components.ID("{f2fa3794-eb73-11db-9d18-00ffd1e32fc4}"),
+  contractID: NS_RDF_DATASOURCE_PRE + "organized-internet-search-folders",
+
+  _outOfDate: true,
+  _observers: [],
+
+  _update: function() {
+    this._outOfDate = false;
+
+    this.beginUpdateBatch();
+    let rootContainer = this._rootContainer;
+    var seOrganizer = Cc[SEOrganizer.prototype.contractID].getService().wrappedJSObject;
 
     // clean up old stuff
     var elements = rootContainer.GetElements(), hasMore = elements.hasMoreElements();
@@ -997,84 +919,28 @@ FoldersOnly.prototype = {
     } catch(e) {}
     this.endUpdateBatch();
   },
-  observe: function(aEngine, aTopic, aVerb) {
-    if(aTopic == "browser-search-engine-modified" && aVerb == "-engines-organized") {
-      this._update();
-    }
-  },
-  get URI() {
-    return this._datasource.URI;
-  },
+
   AddObserver: function nsIRDFDataSource__AddObserver(observer) {
-    return this._datasource.AddObserver(observer);
-  },
-  ArcLabelsIn: function nsIRDFDataSource__ArcLabelsIn(node) {
-    return this._datasource.ArcLabelsIn(node);
-  },
-  ArcLabelsOut: function nsIRDFDataSource__ArcLabelsOut(node) {
-    return this._datasource.ArcLabelsOut(node);
-  },
-  Assert: function nsIRDFDataSource__Assert(source, property, target, truthValue) {
-    //throw Cr.NS_ERROR_NOT_IMPLEMENTED;
-    return this._datasource.Assert(source, property, target, truthValue);
-  },
-  beginUpdateBatch: function nsIRDFDataSource__beginUpdateBatch() {
-    return this._datasource.beginUpdateBatch();
-  },
-  Change: function nsIRDFDataSouce__Change(source, property, oldTarget, newTarget) {
-    //throw Cr.NS_ERROR_NOT_IMPLEMENTED;
-    return this._datasource.Change(source, property, oldTarget, newTarget);
-  },
-  DoCommand: function nsIRDFDataSouce__DoCommand(sources, command, arguments) {
-    return this._datasource.DoCommand(sources, command, arguments);
-  },
-  endUpdateBatch: function nsIRDFDataSouce__endUpdateBatch() {
-    return this._datasource.endUpdateBatch();
-  },
-  GetAllCmds: function nsIRDFDataSource__GetAllCmds(source) {
-    return this._datasource.GetAllCmds(source);
-  },
-  GetAllResources: function nsIRDFDataSource__GetAllResources() {
-    return this._datasource.GetAllResource();
-  },
-  GetSource: function nsIRDFDataSource__GetSource(property, target, truthValue) {
-    return this._datasource.GetSource(property, target, truthValue);
-  },
-  GetSources: function nsIRDFDataSource__GetSources(property, target, truthValue) {
-    return this._datasource.GetSources(property, target, truthValue);
-  },
-  GetTarget: function nsIRDFDataSource__GetTarget(source, property, truthValue) {
-    try {
-      return this._datasource.GetTarget(source, property, truthValue);
-    } catch(e) {
-      throw Cr.NS_ERROR_INVALID_ARG;
-    }
-  },
-  GetTargets: function nsIRDFDataSource__GetTargets(source, property, truthValue) {
-    return this._datasource.GetTargets(source, property, truthValue);
-  },
-  hasArcIn: function nsIRDFDataSource__hasArcIn(node, arc) {
-    return this._datasource.hasArcIn(node, arc);
-  },
-  hasArcOut: function nsIRDFDataSource__hasArcOut(source, arc) {
-    return this._datasource.hasArcOut(source, arc);
-  },
-  HasAssertion: function nsIRDFDataSource__HasAssertion(source, property, target, truthValue) {
-    return this._datasource.HasAssertion(source, property, target, truthValue);
-  },
-  IsCommandEnabled: function nsIRDFDataSource__IsCommandEnabled(sources, command, arguments) {
-    return this._datasource.IsCommandEnabled(sources, command, arguments);
-  },
-  Move: function nsIRDFDataSource__Move(oldSource, newSource, property, target) {
-    //throw Cr.NS_ERROR_NOT_IMPLEMENTED;
-    return this._datasource.Move(oldSource, newSource, property, target);
+    this._rootContainer.DataSource.AddObserver(observer);
+
+    if (this._observers.indexOf(observer) == -1)
+      this._observers.push(observer);
   },
   RemoveObserver: function nsIRDFDataSource__RemoveObserver(observer) {
-    return this._datasource.RemoveObserver(observer);
+    if (this._observers.indexOf(observer) != -1)
+      this._observers.splice(this._observers.indexOf(observer), 1);
+
+    this._rootContainer.DataSource.RemoveObserver(observer);
   },
-  Unassert: function nsIRDFDataSource__Unassert(source, property, target) {
-    //throw Cr.NS_ERROR_NOT_IMPLEMENTED;
-    return this._datasource.Unassert(source, property, target);
+
+  observe: function(aEngine, aTopic, aVerb) {
+    if(aTopic == "browser-search-engine-modified" && aVerb == "-engines-organized") {
+      this._outOfDate = true;
+
+      if (this._observers.length > 0) {
+        this._update();
+      }
+    }
   },
 
   QueryInterface: XPCOMUtils.generateQI([Ci.nsIRDFDataSource, Ci.nsIObserver])
