@@ -77,11 +77,12 @@ Contributor(s):
       
       useNow: false,
 
+      name: this.name
+
     };
 
     parent.openDialog("chrome://seorganizer/content/confirmAddEngine.xul",
                       "_blank", "centerscreen,chrome,modal,titlebar", args);
-    seOrganizer._engineFolders[this.name] = args.folder;
     return {confirmed: args.confirmed, useNow: args.useNow};
   };
 })();

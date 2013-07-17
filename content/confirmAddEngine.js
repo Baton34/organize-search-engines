@@ -17,7 +17,7 @@ The Original Code is Organize Search Engines.
 
 The Initial Developer of the Original Code is
 Malte Kraus.
-Portions created by the Initial Developer are Copyright (C) 2006-2007
+Portions created by the Initial Developer are Copyright (C) 2006-2013
 the Initial Developer. All Rights Reserved.
 
 Contributor(s):
@@ -37,26 +37,22 @@ Contributor(s):
 ***** END LICENSE BLOCK ***** */
 
 Components.utils.import("resource://gre/modules/Services.jsm");
+const Cc = Components.classes, Ci = Components.interfaces;
 
 var organizeSE = {
   onEngineListChange: function organizeSE__onEngineListChange(item) {
-    var args = window.arguments[0];
     args.folder = item.selectedItem.id;
   },
   onAccept: function organizeSE__onAccept() {
-    var args = window.arguments[0];
     args.confirmed = true;
-    args.useNow = document.getElementById("checkbox").checked;
-  },
-  onLoad: function organizeSE__onLoad() {
-    var args = window.arguments[0];
-    document.documentElement.setAttribute("title", args.titleMessage);
-    document.getElementById("info.body").textContent = args.dialogMessage;
-    document.getElementById("checkbox").label = args.checkboxMessage.replace(/&/, "");
-    document.getElementById("checkbox").accessKey = args.checkboxMessage.replace(/^.*&(.).*$/, "$1");  
-    document.documentElement.getButton("accept").label = args.addButtonLabel;
-    args.folder = "urn:organize-search-engines:folders-root";
+    if (document.getElementById("checkbox"))
+      args.useNow = document.getElementById("checkbox").checked;
 
+    let seOrganizer = Cc["@mozilla.org/rdf/datasource;1?name=organized-internet-search-engines"]
+                        .getService().wrappedJSObject;
+    seOrganizer._engineFolders[addedEngineName] = args.folder;
+  },
+  onLoadAlways: function organizeSE__onLoadAlways() {
     let enginePopup = document.getElementById("enginePopup");
     enginePopup.builder.rebuild();
     if(enginePopup.lastChild.nodeName == "template") {
@@ -64,7 +60,30 @@ var organizeSE = {
       sizeToContent();
       return; // if there are no folders, a list is useless
     }
+
+    if ("callBack" in window) { // Add to Search Bar add-on
+      let cb = callBack;
+      callBack = function() {
+        organizeSE.onAccept();
+
+        return cb.apply(this, arguments);
+      };
+    }
+
     this.observer.register();
+  },
+  onLoad: function organizeSE__onLoad() {
+    window.args = window.arguments[0];
+    window.addedEngineName = args.name;
+    document.documentElement.setAttribute("title", args.titleMessage);
+    document.getElementById("info.body").textContent = args.dialogMessage;
+    document.getElementById("checkbox").label = args.checkboxMessage.replace(/&/, "");
+    document.getElementById("checkbox").accessKey = args.checkboxMessage.replace(/^.*&(.).*$/, "$1");  
+    document.documentElement.getButton("accept").label = args.addButtonLabel;
+    args.folder = "urn:organize-search-engines:folders-root";
+
+    this.onLoadAlways();
+
   },
   onClose: function organizeSE__onClose() {
     this.observer.unregister();
@@ -90,5 +109,6 @@ var organizeSE = {
     }
   }
 };
-window.addEventListener("load", function() { organizeSE.onLoad(); }, false);
+
+window.addEventListener("load", function() { organizeSE.onLoadAlways(); }, false);
 window.addEventListener("close", function() { organizeSE.onClose(); }, false);
