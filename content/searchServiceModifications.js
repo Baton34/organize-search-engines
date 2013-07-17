@@ -59,6 +59,11 @@ Contributor(s):
     var sbs = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService);
     var stringBundle = sbs.createBundle(SEARCH_BUNDLE);
 
+    let allKeys = XPCOMUtils.IterSimpleEnumerator(stringBundle.getSimpleEnumeration(),
+                                                  Ci.nsIPropertyElement);
+    let keyCandidates = ["addEngineAsCurrentText", "addEngineUseNowText"];
+    let useNowTexts = [ i.value for each (i in allKeys) if (keyCandidates.indexOf(i.key) != -1)];
+
     var args = {
 
       titleMessage: stringBundle.GetStringFromName("addEngineConfirmTitle"),
@@ -67,7 +72,7 @@ Contributor(s):
       dialogMessage: stringBundle.formatStringFromName("addEngineConfirmation",
                                                [this._name, this._uri.host], 2),
 
-      checkboxMessage: stringBundle.GetStringFromName("addEngineAsCurrentText"),
+      checkboxMessage: useNowTexts[0],
 
       addButtonLabel: stringBundle.GetStringFromName("addEngineAddButtonLabel"),
       

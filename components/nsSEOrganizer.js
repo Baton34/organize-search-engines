@@ -875,11 +875,12 @@ function FoldersOnly() {
     "GetSources", "GetTarget", "GetTargets", "hasArcIn", "hasArcOut",
     "HasAssertion", "IsCommandEnabled", "Move", "Unassert"
   ].forEach((k) => {
-    this[k] = () => {
-      if (this._outOfDate)
-        this._update();
+    let This = this; // we can't use a arrow function here because it would crash Firefox 22.
+    this[k] = function() {
+      if (This._outOfDate)
+        This._update();
 
-      let ds = this._rootContainer.DataSource;
+      let ds = This._rootContainer.DataSource;
       return ds[k].apply(ds, arguments);
     };
   });

@@ -37,7 +37,6 @@ Contributor(s):
 ***** END LICENSE BLOCK ***** */
 
 Components.utils.import("resource://gre/modules/Services.jsm");
-const Cc = Components.classes, Ci = Components.interfaces;
 
 var organizeSE = {
   onEngineListChange: function organizeSE__onEngineListChange(item) {
