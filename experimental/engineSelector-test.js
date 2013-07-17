@@ -1,4 +1,5 @@
-const Ci = Components.interfaces, Cc = Components.classes;
+const Ci = Components.interfaces, Cc = Components.classes, Cu = Components.utils;
+Cu.import("resource://gre/modules/Services.jsm");
 
 const ENGINE_FLAVOR = "text/x-moz-search-engine";
 const BROWSER_SUGGEST_PREF = "browser.search.suggest.enabled";
@@ -616,7 +617,7 @@ Structure__Item.prototype = {
         os.notifyObservers(engine, SEARCH_ENGINE_TOPIC, "engine-loaded");
         //os.addObserver(gSEOrganizer.wrappedJSObject, SEARCH_ENGINE_TOPIC, false);
 
-        var realSearchService = gSEOrganizer.wrappedJSObject._searchService;
+        var realSearchService = Services.search;
         realSearchService.wrappedJSObject._engines[engine.name] = engine;
       }
       if(gSEOrganizer.getNameByItem(this.node) !== this.name) {

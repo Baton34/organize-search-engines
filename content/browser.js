@@ -37,11 +37,13 @@ Contributor(s):
  the terms of any one of the MPL, the GPL or the LGPL.
 ***** END LICENSE BLOCK ***** */
 
+Cu.import("resource://gre/modules/Services.jsm");
+
 var organizeSE;
 function SEOrganizer() {
   window.addEventListener("load", function(e) organizeSE.init(e), false);
   window.addEventListener("unload", this.uninit, false);
-};
+}
 SEOrganizer.prototype = {
   /* "api" */
   getAllMenuitems: function() {
@@ -54,11 +56,16 @@ SEOrganizer.prototype = {
   evalXPath: function(aExpression, aScope, aNSResolver) {
     var resolver = aNSResolver || function resolver(prefix) {
       switch(prefix) {
-        case "html": return "http://www.w3.org/1999/xhtml";
-        case "xbl":  return "http://www.mozilla.org/xbl";
-        case "rdf":  return "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-        case "xul":
-        default:     return "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+      case "html":
+        return "http://www.w3.org/1999/xhtml";
+      case "xbl":
+        return "http://www.mozilla.org/xbl";
+      case "rdf":
+        return "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+      case "xul":
+        /* falls through */
+      default:
+        return "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
       }
     };
     var scope = aScope || document;
@@ -79,8 +86,7 @@ SEOrganizer.prototype = {
     this.customizeToolbarListener(); // time there were no registered listeners
 
     const SORT_DIRECTION_PREF = "extensions.seorganizer.sortDirection";
-    var prefs = Cc["@mozilla.org/preferences-service;1"]
-                  .getService(Ci.nsIPrefService).getBranch(SORT_DIRECTION_PREF);
+    var prefs = Services.prefs.getBranch(SORT_DIRECTION_PREF);
     prefs.QueryInterface(Ci.nsIPrefBranch2).addObserver("", this, false);
 
     var popupset = this.popupset;
@@ -116,12 +122,13 @@ SEOrganizer.prototype = {
   uninit: function uninit() {
     organizeSE.popupset.builder.removeListener(organizeSE.buildObserver);
     const SORT_DIRECTION_PREF = "extensions.seorganizer.sortDirection";
-    Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService)
-      .getBranch(SORT_DIRECTION_PREF).QueryInterface(Ci.nsIPrefBranch2)
-      .removeObserver("", organizeSE);
+    Services.prefs.getBranch(SORT_DIRECTION_PREF).QueryInterface(Ci.nsIPrefBranch2)
+            .removeObserver("", organizeSE);
     window.removeEventListener("unload", uninit, false);
-    for(var i in organizeSE)
-      delete organizeSE[i];
+    for(var i in organizeSE) {
+      if (Object.hasOwnProperty(i))
+        delete organizeSE[i];
+    }
     window.organizeSE = null;
   },
 
@@ -329,8 +336,11 @@ SEOrganizer.prototype = {
     element.setAttribute("label", label);
     if(id)         element.setAttribute("id", id);
     if(className)  element.className = className;
-    if(attrs)      for(var i in attrs) {
-      if(attrs[i])   element.setAttribute(i, attrs[i]);
+    if(attrs) {
+      for(var i in attrs) {
+        if(attrs[i])
+          element.setAttribute(i, attrs[i]);
+      }
     }
     if(parentNode) parentNode.appendChild(element);
     return element;
@@ -363,7 +373,7 @@ SEOrganizer.prototype = {
       submission = aSubmission;
     } else {
       // null parameter below specifies HTML response for search
-      aEngine = aEngine || this.SEOrganizer._searchService.currentEngine;
+      aEngine = aEngine || Services.search.currentEngine;
       submission = aEngine.getSubmission(aData, null);
       allLinks.push(submission);
     }
@@ -390,8 +400,7 @@ SEOrganizer.prototype = {
     } else {
     // from http://mxr.mozilla.org/mozilla1.8/source/browser/components/places/content/controller.js#1333
       // Check prefs to see whether to open over existing tabs.
-      var prefs = Cc["@mozilla.org/preferences-service;1"]
-                    .getService(Ci.nsIPrefService).getBranch("browser.tabs.");
+      var prefs = Services.prefs.getBranch("browser.tabs.");
       var loadInBackground = prefs.getBoolPref("loadBookmarksInBackground");
       // Get the start index to open tabs at
       var browser = getBrowser();
@@ -423,9 +432,9 @@ SEOrganizer.prototype = {
         // Select the first tab in the group.
         // Set newly selected tab after quick timeout, otherwise hideous focus problems
         // can occur because new presshell is not ready to handle events
-        function selectNewForegroundTab(browser, tab) {
+        let selectNewForegroundTab = function(browser, tab) {
           browser.selectedTab = tab;
-        }
+        };
         var tabs = browser.mTabContainer.childNodes;
         setTimeout(selectNewForegroundTab, 0, browser, tabs[firstIndex]);
       }

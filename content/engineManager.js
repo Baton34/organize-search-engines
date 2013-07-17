@@ -38,6 +38,9 @@ Contributor(s):
 
 const Ci = Components.interfaces, Cc = Components.classes, Cu = Components.utils;
 
+Cu.import("resource://gre/modules/Services.jsm");
+
+
 const ENGINE_FLAVOR = "text/x-moz-search-engine";
 const FLAVOR_SEPARATOR = ";";
 const BROWSER_SUGGEST_PREF = "browser.search.suggest.enabled";
@@ -121,7 +124,7 @@ EngineManagerDialog.prototype = {
   _c: Components,
   init: function EngineManager__init() {
     gStrings = document.getElementById("strings");
-    gSEOrganizer = Cc[CONTRACT_ID].getService(Ci.nsISEOrganizer).wrappedJSObject;
+    gSEOrganizer = Cc[CONTRACT_ID].getService().wrappedJSObject;
 
     var prefService = Cc["@mozilla.org/preferences-service;1"]
                         .getService(Ci.nsIPrefService).getBranch("");
@@ -788,7 +791,7 @@ Structure__Item.prototype = {
       if(engine.name != this.name) {
         var oldName = engine.name;
 
-        var realSearchService = gSEOrganizer._searchService.wrappedJSObject;
+        var realSearchService = Services.search.wrappedJSObject;
         delete realSearchService._engines[oldName];
         realSearchService._engines[this.name] = engine;
         engine._name = this.name;
@@ -812,8 +815,7 @@ Structure__Item.prototype = {
         if(!engine._readOnly)
           engine._lazySerializeToFile();
         // inform everybody of the changes, also stores our changes in the cache
-        Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService)
-          .notifyObservers(engine, SEARCH_ENGINE_TOPIC, "engine-changed");
+        Services.obs.notifyObservers(engine, SEARCH_ENGINE_TOPIC, "engine-changed");
       }
     }
   },

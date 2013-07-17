@@ -38,7 +38,7 @@ Contributor(s):
 
 function organizeSE__Extensions() {
   this.init();
-};
+}
 organizeSE__Extensions.prototype = {
   init: function() {
     // using setTimeout(func.apply) doesn't work, so we use this wrapper function
@@ -66,9 +66,9 @@ organizeSE__Extensions.prototype = {
           }
           if("customizeToolbarHandler" in i)
             organizeSE._customizeToolbarListeners.push(i.customizeToolbarHandler);
-         } catch(e) {
-           Components.reportError(e);
-         }
+        } catch(e) {
+          Components.reportError(e);
+        }
       }
     }
   },
@@ -122,8 +122,7 @@ organizeSE__Extensions.prototype = {
       menu1.addEventListener("popupshowing", this.onPopupShowing, true);
       if("onOSEcommand" in gOverlayAutoContext)
         menu1.addEventListener("command", gOverlayAutoContext.onOSEcommand, true);
-      var comp = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
-      if(comp.compare(acext.getExtVersion(acutils.AutoContext_ID_GUID), "1.5") < 0)
+      if(Services.vc.compare(acext.getExtVersion(acutils.AutoContext_ID_GUID), "1.5") < 0)
         menu1.firstChild.addEventListener("command", organizeSE.extensions.contextSearch.search, false);
 
       gOverlayAutoContext.loadSearch = organizeSE.extensions.contextSearch.search;
@@ -167,7 +166,7 @@ organizeSE__Extensions.prototype = {
         folder = seOrganizer_dragObserver.RDFService.GetResource(folder);
         engine = organizeSE.SEOrganizer.folderToEngine(folder);
       } else {
-        engine = organizeSE.SEOrganizer.getEngineByName(target.label)
+        engine = organizeSE.SEOrganizer.getEngineByName(target.label);
       }
       organizeSE.doSearch(text, where, engine);
     },
