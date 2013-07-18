@@ -775,7 +775,7 @@ Structure__Item.prototype = {
             engine[property] = replace[property];
         }
         delete engine.__updateToEngine;
-        if(this.iconURI != engine._iconURI.spec)
+        if(this.iconURI != (engine._iconURI == null ? null : engine._iconURI.spec))
           engine._setIcon(this.iconURI, true);
 
         var globalObject = Cu.getGlobalForObject(engine);
