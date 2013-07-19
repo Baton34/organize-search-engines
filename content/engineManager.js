@@ -400,7 +400,7 @@ EngineManagerDialog.prototype = {
     if(!target) return;
 
     selected = selected.filter(function(sel) {
-      return sel != target && sel.isAncestorOf(target);
+      return sel != target && !sel.isAncestorOf(target);
     });
     if(selected.length == 0) return;
 
@@ -628,11 +628,8 @@ Structure.prototype = {
   modified: 0,
   destroy: function Structure__destroy() {
     this.node = this.parent = this.children = null;
-  },
-
-  isAncestorOf: function Structure__Item__isAncestorOf(item) {
-    return this === item;
   }
+
 };
 function Structure__Container(parent, node, children, open) {
   this.open = open ? true : false;
@@ -822,12 +819,14 @@ Structure__Item.prototype = {
   inheritFrom: function(old) {
     this.alias = old.alias;
     Structure__Container.prototype.inheritFrom.apply(this, arguments);
-  }
+  },
+  isAncestorOf: () => false
 };
-Structure__Item.prototype.isAncestorOf =
+Structure.prototype.isAncestorOf =
 Structure__Container.prototype.isAncestorOf =
            function Structure__General__isAncestorOf(item) {
-  return this.parent === item || this.parent.isAncestorOf(item);
+  return this.children.indexOf(item) != -1 ||
+         this.children.some(e => e.isAncestorOf(item));
 };
 Structure__Item.prototype.destroy = Structure__Container.prototype.destroy =
            function Structure__General__destroy() {
@@ -1115,7 +1114,7 @@ EngineView.prototype = {
         if(!(dropOnNext && dropOnSame && sameParent))
           return false;
       } else {
-        var isAncestor = !dropItem.isAncestorOf(sourceItem);
+        var isAncestor = !sourceItem.isAncestorOf(dropItem);
         if(!(dropOnNext && dropOnSame && isAncestor))
           return false;
       }
