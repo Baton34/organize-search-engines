@@ -885,6 +885,10 @@ function FoldersOnly() {
     };
   });
 
+  if (Services.vc.compare("23.0", Services.appinfo.platformVersion) >= 0) {
+    this._update();
+  }
+
   Services.obs.addObserver(this, "browser-search-engine-modified", false);
 }
 FoldersOnly.prototype = {
