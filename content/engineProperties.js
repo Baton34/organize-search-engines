@@ -271,7 +271,7 @@ var iconMethods = {
     var links = iframe.contentDocument.getElementsByTagName("link");
     for(var i = 0; i < links.length; i++) {
       if(("body" in iframe.contentDocument || link[i].namespaceURI == NS_HTML) && // we only want to check HTML nodes
-         links[i].href && ["icon", "shortcut icon"].indexOf(links[i].rel) != -1) {
+         links[i].href && ["icon", "shortcut icon"].indexOf(links[i].rel.toLowerCase()) != -1) {
         faviconURI = links[i].href;
         break;
       }
