@@ -267,11 +267,14 @@ var iconMethods = {
   },
   downloadIcon2: function downloadIcon2(event) {
     var iframe = event.currentTarget;
+    if (event.target != iframe.contentDocument)
+        return;
+
     var faviconURI = iframe.webNavigation.currentURI.prePath + "/favicon.ico";
-    var links = iframe.contentDocument.getElementsByTagName("link");
+    let selector = 'link[rel="shortcut icon"]:link, link[rel="icon"]:link';
+    var links = iframe.contentDocument.querySelectorAll(selector);
     for(var i = 0; i < links.length; i++) {
-      if(("body" in iframe.contentDocument || link[i].namespaceURI == NS_HTML) && // we only want to check HTML nodes
-         links[i].href && ["icon", "shortcut icon"].indexOf(links[i].rel.toLowerCase()) != -1) {
+      if(("body" in iframe.contentDocument || link[i].namespaceURI == NS_HTML)) { // we only want to check HTML nodes
         faviconURI = links[i].href;
         break;
       }
