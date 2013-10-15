@@ -550,8 +550,9 @@ EngineManagerDialog.prototype = {
         readOnly = !engine || engine._readOnly;
     }
     onlyOneEngine = !multipleSelected && !disableButtons && item.isEngine;
+    let numEngines = gEngineView.rowCount;
 
-    document.getElementById("cmd_remove").setAttribute("disabled", disableButtons);
+    document.getElementById("cmd_remove").setAttribute("disabled", disableButtons || numEngines == 0);
 
     document.getElementById("cmd_rename").setAttribute("disabled", readOnly);
     document.getElementById("cmd_move-engine").setAttribute("disabled", disableButtons);
