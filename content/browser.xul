@@ -84,7 +84,7 @@ Contributor(s):
             <menuitem uri="rdf:*" label="rdf:urn:organize-search-engines#Name"
                       image="rdf:urn:organize-search-engines#Icon"
                       selected="rdf:urn:organize-search-engines#Selected"
-                      class="searchbar-engine-menuitem menuitem-iconic" />
+                      class="searchbar-engine-menuitem menuitem-iconic menuitem-with-favicon" />
           </menupopup>
         </rule>
 
