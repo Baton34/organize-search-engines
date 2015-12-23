@@ -37,3 +37,28 @@
 <!ENTITY sortAscending.accesskey "A">
 <!ENTITY sortDescending.label "Descendente">
 <!ENTITY sortDescending.accesskey "D">
+<!ENTITY  engineManager.title       "Mecanismos de pesquisa">
+<!ENTITY  engineManager.style       "min-width: 35em;">
+<!ENTITY  engineManager.intro       "Estão instaladas estas pesquisas:">
+
+<!ENTITY  columnLabel.name          "Nome">
+<!ENTITY  columnLabel.keyword       "Palavra-chave">
+<!-- Buttons -->
+
+<!ENTITY  up.label                  "Para cima">
+<!ENTITY  up.accesskey              "c">
+<!ENTITY  dn.label                  "Para baixo">
+<!ENTITY  dn.accesskey              "b">
+<!ENTITY  remove.label              "Remover">
+<!ENTITY  remove.accesskey          "R">
+<!ENTITY  edit.label                "Palavra-chave…">
+<!ENTITY  edit.accesskey            "P">
+
+<!ENTITY  addEngine.label           "Obter mais mecanismos de pesquisa…">
+<!ENTITY  addEngine.accesskey       "a">
+
+<!ENTITY  enableSuggest.label       "Exibir sugestões">
+<!ENTITY  enableSuggest.accesskey   "E">
+
+<!ENTITY  restoreDefaults.label     "Restaurar pesquisas padrão">
+<!ENTITY  restoreDefaults.accesskey "R">

@@ -37,3 +37,28 @@
 <!ENTITY sortAscending.accesskey "Р">
 <!ENTITY sortDescending.label "Опадајуће">
 <!ENTITY sortDescending.accesskey "О">
+<!ENTITY  engineManager.title       "Управљање списком претраживача">
+<!ENTITY  engineManager.style       "min-width: 36em;">
+<!ENTITY  engineManager.intro       "Постављени су следећи претраживачи:">
+
+<!ENTITY  columnLabel.name          "Назив">
+<!ENTITY  columnLabel.keyword       "Кључна реч">
+
+<!-- Buttons -->
+<!ENTITY  up.label                  "На горе">
+<!ENTITY  up.accesskey              "г">
+<!ENTITY  dn.label                  "На доле">
+<!ENTITY  dn.accesskey              "д">
+<!ENTITY  remove.label              "Уклони">
+<!ENTITY  remove.accesskey          "У">
+<!ENTITY  edit.label                "Уреди кључну реч…">
+<!ENTITY  edit.accesskey            "к">
+
+<!ENTITY  addEngine.label           "Набави још претраживача…">
+<!ENTITY  addEngine.accesskey       "Н">
+
+<!ENTITY  enableSuggest.label       "Прикажи предлоге претраге">
+<!ENTITY  enableSuggest.accesskey   "П">
+
+<!ENTITY  restoreDefaults.label     "Врати на подразумевано">
+<!ENTITY  restoreDefaults.accesskey "В">

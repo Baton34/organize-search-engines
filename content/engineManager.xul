@@ -41,10 +41,8 @@ Contributor(s):
 <?xml-stylesheet href="chrome://browser/skin/places/places.css"?>
 
 <!DOCTYPE window [
-  <!ENTITY % default SYSTEM "chrome://browser/locale/engineManager.dtd">
+  <!ENTITY % default SYSTEM "chrome://seorganizer/locale/engineManager.dtd">
   %default;
-  <!ENTITY % additional SYSTEM "chrome://seorganizer/locale/engineManager.dtd">
-  %additional;
   <!ENTITY % editmenu SYSTEM "chrome://global/locale/editMenuOverlay.dtd">
   %editmenu;
 ]>
