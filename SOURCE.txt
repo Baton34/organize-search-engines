@@ -1,2 +1,2 @@
 source code is available at:
-http://code.google.com/p/organize-search-engines/source
+https://github.com/Baton34/organize-search-engines
