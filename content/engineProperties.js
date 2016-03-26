@@ -2,21 +2,27 @@
        js-var:nsDragAndDrop;                                          -*- */
 /* ***** BEGIN LICENSE BLOCK *****
 Version: MPL 1.1/GPL 2.0/LGPL 2.1
+
 The contents of this file are subject to the Mozilla Public License Version
 1.1 (the "License"); you may not use this file except in compliance with
 the License. You may obtain a copy of the License at
 http://www.mozilla.org/MPL/
+
 Software distributed under the License is distributed on an "AS IS" basis,
 WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
 for the specific language governing rights and limitations under the
 License.
+
 The Original Code is Add to Search Bar.
+
 The Initial Developer of the Original Code is
 Malte Kraus.
 Portions created by the Initial Developer are Copyright (C) 2006-2009
 the Initial Developer. All Rights Reserved.
+
 Contributor(s):
   Malte Kraus <mails@maltekraus.de> (Original author)
+
  Alternatively, the contents of this file may be used under the terms of
  either the GNU General Public License Version 2 or later (the "GPL"), or
  the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
@@ -55,8 +61,7 @@ function init() {
   document.getElementById("update-interval-textbox").value = origEngine._updateInterval;
   document.getElementById("update-url-textbox").value = origEngine._updateURL;
   document.getElementById("update-icon-url-textbox").value = origEngine._iconUpdateURL;
-  // var dataType = ssGlobalObject.engineMetadataService.getAttr(origEngine, "updatedatatype");
-  dataType="DATA_TXT";
+  var dataType = ssGlobalObject.engineMetadataService.getAttr(origEngine, "updatedatatype");
   var type = document.getElementById("update-data-type-menulist");
   for(var i = 0; i < type.itemCount; i++) {
     if(dataType == Ci.nsISearchEngine[type.getItemAtIndex(i).value]) {
@@ -114,7 +119,6 @@ function cloneEngine(engine, dataType) {
   engine = engine.wrappedJSObject;
   if(engine._engineToUpdate)
     return engine;
-/*    
   var toplevel = Cu.getGlobalForObject(engine);
   var Engine = toplevel.Engine;
   dataType = Ci.nsISearchEngine[dataType];
@@ -127,9 +131,6 @@ function cloneEngine(engine, dataType) {
   engine.__updateToEngine = newEngine;
   newEngine._dataType = dataType;
   return newEngine;
-*/
-  return engine;
-  
 }
 
 function storeChanges() {
