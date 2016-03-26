@@ -61,7 +61,8 @@ function init() {
   document.getElementById("update-interval-textbox").value = origEngine._updateInterval;
   document.getElementById("update-url-textbox").value = origEngine._updateURL;
   document.getElementById("update-icon-url-textbox").value = origEngine._iconUpdateURL;
-  var dataType = ssGlobalObject.engineMetadataService.getAttr(origEngine, "updatedatatype");
+  //var dataType = ssGlobalObject.engineMetadataService.getAttr(origEngine, "updatedatatype");
+  var dataType="DATA_TXT";
   var type = document.getElementById("update-data-type-menulist");
   for(var i = 0; i < type.itemCount; i++) {
     if(dataType == Ci.nsISearchEngine[type.getItemAtIndex(i).value]) {
@@ -119,7 +120,8 @@ function cloneEngine(engine, dataType) {
   engine = engine.wrappedJSObject;
   if(engine._engineToUpdate)
     return engine;
-  var toplevel = Cu.getGlobalForObject(engine);
+/* 
+ var toplevel = Cu.getGlobalForObject(engine);
   var Engine = toplevel.Engine;
   dataType = Ci.nsISearchEngine[dataType];
   var newEngine = new Engine(engine._file, dataType, engine._readOnly);
@@ -131,6 +133,8 @@ function cloneEngine(engine, dataType) {
   engine.__updateToEngine = newEngine;
   newEngine._dataType = dataType;
   return newEngine;
+  */
+  return engine;
 }
 
 function storeChanges() {
