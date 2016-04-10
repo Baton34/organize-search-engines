@@ -147,7 +147,6 @@ organizeSE__Extensions.prototype = {
       contextsearch.search = this.search;
     },
     search: function(e) {
-      contextsearch.contextitem.parentNode.hidePopup();
       var text, where;
       if(e.currentTarget.id == "autocontext-searchmenupopup" ||
          e.currentTarget.id == "autocontext1-searchmenupopup") {
@@ -157,6 +156,7 @@ organizeSE__Extensions.prototype = {
         text = contextsearch.getBrowserSelection(null, e);
         where = whereToOpenLink(e, false, true);
       }
+	  contextsearch.contextitem.parentNode.hidePopup();
       if(where == "tabshifted") where = "tab";
       else if(where == "tab" || where == "current") where = "tabshifted";
 
