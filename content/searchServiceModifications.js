@@ -62,7 +62,7 @@ Contributor(s):
     let allKeys = XPCOMUtils.IterSimpleEnumerator(stringBundle.getSimpleEnumeration(),
                                                   Ci.nsIPropertyElement);
     let keyCandidates = ["addEngineAsCurrentText", "addEngineUseNowText"];
-    let useNowTexts = [ i.value for each (i in allKeys) if (keyCandidates.indexOf(i.key) != -1)];
+    let useNowTexts = [for (i of allKeys) if (keyCandidates.indexOf(i.key) != -1)  i.value];
 
     var args = {
 
