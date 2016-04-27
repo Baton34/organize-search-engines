@@ -73,7 +73,7 @@ SEOrganizer.prototype = {
     var result = doc.evaluate(aExpression, scope, resolver,
                               XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
     function iter() { var e; while((e = result.iterateNext())) yield e; }
-    return [i for each(i in iter())];
+    return [for (i of iter()) i];
   },
 
   init: function init() {
