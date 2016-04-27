@@ -593,7 +593,7 @@ SEOrganizer.prototype = {
     let getChildrenRev = function (container) {
       var iter = XPCOMUtils.IterSimpleEnumerator(container.GetElements(),
                                                  Ci.nsIRDFResource);
-      return [i for (i in iter) ].reverse();
+      return [for (i of iter) i].reverse();
     };
 
     // recursion would be much simpler but it's better avoided
