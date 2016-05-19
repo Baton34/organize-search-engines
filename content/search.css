@@ -1,0 +1,14 @@
+@namespace url(http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul);
+
+@-moz-document url(chrome://browser/content/browser.xul) { 
+
+.searchbar-dropmarker-image {
+  list-style-image: url("chrome://seorganizer/skin/searchbar-dropdown-arrow.png");
+  -moz-image-region: rect(0, 13px, 11px, 0);
+}
+
+.searchbar-engine-button[open="true"] > .searchbar-dropmarker-image {
+  -moz-image-region: rect(0, 26px, 11px, 13px);
+}
+
+}

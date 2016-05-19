@@ -49,6 +49,7 @@ Contributor(s):
     <resources>
       <stylesheet src="chrome://browser/content/search/searchbarBindings.css"/>
       <stylesheet src="chrome://browser/skin/searchbar.css"/>
+	  <stylesheet src="chrome://seorganizer/content/search.css"/>
     </resources>
     <content>
       <xul:stringbundle src="chrome://browser/locale/search.properties"
