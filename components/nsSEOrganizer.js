@@ -316,7 +316,7 @@ SEOrganizer.prototype = {
       case "engine-current": // The current engine was changed.
         var engines = this.getVisibleEngines({});
         for(var i = 0; i < engines.length; i++) {
-          if(engines[i].wrappedJSObject._file.parent.path.indexOf("[fake]/") === 0 &&
+          if(engines[i].wrappedJSObject._loadPath.indexOf("[fake]/") === 0 &&
              engines[i].name != aEngine.name)
             this.removeEngine(engines[i]);
         }
@@ -650,8 +650,11 @@ SEOrganizer.prototype = {
         iconURL: "",
         name: name,
         type: 4,
+        _metaData: {order: 0},
+        setAttr: function(name, val) {this._metaData[name] = val;},
+        getAttr: function(name) {return this._metaData[name] || undefined;},
         addParam: function() { throw Cr.NS_ERROR_FAILURE; },
-        _file: { parent: {path: "[fake]/" + name + ".xml" }},
+        _loadPath: "[fake]/" + name + ".xml",
         _serializeToJSON: function() { return ""; },
         getSubmission: function(data, type) {
           var i = -1;

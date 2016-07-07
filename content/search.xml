@@ -336,7 +336,7 @@ Contributor(s):
               }
             }
           }
-          BrowserSearch.updateSearchButton();
+          BrowserSearch.updateOpenSearchBadge();
         ]]></body>
       </method>
 
@@ -359,7 +359,7 @@ Contributor(s):
               }
             }
           }
-          BrowserSearch.updateSearchButton();
+          BrowserSearch.updateOpenSearchBadge();
         ]]></body>
       </method>
 
