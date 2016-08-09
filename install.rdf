@@ -4,13 +4,13 @@
          xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <RDF:Description RDF:about="urn:mozilla:install-manifest">
 
-    <em:id>organize-search-engines@maltekraus.de</em:id>
+    <em:id>baton34dev@gmail.com</em:id>
     <em:name>Organize Search Engines</em:name>
-    <em:version>1.91</em:version>
+    <em:version>1.94</em:version>
     <em:description>Organize your search engines with separators and folders.</em:description>
 
     <em:optionsURL>chrome://browser/content/search/engineManager.xul</em:optionsURL>
-    <em:homepageURL>http://firefox.maltekraus.de/extensions/organize-search-engines</em:homepageURL>
+    <em:homepageURL>https://github.com/Baton34/organize-search-engines</em:homepageURL>
 
     <em:creator>Malte Kraus</em:creator>
     <em:contributor>ReVox: help sorting out the crash on cancel</em:contributor>
@@ -36,8 +36,8 @@
     <em:targetApplication>
       <RDF:Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>45</em:minVersion>
-        <em:maxVersion>45</em:maxVersion>
+        <em:minVersion>45.*</em:minVersion>
+        <em:maxVersion>48.*</em:maxVersion>
       </RDF:Description>
     </em:targetApplication>
 
