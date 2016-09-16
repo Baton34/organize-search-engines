@@ -37,6 +37,10 @@ Contributor(s):
 ***** END LICENSE BLOCK ***** */
 
 Components.utils.import("resource://gre/modules/Services.jsm");
+const Ci = Components.interfaces
+const Cc = Components.classes
+
+let args;
 
 var organizeSE = {
   onEngineListChange: function organizeSE__onEngineListChange(item) {
@@ -49,9 +53,10 @@ var organizeSE = {
 
     let seOrganizer = Cc["@mozilla.org/rdf/datasource;1?name=organized-internet-search-engines"]
                         .getService().wrappedJSObject;
-    seOrganizer._engineFolders[addedEngineName] = args.folder;
+    seOrganizer._engineFolders[args.addedEngineName] = args.folder;
   },
   onLoadAlways: function organizeSE__onLoadAlways() {
+    args = window.arguments[0];
     let enginePopup = document.getElementById("enginePopup");
     enginePopup.builder.rebuild();
     if(enginePopup.lastChild.nodeName == "template") {
@@ -59,14 +64,15 @@ var organizeSE = {
       sizeToContent();
       return; // if there are no folders, a list is useless
     }
-
-    if ("callBack" in window) { // Add to Search Bar add-on
-      let cb = callBack;
-      callBack = function() {
-        organizeSE.onAccept();
-
-        return cb.apply(this, arguments);
-      };
+    if ("onDialogAccept" in window) { // Add to Search Bar add-on
+        onDialogAccept = function() {
+            args.addedEngineName = document.getElementById("name").value;
+            args.iconURL = document.getElementById("icon").src;
+            args.description = args.addedEngineName;
+            args.alias = document.getElementById("alias").value;
+            organizeSE.onAccept();
+            return window.arguments[1].addEngineWithData(args);
+        };
     }
 
     this.observer.register();
