@@ -56,9 +56,6 @@ Contributor(s):
         buttonpack="center"
         buttons="accept,cancel">
 
-  <script type="application/x-javascript">
-    const Cc = Components.classes, Ci = Components.interfaces;
-  </script>
   <script type="application/x-javascript" src="chrome://seorganizer/content/confirmAddEngine.js"/>
 
   <hbox flex="1">

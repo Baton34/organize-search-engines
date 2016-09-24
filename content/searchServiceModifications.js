@@ -82,7 +82,9 @@ Contributor(s):
       
       useNow: false,
 
-      name: this.name
+      name: this.name,
+      
+      addedEngineName: this.name
 
     };
 

@@ -50,7 +50,6 @@ var organizeSE = {
     args.confirmed = true;
     if (document.getElementById("checkbox"))
       args.useNow = document.getElementById("checkbox").checked;
-
     let seOrganizer = Cc["@mozilla.org/rdf/datasource;1?name=organized-internet-search-engines"]
                         .getService().wrappedJSObject;
     seOrganizer._engineFolders[args.addedEngineName] = args.folder;
@@ -67,6 +66,7 @@ var organizeSE = {
     if ("onDialogAccept" in window) { // Add to Search Bar add-on
         onDialogAccept = function() {
             args.addedEngineName = document.getElementById("name").value;
+            args.name=args.addedEngineName;
             args.iconURL = document.getElementById("icon").src;
             args.description = args.addedEngineName;
             args.alias = document.getElementById("alias").value;
@@ -78,7 +78,7 @@ var organizeSE = {
     this.observer.register();
   },
   onLoad: function organizeSE__onLoad() {
-    window.args = window.arguments[0];
+    args = window.arguments[0];
     window.addedEngineName = args.name;
     document.documentElement.setAttribute("title", args.titleMessage);
     document.getElementById("info.body").textContent = args.dialogMessage;
