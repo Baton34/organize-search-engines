@@ -10,3 +10,5 @@
 Автор оригинального расширения Malte Kraus.
 
 Последняя версия расширения подписанная Mozilla: [organize-search-engines_x.xx-**fx**.xpi] (https://github.com/Baton34/organize-search-engines/releases/latest)
+
+Перед установкой версии 1.95.5 удалите предыдущую версию.
