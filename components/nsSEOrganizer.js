@@ -678,7 +678,8 @@ SEOrganizer.prototype = {
         supportsResponseType: function(type) {
           return (type === null || type == "text/html");
         },
-        QueryInterface: XPCOMUtils.generateQI([Ci.nsISearchEngine])
+        QueryInterface: XPCOMUtils.generateQI([Ci.nsISearchEngine]),
+        getIconURLBySize : function(xx,yy) {},
       };
       engine.wrappedJSObject = engine;
       this._iterateAll(function(item) {

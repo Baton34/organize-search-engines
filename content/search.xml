@@ -531,7 +531,17 @@ Contributor(s):
 			if(Services.prefs.getBranch("browser.search.").getBoolPref("openintab"))
 			  where = "tab";
 		  } catch(e) {}
-
+          
+          if (gBrowser.isBlankNotBusyTab) {
+            var tab = gBrowser.selectedTab;
+            var isBlankTab = gBrowser.isBlankNotBusyTab(tab);
+            var isLockTab = !isBlankTab && tab.hasAttribute("locked");
+            if (where == "current" && isLockTab)
+                where = "tab";
+            else if (/^tab/.test(where) && isBlankTab)
+                where = "current";
+          }
+          
           // Open ctrl/cmd clicks on one-off buttons in a new background tab.
           if (aEvent && aEvent.originalTarget.getAttribute("anonid") == "search-go-button") {
             if (aEvent.button == 2)
