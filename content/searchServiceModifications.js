@@ -148,6 +148,6 @@ SearchService.prototype._getSortedEngines = function getSorted(aWithHidden) {
   if(aWithHidden)
     return this._sortedEngines;
   if(!_filteredSortedEngines)
-    _filteredSortedEngines = this._sortedEngines.filter(function(e)!e.hidden);
+    _filteredSortedEngines = this._sortedEngines.filter(function(e){return !e.hidden;});
   return _filteredSortedEngines;
 };

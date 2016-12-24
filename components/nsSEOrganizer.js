@@ -664,7 +664,7 @@ SEOrganizer.prototype = {
               var submission = innerEngines[i].getSubmission(data, type);
               return submission;
             },
-            hasMoreElements: function() i + 1 < innerEngines.length,
+            hasMoreElements: function() {return i + 1 < innerEngines.length;},
             QueryInterface: XPCOMUtils.generateQI([Ci.nsISimpleEnumerator, Ci.nsISearchSubmission])
           };
           submission.wrappedJSObject = submission;

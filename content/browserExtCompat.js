@@ -46,7 +46,7 @@ organizeSE__Extensions.prototype = {
       return func.apply(thisObj, (otherArgs || []));
     }
     var sortDirection = organizeSE.popupset.getAttribute("sortDirection");
-    for each(var i in this) {
+    for (var i in this) {
       if(typeof i == "object" && i.check) {
         try {
           if("wait" in i)
