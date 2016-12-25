@@ -374,9 +374,13 @@ SEOrganizer.prototype = {
     } else {
       // null parameter below specifies HTML response for search
       aEngine = aEngine || Services.search.currentEngine;
-      submission = aEngine.getSubmission(aData, null);
+      submission = aEngine.getSubmission(aData, null, "searchbar");
       allLinks.push(submission);
     }
+    let params = {
+        postData: submission.postData,
+        inBackground: aWhere == "tab-background"
+    };
     if(submission.wrappedJSObject && "hasMoreElements" in submission.wrappedJSObject) {
       while(submission.wrappedJSObject.hasMoreElements()) {
         allLinks.push(submission.wrappedJSObject.getNext().QueryInterface(Ci.nsISearchSubmission));
