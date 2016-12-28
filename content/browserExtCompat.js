@@ -46,32 +46,33 @@ organizeSE__Extensions.prototype = {
       return func.apply(thisObj, (otherArgs || []));
     }
     var sortDirection = organizeSE.popupset.getAttribute("sortDirection");
-    for (var i in this) {
-      if(typeof i == "object" && i.check) {
-        try {
-          if("wait" in i)
-            setTimeout(applyWrapper, i.wait, i.init, i, []);
-          else
-            i.init();
 
-          if("sortDirectionHandler" in i) {
-            i.sortDirectionHandler(sortDirection);
-            organizeSE._sortDirectionHandlers.push(i.sortDirectionHandler);
+    for (var i in this) {
+      if(typeof this[i] == "object" && this[i].check) {
+        try {
+          if("wait" in this[i])
+            setTimeout(applyWrapper, this[i].wait, this[i].init, this[i], []);
+          else
+            this[i].init();
+        
+          if("sortDirectionHandler" in this[i]) {
+            this[i].sortDirectionHandler(sortDirection);
+            organizeSE._sortDirectionHandlers.push(this[i].sortDirectionHandler);
           }
-          if("insertItemsHandler" in i) {
-            i.insertItemsHandler.mod = i;
-            if(!("subFolders" in i.insertItemsHandler))
-              i.insertItemsHandler.subFolders = false;
-            organizeSE._insertItemsHandlers.push(i.insertItemsHandler);
+          if("insertItemsHandler" in this[i]) {
+            this[i].insertItemsHandler.mod = this[i];
+            if(!("subFolders" in this[i].insertItemsHandler))
+              this[i].insertItemsHandler.subFolders = false;
+            organizeSE._insertItemsHandlers.push(this[i].insertItemsHandler);
           }
-          if("customizeToolbarHandler" in i)
-            organizeSE._customizeToolbarListeners.push(i.customizeToolbarHandler);
+          if("customizeToolbarHandler" in this[i])
+            organizeSE._customizeToolbarListeners.push(this[i].customizeToolbarHandler);
         } catch(e) {
           Components.reportError(e);
         }
       }
     }
-  },
+},
   /*****************************************************************************
    ** object properties here have these properties and methods:               **
    **   @property check: when set to false, the whole object will be ignored. **

@@ -6,7 +6,7 @@
 
     <em:id>ose@baton34dev</em:id>
     <em:name>Organize Search Engines</em:name>
-    <em:version>1.95.7</em:version>
+    <em:version>1.95.8</em:version>
     <em:description>Organize your search engines with separators and folders.</em:description>
 
     <em:optionsURL>chrome://browser/content/search/engineManager.xul</em:optionsURL>
