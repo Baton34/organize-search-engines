@@ -777,8 +777,9 @@ Structure__Item.prototype = {
           engine._setIcon(this.iconURI, true);
 
         var globalObject = Cu.getGlobalForObject(engine);
-        globalObject.engineMetadataService.setAttr(engine, "updatedatatype", engine._dataType.toString());
-        if(engine._hasUpdates && !globalObject.engineMetadataService.getAttr(engine, "updateexpir"))
+//        globalObject.engineMetadataService.setAttr(engine, "updatedatatype", engine._dataType.toString());
+//        if(engine._hasUpdates && !globalObject.engineMetadataService.getAttr(engine, "updateexpir"))
+        if(engine._hasUpdates && !engine.getAttr("updateexpir"))
           globalObject.engineUpdateService.scheduleNextUpdate(engine);
 
         engine.__action = "properties";
@@ -810,8 +811,8 @@ Structure__Item.prototype = {
                             rdfService.GetLiteral(this.name), true);
       }
       if(changed) {
-        if(!engine._readOnly)
-          engine._lazySerializeToFile();
+//        if(!engine._readOnly)
+          //engine._lazySerializeToFile();
         // inform everybody of the changes, also stores our changes in the cache
         Services.obs.notifyObservers(engine, SEARCH_ENGINE_TOPIC, "engine-changed");
       }

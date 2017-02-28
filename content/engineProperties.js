@@ -118,13 +118,15 @@ function checkUpdates() {
 /* clone a nsISearchEngine, replacement is delayed until ok is clicked in the manager */
 function cloneEngine(engine, dataType) {
   engine = engine.wrappedJSObject;
-  if(engine._engineToUpdate)
+ if(engine._engineToUpdate)
     return engine;
-/* 
  var toplevel = Cu.getGlobalForObject(engine);
   var Engine = toplevel.Engine;
   dataType = Ci.nsISearchEngine[dataType];
-  var newEngine = new Engine(engine._file, dataType, engine._readOnly);
+  if (!engine._loadPath) {  // AddToSearchBar not created this field
+      engine._loadPath="[atsb]";
+  }
+  var newEngine = new Engine(engine._loadPath, engine._readOnly);
   for(var property in engine) {
     if(!(engine.__lookupGetter__(property) || engine.__lookupSetter__(property)) &&
        engine.hasOwnProperty(property) && property != "__updateToEngine")
@@ -133,8 +135,6 @@ function cloneEngine(engine, dataType) {
   engine.__updateToEngine = newEngine;
   newEngine._dataType = dataType;
   return newEngine;
-  */
-  return engine;
 }
 
 function storeChanges() {

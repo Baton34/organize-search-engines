@@ -316,7 +316,7 @@ SEOrganizer.prototype = {
       case "engine-current": // The current engine was changed.
         var engines = this.getVisibleEngines({});
         for(var i = 0; i < engines.length; i++) {
-          if(engines[i].wrappedJSObject._loadPath.indexOf("[fake]/") === 0 &&
+          if(engines[i].wrappedJSObject._loadPath && engines[i].wrappedJSObject._loadPath.indexOf("[fake]/") === 0 &&
              engines[i].name != aEngine.name)
             this.removeEngine(engines[i]);
         }
