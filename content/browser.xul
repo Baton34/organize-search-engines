@@ -35,7 +35,7 @@ Contributor(s):
  the terms of any one of the MPL, the GPL or the LGPL.
 ***** END LICENSE BLOCK ***** -->
 <?xml-stylesheet href="chrome://seorganizer/skin/browser.css" type="text/css" ?>
-<!DOCTYPE overlay SYSTEM "chrome://browser/locale/searchbar.dtd">
+<!DOCTYPE overlay SYSTEM "chrome://seorganizer/locale/searchbar.dtd">
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
 

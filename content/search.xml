@@ -35,7 +35,7 @@ Contributor(s):
  the terms of any one of the MPL, the GPL or the LGPL.
 ***** END LICENSE BLOCK ***** -->
 <!DOCTYPE bindings [
-<!ENTITY % searchBarDTD SYSTEM "chrome://browser/locale/searchbar.dtd" >
+<!ENTITY % searchBarDTD SYSTEM "chrome://seorganizer/locale/searchbar.dtd">
 %searchBarDTD;
 <!ENTITY % browserDTD SYSTEM "chrome://browser/locale/browser.dtd">
 %browserDTD;
@@ -81,7 +81,7 @@ Contributor(s):
                             anonid="open-engine-manager"
                             label="&cmd_engineManager.label;"
                             oncommand="openManager(event);"/>
-            </xul:menupopup>
+                            </xul:menupopup>
           </xul:toolbarbutton>
         </xul:box>
         <xul:hbox class="search-go-container">
