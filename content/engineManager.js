@@ -22,6 +22,7 @@ the Initial Developer. All Rights Reserved.
 
 Contributor(s):
   Malte Kraus <mails@maltekraus.de> (Original author)
+  strel
 
  Alternatively, the contents of this file may be used under the terms of
  either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -572,6 +573,45 @@ EngineManagerDialog.prototype = {
               .getMostRecentWindow("navigator:browser");
     }
     win.BrowserSearch.loadAddEngines();
+    window.close();
+    win.focus();
+  },
+       
+  loadAddEnginesMP: function EngineManager__loadAddEnginesMP() {
+    this.onOK();
+    var win = window.opener;
+    if(!("BrowserSearch" in win)) {
+      win = Cc["@mozilla.org/appshell/window-mediator;1"]
+              .getService(Ci.nsIWindowMediator)
+              .getMostRecentWindow("navigator:browser");
+    }
+    win.gBrowser.addTab("http://www.mycroftproject.com/search-engines.html");
+    window.close();
+    win.focus();
+  },
+  
+  loadGenerator7is7: function EngineManager__loadGenerator7is7() {
+    this.onOK();
+    var win = window.opener;
+    if(!("BrowserSearch" in win)) {
+      win = Cc["@mozilla.org/appshell/window-mediator;1"]
+              .getService(Ci.nsIWindowMediator)
+              .getMostRecentWindow("navigator:browser");
+    }
+    win.gBrowser.addTab("http://7is7.com/software/firefox/opensearch.html");
+    window.close();
+    win.focus();
+  },
+  
+  loadGeneratorR2S: function EngineManager__loadGeneratorR2S() {
+    this.onOK();
+    var win = window.opener;
+    if(!("BrowserSearch" in win)) {
+      win = Cc["@mozilla.org/appshell/window-mediator;1"]
+              .getService(Ci.nsIWindowMediator)
+              .getMostRecentWindow("navigator:browser");
+    }
+    win.gBrowser.addTab("http://ready.to/search/en/");
     window.close();
     win.focus();
   },
