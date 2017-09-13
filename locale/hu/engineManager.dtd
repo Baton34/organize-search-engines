@@ -1,6 +1,5 @@
 <!ENTITY namecol.label "Név">
 <!ENTITY aliascol.label "Kulcsszó">
-<!ENTITY addEngine.accesskey "G">
 <!ENTITY restoreDefault.label "Alapértelmezett kereső visszaállítása">
 <!ENTITY restoreDefault.accesskey "A">
 <!ENTITY new-folder.label "Új mappa...">
@@ -54,8 +53,14 @@
 <!ENTITY  edit.label                "Kulcsszó szerkesztése…">
 <!ENTITY  edit.accesskey            "K">
 
-<!ENTITY  addEngine.label           "További keresők letöltése…">
-<!ENTITY  addEngine.accesskey       "T">
+<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "7is7 search plugin generator (advanced)">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Ready2Search plugin generator (advanced)">
+<!ENTITY  openGenR2S.accesskey      "2">
 
 <!ENTITY  enableSuggest.label       "Keresési javaslatok megjelenítése">
 <!ENTITY  enableSuggest.accesskey   "K">
