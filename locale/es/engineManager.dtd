@@ -1,0 +1,71 @@
+<!ENTITY namecol.label            "Nombre">
+<!ENTITY aliascol.label           "Palabra clave">
+
+<!ENTITY restoreDefault.label     "Restaurar motor predeterminado">
+<!ENTITY restoreDefault.accesskey "R">
+
+<!ENTITY new-folder.label         "Nueva carpeta">
+<!ENTITY new-folder.accesskey     "c">
+<!ENTITY new-separator.label      "Nuevo separador">
+<!ENTITY new-separator.accesskey  "s">
+
+<!ENTITY move-engine.label        "Mover a carpeta">
+<!ENTITY move-engine.accesskey    "M">
+
+<!ENTITY rename.label             "Renombrar">
+<!ENTITY rename.accesskey         "R">
+<!ENTITY editalias.label          "Editar palabra clave">
+<!ENTITY editalias.accesskey      "d">
+<!ENTITY properties.label         "Propiedades">
+<!ENTITY properties.accesskey     "P">
+
+<!ENTITY context.new.label        "Nuevo/a">
+<!ENTITY context.new.accesskey    "N">
+
+<!ENTITY noconflict.enableSuggest.accesskey "&enableSuggest.accesskey;">
+<!ENTITY noconflict.remove.accesskey        "&remove.accesskey;">
+<!ENTITY noconflict.up.accesskey            "&up.accesskey;">
+<!ENTITY noconflict.dn.accesskey            "&dn.accesskey;">
+
+<!ENTITY fileMenu.label           "Archivo">
+<!ENTITY fileMenu.accesskey       "A">
+<!ENTITY closeCmd.label           "Cerrar">
+<!ENTITY closeCmd.accesskey       "e">
+<!ENTITY viewMenu.label           "Ver">
+<!ENTITY viewMenu.accesskey       "V">
+<!ENTITY menuitem.view.command.toolbar.label     "Barra de herramientas">
+<!ENTITY menuitem.view.command.toolbar.accesskey "B">
+<!ENTITY menuitem.view.show_columns.label        "Mostrar columnas">
+<!ENTITY menuitem.view.show_columns.accesskey    "M">
+<!ENTITY menuitem.view.unsorted.label            "Desordenada">
+<!ENTITY menuitem.view.unsorted.accesskey        "s">
+<!ENTITY sortAscending.label                     "Ascendente">
+<!ENTITY sortAscending.accesskey                 "A">
+<!ENTITY sortDescending.label                    "Descendente">
+<!ENTITY sortDescending.accesskey                "D">
+<!ENTITY  engineManager.title       "Administrar lista de motores de búsqueda">
+<!ENTITY  engineManager.style       "min-width: 35em;">
+<!ENTITY  engineManager.intro       "Tiene instalados los siguientes motores:">
+<!ENTITY  columnLabel.name          "Nombre">
+<!ENTITY  columnLabel.keyword       "Palabra clave">
+<!-- Buttons -->
+<!ENTITY  up.label                  "Mover arriba">
+<!ENTITY  up.accesskey              "a">
+<!ENTITY  dn.label                  "Mover abajo">
+<!ENTITY  dn.accesskey              "b">
+<!ENTITY  remove.label              "Eliminar">
+<!ENTITY  remove.accesskey          "E">
+<!ENTITY  edit.label                "Editar palabra clave">
+<!ENTITY  edit.accesskey            "d">
+<!ENTITY  addEngine.label           "Obtener plugins de Mozilla">
+<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngineMP.label         "Obtener plugins de Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "Generador de plugins 7is7 (avanzado)">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Generador de plugins Ready2Search (avanzado)">
+<!ENTITY  openGenR2S.accesskey      "2">
+<!ENTITY  enableSuggest.label       "Mostrar sugerencias de búsqueda">
+<!ENTITY  enableSuggest.accesskey   "u">
+<!ENTITY  restoreDefaults.label     "Restaurar valores predeterminados">
+<!ENTITY  restoreDefaults.accesskey "e">
