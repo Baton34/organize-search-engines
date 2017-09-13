@@ -1,6 +1,5 @@
 <!ENTITY namecol.label "名稱">
 <!ENTITY aliascol.label "關鍵字">
-<!ENTITY addEngine.accesskey "G">
 <!ENTITY restoreDefault.label "回復預設搜尋引擎">
 <!ENTITY restoreDefault.accesskey "e">
 <!ENTITY new-folder.label "新增資料夾">
@@ -54,11 +53,17 @@
 <!ENTITY  edit.label                "編輯關鍵字…">
 <!ENTITY  edit.accesskey            "t">
 
-<!ENTITY  addEngine.label           "更多搜尋引擎…">
-<!ENTITY  addEngine.accesskey       "a">
+<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "7is7 search plugin generator (advanced)">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Ready2Search plugin generator (advanced)">
+<!ENTITY  openGenR2S.accesskey      "2">
 
 <!ENTITY  enableSuggest.label       "顯示搜尋建議">
-<!ENTITY  enableSuggest.accesskey   "S">
+<!ENTITY  enableSuggest.accesskey   "u">
 
 <!ENTITY  restoreDefaults.label     "回復為預設值">
 <!ENTITY  restoreDefaults.accesskey "e">
