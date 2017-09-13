@@ -1,6 +1,5 @@
 <!ENTITY namecol.label "Nazwa">
 <!ENTITY aliascol.label "Słowo kluczowe">
-<!ENTITY addEngine.accesskey "W">
 <!ENTITY restoreDefault.label "Przywróć domyślną wyszukiwarkę">
 <!ENTITY restoreDefault.accesskey "r">
 <!ENTITY new-folder.label "Nowy folder...">
@@ -55,8 +54,14 @@
 <!ENTITY  edit.label                "Zmień słowo kluczowe…">
 <!ENTITY  edit.accesskey            "Z">
 
-<!ENTITY  addEngine.label           "Pobierz więcej wyszukiwarek…">
-<!ENTITY  addEngine.accesskey       "P">
+<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "7is7 search plugin generator (advanced)">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Ready2Search plugin generator (advanced)">
+<!ENTITY  openGenR2S.accesskey      "2">
 
 <!ENTITY  enableSuggest.label       "Wyświetlaj podpowiedzi wyszukiwania">
 <!ENTITY  enableSuggest.accesskey   "W">
