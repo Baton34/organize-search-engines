@@ -3,6 +3,7 @@
 Предоставляет расширенные возможности по управлению поисковыми плагинами **Firefox**:
 * создание папок
 * создание разделителей
+* доступ к онлайн-ресурсам для загрузки и создания/загрузки поисковых плагинов
 * изменение порядка плагинов в списке
 * редактирование и удаление плагинов
 * поиск во всех плагинах папки нажатием одной кнопки
@@ -21,9 +22,10 @@
 Provides advanced features for managing search plug-ins in **Firefox**:
 * creating folders
 * creating separators
+* accessing online resources to download and create/upload search plugins
 * changing the order of plugins in the list
 * editing and deleting plugins
-* search in all plug-ins folder with the click of a button
+* search with all search plugins in a folder with the click of a button
 
 The author of the original extension is Malte Kraus.
 
