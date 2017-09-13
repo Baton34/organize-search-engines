@@ -21,6 +21,7 @@ the Initial Developer. All Rights Reserved.
 
 Contributor(s):
   Malte Kraus <mails@maltekraus.de> (Original author)
+  strel
 
  Alternatively, the contents of this file may be used under the terms of
  either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -123,14 +124,14 @@ Contributor(s):
       <menuitem label="&dn.label;" accesskey="&noconflict.dn.accesskey;"
                 id="context-down" command="cmd_movedown" />
       <menuseparator />
-      <menu id="context-new" label="&context.new.label;" accesskey="&context.new.accesskey;">
-        <menupopup>
+<!--      <menu id="context-new" label="&context.new.label;" accesskey="&context.new.accesskey;">
+        <menupopup> -->
           <menuitem label="&new-folder.label;" accesskey="&new-folder.accesskey;"
                     id="context-new-folder" command="cmd_new-folder" />
           <menuitem label="&new-separator.label;" accesskey="&new-separator.accesskey;"
                     id="context-new-separator" command="cmd_new-separator" />
-        </menupopup>
-      </menu>
+<!--        </menupopup>
+      </menu> -->
       <menuitem key="key_remove" label="&remove.label;" accesskey="&noconflict.remove.accesskey;"
                 id="context-remove" command="cmd_remove" />
       <menuseparator />
@@ -153,6 +154,15 @@ Contributor(s):
           <menuitem id="addEngines" label="&addEngine.label;"
                     accesskey="&addEngine.accesskey;"
                     oncommand="gEngineManagerDialog.loadAddEngines();" />
+          <menuitem id="addEnginesMP" label="&addEngineMP.label;"
+                    accesskey="&addEngineMP.accesskey;"
+                    oncommand="gEngineManagerDialog.loadAddEnginesMP();" />
+          <menuitem id="openGenerator7is7" label="&openGen7is7.label;"
+                    accesskey="&openGen7is7.accesskey;"
+                    oncommand="gEngineManagerDialog.loadGenerator7is7();" />
+          <menuitem id="openGeneratorR2S" label="&openGenR2S.label;"
+                    accesskey="&openGenR2S.accesskey;"
+                    oncommand="gEngineManagerDialog.loadGeneratorR2S();" />
           <menuitem id="restoreDefault" label="&restoreDefault.label;"
                     accesskey="&restoreDefault.accesskey;"
                     oncommand="gEngineManagerDialog.newItem(gEngineManagerDialog.NEW_ITEM_RESTORED_DEFAULT_ENGINE);" />
