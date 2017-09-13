@@ -12,3 +12,21 @@
 Последняя версия расширения подписанная Mozilla: [organize-search-engines_x.xx-**fx**.xpi] (https://github.com/Baton34/organize-search-engines/releases/latest)
 
 Перед установкой версии 1.95.5 и выше удалите предыдущую версию (1.95.2 и ниже).
+
+
+
+# "Organize Search Engines" extension for Firefox
+(Translated 2017-09-13)
+
+Provides advanced features for managing search plug-ins in **Firefox**:
+* creating folders
+* creating separators
+* changing the order of plugins in the list
+* editing and deleting plugins
+* search in all plug-ins folder with the click of a button
+
+The author of the original extension is Malte Kraus.
+
+The latest version of the extension signed by Mozilla can be found here: [organize-search-engines_x.xx - **fx**. Xpi] (https://github.com/Baton34/organize-search-engines/releases/latest)
+
+Before installing a version 1.95.5 or higher, delete any previous version 1.95.2 and below.
