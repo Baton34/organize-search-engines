@@ -1,6 +1,5 @@
 <!ENTITY namecol.label "שם">
 <!ENTITY aliascol.label "מילת מפתח">
-<!ENTITY addEngine.accesskey "י">
 <!ENTITY restoreDefault.label "שחזר מנועי ברירת מחדל">
 <!ENTITY restoreDefault.accesskey "ז">
 <!ENTITY new-folder.label "תיקיה חדשה...">
@@ -54,8 +53,14 @@
 <!ENTITY  edit.label                "עריכת מילת מפתח...">
 <!ENTITY  edit.accesskey            "ע">
 
-<!ENTITY  addEngine.label           "קבלת מנועי חיפוש נוספים...">
-<!ENTITY  addEngine.accesskey       "מ">
+<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "7is7 search plugin generator (advanced)">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Ready2Search plugin generator (advanced)">
+<!ENTITY  openGenR2S.accesskey      "2">
 
 <!ENTITY  enableSuggest.label       "הצגת המלצות חיפוש">
 <!ENTITY  enableSuggest.accesskey   "צ">
