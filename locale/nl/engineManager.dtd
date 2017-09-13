@@ -1,6 +1,5 @@
 <!ENTITY namecol.label "Naam">
 <!ENTITY aliascol.label "Sleutelwoord">
-<!ENTITY addEngine.accesskey "S">
 <!ENTITY restoreDefault.label "Standaard zoekmachine herstellen">
 <!ENTITY restoreDefault.accesskey "h">
 <!ENTITY new-folder.label "Nieuwe map...">
@@ -54,8 +53,14 @@
 <!ENTITY  edit.label                "Sleutelwoord bewerken…">
 <!ENTITY  edit.accesskey            "b">
 
-<!ENTITY  addEngine.label           "Meer zoekmachines verkrijgen…">
-<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.accesskey       "o">
+<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "7is7 search plugin generator (advanced)">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Ready2Search plugin generator (advanced)">
+<!ENTITY  openGenR2S.accesskey      "2">
 
 <!ENTITY  enableSuggest.label       "Zoeksuggesties tonen">
 <!ENTITY  enableSuggest.accesskey   "Z">
