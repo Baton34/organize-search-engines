@@ -1,6 +1,5 @@
 <!ENTITY namecol.label "Name">
 <!ENTITY aliascol.label "Schlüsselwort">
-<!ENTITY addEngine.accesskey "M">
 <!ENTITY restoreDefault.label "Vorgabe wiederherstellen">
 <!ENTITY restoreDefault.accesskey "V">
 <!ENTITY new-folder.label "Neuer Ordner…">
@@ -54,8 +53,14 @@
 <!ENTITY  edit.label                "Schlüsselwort bearbeiten…">
 <!ENTITY  edit.accesskey            "b">
 
-<!ENTITY  addEngine.label           "Weitere Suchmaschinen hinzufügen…">
-<!ENTITY  addEngine.accesskey       "W">
+<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "7is7 search plugin generator (advanced)">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Ready2Search plugin generator (advanced)">
+<!ENTITY  openGenR2S.accesskey      "2">
 
 <!ENTITY  enableSuggest.label       "Suchvorschläge anzeigen">
 <!ENTITY  enableSuggest.accesskey   "S">
