@@ -1,6 +1,5 @@
 <!ENTITY namecol.label "Назив">
 <!ENTITY aliascol.label "Кључна реч">
-<!ENTITY addEngine.accesskey "Г">
 <!ENTITY restoreDefault.label "Врати изворни претраживач">
 <!ENTITY restoreDefault.accesskey "е">
 <!ENTITY new-folder.label "Нова фасцикла...">
@@ -54,8 +53,14 @@
 <!ENTITY  edit.label                "Уреди кључну реч…">
 <!ENTITY  edit.accesskey            "к">
 
-<!ENTITY  addEngine.label           "Набави још претраживача…">
-<!ENTITY  addEngine.accesskey       "Н">
+<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "7is7 search plugin generator (advanced)">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Ready2Search plugin generator (advanced)">
+<!ENTITY  openGenR2S.accesskey      "2">
 
 <!ENTITY  enableSuggest.label       "Прикажи предлоге претраге">
 <!ENTITY  enableSuggest.accesskey   "П">
