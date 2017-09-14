@@ -1,6 +1,5 @@
 <!ENTITY namecol.label "Nome">
 <!ENTITY aliascol.label "Parola chiave">
-<!ENTITY addEngine.accesskey "G">
 <!ENTITY restoreDefault.label "Ripristina predefiniti">
 <!ENTITY restoreDefault.accesskey "e">
 <!ENTITY new-folder.label "Nuova cartella...">
@@ -50,9 +49,15 @@
 <!ENTITY remove.accesskey "R">
 <!ENTITY edit.label "Modifica parola chiave…">
 <!ENTITY edit.accesskey "c">
-<!ENTITY addEngine.label "Altri motori di ricerca…">
-<!ENTITY addEngine.accesskey "A">
+<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "7is7 search plugin generator (advanced)">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Ready2Search plugin generator (advanced)">
+<!ENTITY  openGenR2S.accesskey      "2">
 <!ENTITY enableSuggest.label "Mostra i suggerimenti di ricerca">
-<!ENTITY enableSuggest.accesskey "M">
+<!ENTITY enableSuggest.accesskey "u">
 <!ENTITY restoreDefaults.label "Ripristina predefiniti">
 <!ENTITY restoreDefaults.accesskey "n">

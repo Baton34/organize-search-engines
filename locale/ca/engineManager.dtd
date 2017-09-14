@@ -1,6 +1,5 @@
 <!ENTITY namecol.label "Nom">
 <!ENTITY aliascol.label "Paraula clau">
-<!ENTITY addEngine.accesskey "G">
 <!ENTITY restoreDefault.label "Restaura el motor predeterminat">
 <!ENTITY restoreDefault.accesskey "R">
 <!ENTITY new-folder.label "Carpeta nova...">
@@ -54,11 +53,17 @@
 <!ENTITY  edit.label                "Edita la paraula clau…">
 <!ENTITY  edit.accesskey            "t">
 
-<!ENTITY  addEngine.label           "Aconsegueix més motors de cerca…">
-<!ENTITY  addEngine.accesskey       "A">
+<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "7is7 search plugin generator (advanced)">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Ready2Search plugin generator (advanced)">
+<!ENTITY  openGenR2S.accesskey      "2">
 
 <!ENTITY  enableSuggest.label       "Mostra suggeriments de cerca">
-<!ENTITY  enableSuggest.accesskey   "s">
+<!ENTITY  enableSuggest.accesskey   "u">
 
 <!ENTITY  restoreDefaults.label     "Restaura els motors per defecte">
 <!ENTITY  restoreDefaults.accesskey "e">

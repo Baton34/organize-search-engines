@@ -1,6 +1,5 @@
 <!ENTITY namecol.label "名前">
 <!ENTITY aliascol.label "キーワード">
-<!ENTITY addEngine.accesskey "G">
 <!ENTITY restoreDefault.label "既定のエンジンに戻す">
 <!ENTITY restoreDefault.accesskey "e">
 <!ENTITY new-folder.label "新しいフォルダ...">
@@ -54,11 +53,17 @@
 <!ENTITY  edit.label			"キーワードを編集...">
 <!ENTITY  edit.accesskey		"t">
 
-<!ENTITY  addEngine.label		"検索エンジンを追加...">
-<!ENTITY  addEngine.accesskey		"A">
+<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "7is7 search plugin generator (advanced)">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Ready2Search plugin generator (advanced)">
+<!ENTITY  openGenR2S.accesskey      "2">
 
 <!ENTITY  enableSuggest.label		"検索語句の候補を表示する">
-<!ENTITY  enableSuggest.accesskey	"S">
+<!ENTITY  enableSuggest.accesskey	"u">
 
 <!ENTITY  restoreDefaults.label		"初期設定に戻す">
 <!ENTITY  restoreDefaults.accesskey	"e">

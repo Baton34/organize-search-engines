@@ -1,6 +1,5 @@
 <!ENTITY namecol.label "Название">
 <!ENTITY aliascol.label "Короткое имя">
-<!ENTITY addEngine.accesskey "и">
 <!ENTITY restoreDefault.label "Восстановить поисковой плагин по умолчанию">
 <!ENTITY restoreDefault.accesskey "В">
 <!ENTITY new-folder.label "Новая папка">
@@ -50,8 +49,14 @@
 <!ENTITY remove.accesskey "У">
 <!ENTITY edit.label "Изменить…">
 <!ENTITY edit.accesskey "з">
-<!ENTITY addEngine.label "Плагины для других поисковых систем…">
-<!ENTITY addEngine.accesskey "л">
+<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "7is7 search plugin generator (advanced)">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Ready2Search plugin generator (advanced)">
+<!ENTITY  openGenR2S.accesskey      "2">
 <!ENTITY enableSuggest.label "Показывать поисковые предложения">
 <!ENTITY enableSuggest.accesskey "п">
 <!ENTITY restoreDefaults.label "Восстановить набор по умолчанию">

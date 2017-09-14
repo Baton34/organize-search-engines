@@ -1,6 +1,5 @@
 <!ENTITY namecol.label "Nome">
 <!ENTITY aliascol.label "Palavra-chave">
-<!ENTITY addEngine.accesskey "G">
 <!ENTITY restoreDefault.label "Restaurar Mecanismo Padrão">
 <!ENTITY restoreDefault.accesskey "e">
 <!ENTITY new-folder.label "Nova Pasta...">
@@ -54,11 +53,17 @@
 <!ENTITY  edit.label                "Palavra-chave…">
 <!ENTITY  edit.accesskey            "P">
 
-<!ENTITY  addEngine.label           "Obter mais mecanismos de pesquisa…">
-<!ENTITY  addEngine.accesskey       "a">
+<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "7is7 search plugin generator (advanced)">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Ready2Search plugin generator (advanced)">
+<!ENTITY  openGenR2S.accesskey      "2">
 
 <!ENTITY  enableSuggest.label       "Exibir sugestões">
-<!ENTITY  enableSuggest.accesskey   "E">
+<!ENTITY  enableSuggest.accesskey   "u">
 
 <!ENTITY  restoreDefaults.label     "Restaurar pesquisas padrão">
 <!ENTITY  restoreDefaults.accesskey "R">

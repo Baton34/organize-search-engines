@@ -1,12 +1,11 @@
 <!ENTITY namecol.label "AD">
 <!ENTITY aliascol.label "Anahtar kelimeler">
-<!ENTITY addEngine.accesskey "G">
-<!ENTITY restoreDefault.label "Varsayılan Arama Motoruna dön">
-<!ENTITY restoreDefault.accesskey "e">
-<!ENTITY new-folder.label "Yeni Klasör">
-<!ENTITY new-folder.accesskey "F">
+<!ENTITY restoreDefault.label "Varsayılan arama motoruna dön">
+<!ENTITY restoreDefault.accesskey "V">
+<!ENTITY new-folder.label "Yeni klasör">
+<!ENTITY new-folder.accesskey "K">
 <!ENTITY new-separator.label "Yeni boşluk">
-<!ENTITY new-separator.accesskey "S">
+<!ENTITY new-separator.accesskey "b">
 <!ENTITY move-engine.label "Taşı...">
 <!ENTITY move-engine.accesskey "M">
 <!ENTITY rename.label "Yeni isim...">
@@ -54,11 +53,17 @@
 <!ENTITY  edit.label                "Anahtar kelime düzenle…">
 <!ENTITY  edit.accesskey            "t">
 
-<!ENTITY  addEngine.label           "Daha fazla arama motoru bul…">
-<!ENTITY  addEngine.accesskey       "a">
+<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "7is7 search plugin generator (advanced)">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Ready2Search plugin generator (advanced)">
+<!ENTITY  openGenR2S.accesskey      "2">
 
 <!ENTITY  enableSuggest.label       "Arama önerilerini göster">
-<!ENTITY  enableSuggest.accesskey   "s">
+<!ENTITY  enableSuggest.accesskey   "n">
 
 <!ENTITY  restoreDefaults.label     "Varsayılanları geri getir">
 <!ENTITY  restoreDefaults.accesskey "e">

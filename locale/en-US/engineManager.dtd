@@ -1,9 +1,8 @@
 <!ENTITY namecol.label            "Name">
 <!ENTITY aliascol.label           "Keyword">
 
-<!ENTITY addEngine.accesskey      "G">
 <!ENTITY restoreDefault.label     "Restore Default Engine">
-<!ENTITY restoreDefault.accesskey "e">
+<!ENTITY restoreDefault.accesskey "R">
 
 <!ENTITY new-folder.label         "New Folder">
 <!ENTITY new-folder.accesskey     "F">
@@ -58,9 +57,15 @@
 <!ENTITY  remove.accesskey          "R">
 <!ENTITY  edit.label                "Edit Keyword…">
 <!ENTITY  edit.accesskey            "t">
-<!ENTITY  addEngine.label           "Get more search engines…">
-<!ENTITY  addEngine.accesskey       "A">
+<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.accesskey       "M">
+<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.accesskey     "y">
+<!ENTITY  openGen7is7.label         "7is7 plugin generator">
+<!ENTITY  openGen7is7.accesskey     "7">
+<!ENTITY  openGenR2S.label          "Ready2Search plugin generator">
+<!ENTITY  openGenR2S.accesskey      "2">
 <!ENTITY  enableSuggest.label       "Show search suggestions">
-<!ENTITY  enableSuggest.accesskey   "S">
+<!ENTITY  enableSuggest.accesskey   "u">
 <!ENTITY  restoreDefaults.label     "Restore Defaults">
 <!ENTITY  restoreDefaults.accesskey "e">

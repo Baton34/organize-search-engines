@@ -1,0 +1,57 @@
+<!ENTITY engineProperties.title "Propiedades del motor">
+
+<!ENTITY prop.name.label     "Nombre:">
+<!ENTITY prop.name.accesskey "N">
+
+<!ENTITY prop.icon.label     "Icono:">
+
+<!ENTITY prop.icon.browse.label     "Examinar…">
+<!ENTITY prop.icon.browse.accesskey "E">
+
+<!ENTITY prop.icon.download.label     "Descargar automáticamente">
+<!ENTITY prop.icon.download.accesskey "D">
+
+<!ENTITY prop.keyword.label     "Palabra clave:">
+<!ENTITY prop.keyword.accesskey "P">
+
+<!ENTITY prop.description.label     "Descripción:">
+<!ENTITY prop.description.accesskey "s">
+
+<!ENTITY prop.homepage.label     "Página principal:">
+<!ENTITY prop.homepage.accesskey "g">
+
+<!ENTITY prop.searchurl.label     "URL de búsqueda:">
+<!ENTITY prop.searchurl.accesskey "b">
+
+<!ENTITY prop.encoding.label     "Codificación:">
+<!ENTITY prop.encoding.accesskey "C">
+
+<!ENTITY prop.httpmethod.label     "Método HTTP:">
+<!ENTITY prop.httpmethod.accesskey "M">
+
+<!ENTITY prop.parameter.label            "Parámetro:">
+<!ENTITY prop.parameter.accesskey        "r">
+<!ENTITY prop.parameter.add.label        "Añadir:">
+<!ENTITY prop.parameter.add.accesskey    "A">
+<!ENTITY prop.parameter.remove.label     "Eliminar:">
+<!ENTITY prop.parameter.remove.accesskey "E">
+
+<!ENTITY prop.update.url.label     "URL de actualización:">
+<!ENTITY prop.update.url.accesskey "a">
+
+<!ENTITY prop.update.datatype.label     "Tipo de datos de actualización:">
+<!ENTITY prop.update.datatype.accesskey "T">
+
+<!ENTITY prop.update.datatype.openmozsearch.label     "OpenSearch o MozSearch">
+<!ENTITY prop.update.datatype.openmozsearch.accesskey "OM">
+
+<!ENTITY prop.update.datatype.sherlock.label     "Apple Sherlock">
+<!ENTITY prop.update.datatype.sherlock.accesskey "A">
+
+<!ENTITY prop.update.icon.label     "URL de actualización del icono:">
+<!ENTITY prop.update.icon.accesskey "o">
+
+<!ENTITY prop.update.interval.label     "Intervalo de actualización:">
+<!ENTITY prop.update.interval.accesskey "I">
+
+<!ENTITY prop.update.interval.days.label     "días">
