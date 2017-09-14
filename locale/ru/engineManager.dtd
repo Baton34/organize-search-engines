@@ -49,13 +49,13 @@
 <!ENTITY remove.accesskey "У">
 <!ENTITY edit.label "Изменить…">
 <!ENTITY edit.accesskey "з">
-<!ENTITY  addEngine.label           "Get search plugins from Mozilla">
+<!ENTITY  addEngine.label           "Найти плагин на сайте Mozilla">
 <!ENTITY  addEngine.accesskey       "M">
-<!ENTITY  addEngineMP.label         "Get search plugins from Mycroft Project">
+<!ENTITY  addEngineMP.label         "Найти плагин на сайте Mycroft Project">
 <!ENTITY  addEngineMP.accesskey     "y">
-<!ENTITY  openGen7is7.label         "7is7 search plugin generator (advanced)">
+<!ENTITY  openGen7is7.label         "Создать плагин на сайте 7is7">
 <!ENTITY  openGen7is7.accesskey     "7">
-<!ENTITY  openGenR2S.label          "Ready2Search plugin generator (advanced)">
+<!ENTITY  openGenR2S.label          "Создать плагин на сайте Ready2Search">
 <!ENTITY  openGenR2S.accesskey      "2">
 <!ENTITY enableSuggest.label "Показывать поисковые предложения">
 <!ENTITY enableSuggest.accesskey "п">
