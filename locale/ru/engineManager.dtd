@@ -1,6 +1,6 @@
 <!ENTITY namecol.label "Название">
 <!ENTITY aliascol.label "Короткое имя">
-<!ENTITY restoreDefault.label "Восстановить поисковой плагин по умолчанию">
+<!ENTITY restoreDefault.label "Восстановить поисковый плагин по умолчанию">
 <!ENTITY restoreDefault.accesskey "В">
 <!ENTITY new-folder.label "Новая папка">
 <!ENTITY new-folder.accesskey "Н">
