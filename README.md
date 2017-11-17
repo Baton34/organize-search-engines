@@ -1,4 +1,5 @@
 # Расширение "Organize Search Engines" для Firefox
+**_не работает в FF 57 и выше_**
 
 Предоставляет расширенные возможности по управлению поисковыми плагинами **Firefox**:
 * создание папок
@@ -17,7 +18,7 @@
 
 
 # "Organize Search Engines" extension for Firefox
-(Translated 2017-09-13)
+**_does not work in FF57 and above_**
 
 Provides advanced features for managing search plug-ins in **Firefox**:
 * creating folders
