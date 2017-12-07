@@ -1,7 +1,7 @@
-# Расширение "Organize Search Engines" для Firefox
+# Расширение "Organize Search Engines" для Firefox и Pale Moon
 **_не работает в FF 57 и выше_**
 
-Предоставляет расширенные возможности по управлению поисковыми плагинами **Firefox**:
+Предоставляет расширенные возможности по управлению поисковыми плагинами:
 * создание папок
 * создание разделителей
 * доступ к онлайн-ресурсам для загрузки и создания поисковых плагинов
@@ -17,10 +17,10 @@
 
 
 
-# "Organize Search Engines" extension for Firefox
+# "Organize Search Engines" extension for Firefox and Pale Moon
 **_does not work in FF57 and above_**
 
-Provides advanced features for managing search plug-ins in **Firefox**:
+Provides advanced features for managing search plug-ins in:
 * creating folders
 * creating separators
 * accessing online resources to download and create/upload search plugins
