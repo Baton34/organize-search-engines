@@ -4,3 +4,14 @@
 
 <!ENTITY cmd_engineManager.label        "Keresőszolgáltatások kezelése…">
 <!ENTITY searchEndCap.label             "Keresés">
+<!ENTITY searchFor.label              "​">
+<!ENTITY searchWith.label             " keresése ezzel:">
+<!ENTITY search.label                 "​">
+<!ENTITY searchAfter.label            " keresés">
+<!ENTITY searchWithHeader.label       "Keresés ezzel:">
+<!ENTITY changeSearchSettings.button  "Keresési beállítások módosítása">
+<!ENTITY changeSearchSettings.tooltip "Keresési beállítások módosítása">
+<!ENTITY searchInNewTab.label         "Keresés új lapon">
+<!ENTITY searchInNewTab.accesskey     "r">
+<!ENTITY searchSetAsDefault.label     "Legyen alapértelmezett keresőszolgáltatás">
+<!ENTITY searchSetAsDefault.accesskey "L">

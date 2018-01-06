@@ -4,3 +4,14 @@
 
 <!ENTITY cmd_engineManager.label        "Arama motorlarını yönet…">
 <!ENTITY searchEndCap.label             "Ara">
+<!ENTITY searchFor.label              "⁠">
+<!ENTITY searchWith.label             " terimini bununla ara:">
+<!ENTITY search.label                 "⁠">
+<!ENTITY searchAfter.label            " ile ara">
+<!ENTITY searchWithHeader.label       "Bununla ara:">
+<!ENTITY changeSearchSettings.button  "Arama ayarlarını değiştir">
+<!ENTITY changeSearchSettings.tooltip "Arama ayarlarını değiştir">
+<!ENTITY searchInNewTab.label         "Yeni sekmede ara">
+<!ENTITY searchInNewTab.accesskey     "s">
+<!ENTITY searchSetAsDefault.label     "Varsayılan arama motoru yap">
+<!ENTITY searchSetAsDefault.accesskey "m">

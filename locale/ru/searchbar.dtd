@@ -4,3 +4,14 @@
 
 <!ENTITY cmd_engineManager.label "Управление поисковыми системами…">
 <!ENTITY searchEndCap.label "Поиск">
+<!ENTITY searchFor.label "Искать ">
+<!ENTITY searchWith.label " в:">
+<!ENTITY search.label "Искать в ">
+<!ENTITY searchAfter.label "">
+<!ENTITY searchWithHeader.label "Искать в:">
+<!ENTITY changeSearchSettings.button "Изменить настройки поиска">
+<!ENTITY changeSearchSettings.tooltip "Изменить параметры поиска">
+<!ENTITY searchInNewTab.label "Искать в новой вкладке">
+<!ENTITY searchInNewTab.accesskey "а">
+<!ENTITY searchSetAsDefault.label "Установить как поисковую систему по умолчанию">
+<!ENTITY searchSetAsDefault.accesskey "о">

@@ -4,3 +4,14 @@
 
 <!ENTITY cmd_engineManager.label        "Gestiona els motors de cerca…">
 <!ENTITY searchEndCap.label             "Cerca">
+<!ENTITY searchFor.label              "Cerca ">
+<!ENTITY searchWith.label             " amb:">
+<!ENTITY search.label                 "Cerca a ">
+<!ENTITY searchAfter.label            "">
+<!ENTITY searchWithHeader.label       "Cerca amb:">
+<!ENTITY changeSearchSettings.button  "Canvia els paràmetres de cerca">
+<!ENTITY changeSearchSettings.tooltip "Canvia els paràmetres de cerca">
+<!ENTITY searchInNewTab.label         "Cerca en una pestanya nova">
+<!ENTITY searchInNewTab.accesskey     "t">
+<!ENTITY searchSetAsDefault.label     "Defineix com a motor de cerca per defecte">
+<!ENTITY searchSetAsDefault.accesskey "D">

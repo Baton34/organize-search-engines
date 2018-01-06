@@ -4,3 +4,14 @@
 
 <!ENTITY cmd_engineManager.label        "Zoekmachines beheren…">
 <!ENTITY searchEndCap.label             "Zoeken">
+<!ENTITY searchFor.label              "Zoeken naar ">
+<!ENTITY searchWith.label             " met:">
+<!ENTITY search.label                 "Zoeken bij ">
+<!ENTITY searchAfter.label            "">
+<!ENTITY searchWithHeader.label       "Zoeken met:">
+<!ENTITY changeSearchSettings.button  "Zoekinstellingen wijzigen">
+<!ENTITY changeSearchSettings.tooltip "Zoekinstellingen wijzigen">
+<!ENTITY searchInNewTab.label         "Zoeken in Nieuw tabblad">
+<!ENTITY searchInNewTab.accesskey     "t">
+<!ENTITY searchSetAsDefault.label     "Instellen als standaardzoekmachine">
+<!ENTITY searchSetAsDefault.accesskey "s">

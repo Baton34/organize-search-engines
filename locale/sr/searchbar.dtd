@@ -4,4 +4,14 @@
 
 <!ENTITY cmd_engineManager.label        "Уреди претраживаче…">
 <!ENTITY searchEndCap.label             "Претрага">
-
+<!ENTITY searchFor.label              "Претражи ">
+<!ENTITY searchWith.label             " са:">
+<!ENTITY search.label                 "Претрага ">
+<!ENTITY searchAfter.label            "">
+<!ENTITY searchWithHeader.label       "Претражи са:">
+<!ENTITY changeSearchSettings.button  "Промени поставке претраге">
+<!ENTITY changeSearchSettings.tooltip "Промени поставке претраге">
+<!ENTITY searchInNewTab.label         "Претражи у новом језичку">
+<!ENTITY searchInNewTab.accesskey     "ј">
+<!ENTITY searchSetAsDefault.label     "Постави као подразумевани претраживач">
+<!ENTITY searchSetAsDefault.accesskey "т">

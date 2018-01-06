@@ -4,3 +4,14 @@
 
 <!ENTITY cmd_engineManager.label        "Впорядкувати…">
 <!ENTITY searchEndCap.label             "Пошук">
+<!ENTITY searchFor.label              "Пошук ">
+<!ENTITY searchWith.label             " за допомогою:">
+<!ENTITY search.label                 "Пошук в ">
+<!ENTITY searchAfter.label            "">
+<!ENTITY searchWithHeader.label       "Шукати з:">
+<!ENTITY changeSearchSettings.button  "Налаштувати пошук">
+<!ENTITY changeSearchSettings.tooltip "Змінити налаштування пошуку">
+<!ENTITY searchInNewTab.label         "Пошук в новій вкладці">
+<!ENTITY searchInNewTab.accesskey     "в">
+<!ENTITY searchSetAsDefault.label     "Встановити типовим засобом пошуку">
+<!ENTITY searchSetAsDefault.accesskey "т">

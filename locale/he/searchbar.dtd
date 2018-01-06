@@ -4,3 +4,14 @@
 
 <!ENTITY cmd_engineManager.label        "ניהול מנועי חיפוש…">
 <!ENTITY searchEndCap.label             "חיפוש">
+<!ENTITY searchFor.label              "חיפוש אחר ">
+<!ENTITY searchWith.label             " עם:">
+<!ENTITY search.label                 "חיפוש באמצעות ">
+<!ENTITY searchAfter.label            "">
+<!ENTITY searchWithHeader.label       "חיפוש עם:">
+<!ENTITY changeSearchSettings.button  "שינוי הגדרות חיפוש">
+<!ENTITY changeSearchSettings.tooltip "שינוי הגדרות חיפוש">
+<!ENTITY searchInNewTab.label         "חיפוש בלשונית חדשה">
+<!ENTITY searchInNewTab.accesskey     "ל">
+<!ENTITY searchSetAsDefault.label     "הגדרה כמנוע חיפוש בררת מחדל">
+<!ENTITY searchSetAsDefault.accesskey "ב">

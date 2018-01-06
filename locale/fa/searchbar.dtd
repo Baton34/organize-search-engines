@@ -4,3 +4,14 @@
 
 <!ENTITY cmd_engineManager.label        "مدیریت موتورهای جست‌وجو…">
 <!ENTITY searchEndCap.label             "جست‌وجو">
+<!ENTITY searchFor.label              "جستجو برای ">
+<!ENTITY searchWith.label             " با:">
+<!ENTITY search.label                 "جست‌وجو ">
+<!ENTITY searchAfter.label            "">
+<!ENTITY searchWithHeader.label       "جست‌وجو در:">
+<!ENTITY changeSearchSettings.button  "تغییر تنظیمات جستجو">
+<!ENTITY changeSearchSettings.tooltip "تغییر تنظیمات جستجو">
+<!ENTITY searchInNewTab.label         "جست‌وجو در زبانه جدید">
+<!ENTITY searchInNewTab.accesskey     "ز">
+<!ENTITY searchSetAsDefault.label     "تنظیم به عنوان موتور جست‌وجو پیش‌فرض">
+<!ENTITY searchSetAsDefault.accesskey "پ">

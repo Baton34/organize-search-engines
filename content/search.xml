@@ -701,7 +701,7 @@ Contributor(s):
           label = this._stringBundle.getString("cmd_pasteAndSearch");
           element.setAttribute("label", label);
           element.setAttribute("anonid", "paste-and-search");
-          element.setAttribute("oncommand", "BrowserSearch.pasteAndSearch(event)");
+          element.setAttribute("oncommand", "BrowserSearch.searchBar.select(); goDoCommand('cmd_paste'); BrowserSearch.searchBar.handleSearchCommand();");
           cxmenu.insertBefore(element, insertLocation.nextSibling);
           pasteAndSearch = element;
         }

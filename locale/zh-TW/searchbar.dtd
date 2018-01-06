@@ -4,4 +4,14 @@
 
 <!ENTITY cmd_engineManager.label        "管理搜尋引擎…">
 <!ENTITY searchEndCap.label             "搜尋">
-
+<!ENTITY searchFor.label              "搜尋">
+<!ENTITY searchWith.label             "使用:">
+<!ENTITY search.label                 "搜尋">
+<!ENTITY searchAfter.label            "">
+<!ENTITY searchWithHeader.label       "搜尋:">
+<!ENTITY changeSearchSettings.button  "變更搜尋設定">
+<!ENTITY changeSearchSettings.tooltip "修改搜尋設定">
+<!ENTITY searchInNewTab.label         "在新分頁中搜尋">
+<!ENTITY searchInNewTab.accesskey     "T">
+<!ENTITY searchSetAsDefault.label     "設為預設搜尋引擎">
+<!ENTITY searchSetAsDefault.accesskey "D">

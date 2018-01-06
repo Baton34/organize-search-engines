@@ -4,3 +4,14 @@
 
 <!ENTITY cmd_engineManager.label        "Administrar motores de búsqueda…">
 <!ENTITY searchEndCap.label             "Buscar">
+<!ENTITY searchFor.label "Buscar ">
+<!ENTITY searchWith.label " con:">
+<!ENTITY search.label "Buscar ">
+<!ENTITY searchAfter.label "">
+<!ENTITY searchWithHeader.label "Buscar con:">
+<!ENTITY changeSearchSettings.button "Cambiar configuración de búsqueda">
+<!ENTITY changeSearchSettings.tooltip "Cambiar configuración de búsqueda">
+<!ENTITY searchInNewTab.label "Buscar en una pestaña nueva">
+<!ENTITY searchInNewTab.accesskey "B">
+<!ENTITY searchSetAsDefault.label "Establecer como buscador predeterminado">
+<!ENTITY searchSetAsDefault.accesskey "E">

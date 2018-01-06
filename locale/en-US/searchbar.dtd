@@ -4,3 +4,15 @@
 
 <!ENTITY cmd_engineManager.label        "Manage Search Engines…">
 <!ENTITY searchEndCap.label             "Search">
+<!ENTITY searchFor.label              "Search for ">
+<!ENTITY searchWith.label             " with:">
+<!ENTITY search.label                 "Search ">
+<!ENTITY searchAfter.label            "">
+<!ENTITY searchWithHeader.label       "Search with:">
+<!ENTITY changeSearchSettings.button  "Change Search Settings">
+<!ENTITY changeSearchSettings.tooltip "Change search settings">
+<!ENTITY searchInNewTab.label         "Search in New Tab">
+<!ENTITY searchInNewTab.accesskey     "T">
+<!ENTITY searchSetAsDefault.label     "Set As Default Search Engine">
+<!ENTITY searchSetAsDefault.accesskey "D">
+

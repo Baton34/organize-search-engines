@@ -4,3 +4,14 @@
 
 <!ENTITY cmd_engineManager.label        "管理搜索引擎…">
 <!ENTITY searchEndCap.label             "搜索">
+<!ENTITY searchFor.label              "搜索“">
+<!ENTITY searchWith.label             "”，使用：">
+<!ENTITY search.label                 "使用 ">
+<!ENTITY searchAfter.label            " 搜索">
+<!ENTITY searchWithHeader.label       "搜索引擎：">
+<!ENTITY changeSearchSettings.button  "更改搜索设置">
+<!ENTITY changeSearchSettings.tooltip "更改搜索设置">
+<!ENTITY searchInNewTab.label         "在新标签页中搜索">
+<!ENTITY searchInNewTab.accesskey     "T">
+<!ENTITY searchSetAsDefault.label     "设为默认搜索引擎">
+<!ENTITY searchSetAsDefault.accesskey "D">

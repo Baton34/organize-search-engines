@@ -4,3 +4,14 @@
 
 <!ENTITY cmd_engineManager.label        "検索バーの管理...">
 <!ENTITY searchEndCap.label             "検索">
+<!ENTITY searchFor.label              "">
+<!ENTITY searchWith.label             " を検索">
+<!ENTITY search.label                 "">
+<!ENTITY searchAfter.label            " で検索">
+<!ENTITY searchWithHeader.label       "検索エンジン:">
+<!ENTITY changeSearchSettings.button  "検索設定を変更">
+<!ENTITY changeSearchSettings.tooltip "検索設定を変更します">
+<!ENTITY searchInNewTab.label         "新しいタブで検索">
+<!ENTITY searchInNewTab.accesskey     "T">
+<!ENTITY searchSetAsDefault.label     "既定の検索エンジンに設定">
+<!ENTITY searchSetAsDefault.accesskey "D">

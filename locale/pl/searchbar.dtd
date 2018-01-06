@@ -4,3 +4,14 @@
 
 <!ENTITY cmd_engineManager.label        "Zarządzaj wyszukiwarkami…">
 <!ENTITY searchEndCap.label             "Szukaj">
+<!ENTITY searchFor.label "Wyszukaj „">
+<!ENTITY searchWith.label "” z:">
+<!ENTITY search.label "Szukaj z ">
+<!ENTITY searchAfter.label "">
+<!ENTITY searchWithHeader.label "Szukaj z">
+<!ENTITY changeSearchSettings.button "Zmień ustawienia wyszukiwania">
+<!ENTITY changeSearchSettings.tooltip "Zmień ustawienia wyszukiwania">
+<!ENTITY searchInNewTab.label "Szukaj w nowej karcie">
+<!ENTITY searchInNewTab.accesskey "S">
+<!ENTITY searchSetAsDefault.label "Ustaw jako domyślną wyszukiwarkę">
+<!ENTITY searchSetAsDefault.accesskey "U">
