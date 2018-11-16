@@ -123,13 +123,18 @@ function cloneEngine(engine, dataType) {
  var toplevel = Cu.getGlobalForObject(engine);
   var Engine = toplevel.Engine;
   dataType = Ci.nsISearchEngine[dataType];
-  if (!engine._loadPath) {  // AddToSearchBar not created this field
-      engine._loadPath="[atsb]";
+  var newEngine;
+  if (engine._file) {
+    newEngine=new Engine(engine._file, engine._readOnly);  
+  } else {
+	if (!engine.loadPath) {  // AddToSearchBar not created this field
+      engine.loadPath="[atsb]";
+	}
+	newEngine=new Engine(engine.loadPath, engine._readOnly);
   }
-  var newEngine = new Engine(engine._loadPath, engine._readOnly);
   for(var property in engine) {
     if(!(engine.__lookupGetter__(property) || engine.__lookupSetter__(property)) &&
-       engine.hasOwnProperty(property) && property != "__updateToEngine")
+      engine.hasOwnProperty(property) && property != "__updateToEngine")
       newEngine[property] = engine[property];
   }
   engine.__updateToEngine = newEngine;

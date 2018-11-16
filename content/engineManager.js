@@ -819,9 +819,17 @@ Structure__Item.prototype = {
         var globalObject = Cu.getGlobalForObject(engine);
 //        globalObject.engineMetadataService.setAttr(engine, "updatedatatype", engine._dataType.toString());
 //        if(engine._hasUpdates && !globalObject.engineMetadataService.getAttr(engine, "updateexpir"))
-        if(engine._hasUpdates && !engine.getAttr("updateexpir"))
-          globalObject.engineUpdateService.scheduleNextUpdate(engine);
-
+//        if(engine._hasUpdates && !engine.getAttr("updateexpir"))
+		if (engine._hasUpdates) {
+			var flagUpdateexpir;
+			if (typeof globalObject.engineMetadataService!=='undefined') {
+				flagUpdateexpir=globalObject.engineMetadataService.getAttr(engine, "updateexpir");
+			} else {
+				flagUpdateexpir=engine.getAttr("updateexpir");
+			}
+			if (!flagUpdateexpir)
+				globalObject.engineUpdateService.scheduleNextUpdate(engine);
+		}
         engine.__action = "properties";
         changed = true;
       }
