@@ -75,10 +75,12 @@ function init() {
   var url = origEngine._getURLOfType("text/html");
   document.getElementById("method-radio").selectedIndex = (url.method == "GET" ? 0 : 1);
   document.getElementById("url-textbox").value = url.template;
-  if(!ssGlobalObject.getBoolPref(ssGlobalObject.BROWSER_SEARCH_PREF + "update", true)) {
-    ["update-interval-row", "update-url-row", "update-icon-url-row"].forEach(function(id) {
-      document.getElementById(id).hidden = true;
-    });
+  if(ssGlobalObject.getBoolPref) {
+	if(!ssGlobalObject.getBoolPref(ssGlobalObject.BROWSER_SEARCH_PREF + "update", true)) {
+		["update-interval-row", "update-url-row", "update-icon-url-row"].forEach(function(id) {
+		document.getElementById(id).hidden = true;
+		});
+	}
   }
   var tree = document.getElementById("params-tree");
   tree.addEventListener("keypress", function(event) {
